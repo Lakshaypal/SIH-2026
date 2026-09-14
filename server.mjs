@@ -23,6 +23,7 @@ if (existsSync('.env')) {
 const port = Number(process.env.PORT || 4173);
 const root = process.cwd();
 const aisKey = process.env.AISSTREAM_API_KEY;
+const cartoKey = process.env.CARTO_API_KEY;
 const clients = new Set();
 let aisSocket = null;
 let latestVessels = new Map();
@@ -403,7 +404,7 @@ function startAis() {
     console.log('  ⚓ Connected to AISStream WSS v0 for North Indian Ocean (5-30°N, 45-105°E)');
     aisSocket.send(JSON.stringify({
       APIKey: aisKey,
-      BoundingBoxes: [[[5, 45], [30, 105]]],
+      BoundingBoxes: [[[-90, -180], [90, 180]]],
       FilterMessageTypes: ['PositionReport', 'StandardClassBPositionReport', 'ExtendedClassBPositionReport']
     }));
     broadcast('ais-status', { connected: true, source: 'AISStream', message: 'Live AIS stream active' });
@@ -467,6 +468,8 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store', ...corsHeaders });
     res.end(JSON.stringify({
       aisConfigured: Boolean(aisKey),
+      cartoConfigured: Boolean(cartoKey),
+      cartoKey: cartoKey || '',
       vessels: latestVessels.size,
       liveVesselsReceived: liveCount,
       domain: '5°N–30°N, 45°E–105°E'
