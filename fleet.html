@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="description" content="OceanEmbed-PG Fleet Radar — Real-Time AIS Maritime Vessel Tracking & Subsurface Intelligence · SIH26066 / INCOIS / MoES">
+  <title>Fleet Radar — OceanEmbed-PG · SIH26066</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+  <!-- Leaflet Heat -->
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+  <!-- Chart.js (for vessel analytics) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-fleet">
+
+  <!-- ============================================ -->
+  <!--  NAVIGATION                                  -->
+  <!-- ============================================ -->
+  <header id="topbar" class="topbar">
+    <a class="brand" href="index.html">
+      <span class="brand-icon">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M2 12c2-3 5-5 10-5s8 2 10 5"/>
+          <path d="M2 17c2-3 5-5 10-5s8 2 10 5" opacity=".5"/>
+          <circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none"/>
+        </svg>
+      </span>
+      <span class="brand-text">OceanEmbed<sup>PG</sup></span>
+    </a>
+    <nav id="mainNav">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="dashboard.html" class="nav-link">Ocean Explorer</a>
+      <a href="fleet.html" class="nav-link active">Fleet Radar</a>
+      <a href="technical.html" class="nav-link">Method &amp; Validation</a>
+    </nav>
+    <div class="topbar-actions">
+      <a href="OceanEmbed_PG_SIH2026_Engineering_and_Data_Specification.pdf" download class="btn-pdf-spec" title="Download Official ML & Data Scraper Engineering Specification (PDF)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Technical PDF</span>
+      </a>
+      <div id="liveBadge" class="live-badge">
+        <span class="badge-dot"></span>
+        <span class="badge-text">AIS STANDBY</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================ -->
+  <!--  FLEET BANNER                                -->
+  <!-- ============================================ -->
+  <section class="section" style="padding-top: 100px; padding-bottom: 24px;">
+    <div class="fleet-banner">
+      <div>
+        <span class="section-kicker">MARITIME CONTEXT · AIS + DEMO</span>
+        <h1 class="section-title" style="margin-top: 6px;">Fleet radar</h1>
+        <p class="section-desc" style="max-width: 720px;">Live AISStream reports and a clearly labelled demo fleet share the same map. Demo movement keeps the presentation usable offline; live and demo records remain distinct in the inspector.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!--  REAL-TIME AIS SHIP TRACKING                 -->
+  <!-- ============================================ -->
+  <section id="ais-tracking" class="section ais-section">
+    <div class="section-header" style="display:none;">
+      <!-- Header hidden since banner above covers it -->
+    </div>
+
+    <!-- Fleet Search & Type Filters -->
+    <div class="ais-toolbar">
+      <div class="ais-search-box">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="aisSearchInput" placeholder="Search live AIS or demo vessels…" autocomplete="off">
+        <button id="aisSearchClear" class="search-clear-btn" style="display:none">✕</button>
+      </div>
+      <div class="ais-filter-chips">
+        <button class="vessel-filter-chip active" data-type="all">All (<span id="countAll">—</span>)</button>
+        <button class="vessel-filter-chip" data-type="cargo"><span class="dot-cargo">●</span> Cargo (<span id="countCargo">—</span>)</button>
+        <button class="vessel-filter-chip" data-type="tanker"><span class="dot-tanker">●</span> Tankers (<span id="countTanker">—</span>)</button>
+        <button class="vessel-filter-chip" data-type="fishing"><span class="dot-fishing">●</span> Fishing (<span id="countFishing">—</span>)</button>
+        <button class="vessel-filter-chip" data-type="passenger"><span class="dot-passenger">●</span> Passenger (<span id="countPassenger">—</span>)</button>
+        <button class="vessel-filter-chip" data-type="military"><span class="dot-military">●</span> Naval (<span id="countMilitary">—</span>)</button>
+        <button class="vessel-filter-chip" data-type="tug"><span class="dot-tug">●</span> Tugs &amp; OSV (<span id="countTug">—</span>)</button>
+      </div>
+      <div class="ais-mode-toggle">
+        <button id="btnAisMarkers" class="ais-mode-btn active">🚢 Ships View</button>
+        <button id="btnAisDensity" class="ais-mode-btn">🔥 Density Heatmap</button>
+      </div>
+    </div>
+
+    <div class="ais-grid">
+      <div class="ais-map-container">
+        <div id="aisMap" class="leaflet-map ais-map"></div>
+        <div class="ais-overlay">
+          <div id="vesselCount" class="vessel-counter">
+            <span class="counter-value" id="vesselCountVal">—</span>
+              <span class="counter-label">Live + demo vessels</span>
+          </div>
+          <div id="aisStatus" class="ais-status-badge">
+            <span class="status-dot"></span>
+            <span class="status-text" id="aisStatusText">Connecting to AIS feed…</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vessel Inspector Drawer & Maritime Analytics Panel -->
+      <div class="ais-sidebar-panel">
+        <!-- Active Vessel Inspector Card -->
+        <div id="vesselInspectorCard" class="vessel-inspector-card">
+          <div class="inspector-header">
+            <div class="inspector-title-group">
+              <span class="inspector-flag" id="shipFlag">🚢</span>
+              <div>
+                <h3 class="inspector-name" id="shipName">SELECT A VESSEL ON RADAR</h3>
+                <span class="inspector-type" id="shipType">Click any vessel marker or search above</span>
+              </div>
+            </div>
+            <span class="inspector-live-tag" id="shipLiveTag">REAL-TIME</span>
+          </div>
+
+          <div class="inspector-grid">
+            <div class="inspector-stat">
+              <span class="stat-lbl">MMSI</span>
+              <strong class="stat-val" id="shipMMSI">—</strong>
+            </div>
+            <div class="inspector-stat">
+              <span class="stat-lbl">IMO</span>
+              <strong class="stat-val" id="shipIMO">—</strong>
+            </div>
+            <div class="inspector-stat">
+              <span class="stat-lbl">Speed (SOG)</span>
+              <strong class="stat-val" id="shipSOG">—</strong>
+            </div>
+            <div class="inspector-stat">
+              <span class="stat-lbl">Course (COG)</span>
+              <strong class="stat-val" id="shipCOG">—</strong>
+            </div>
+            <div class="inspector-stat">
+              <span class="stat-lbl">Draught</span>
+              <strong class="stat-val" id="shipDraught">—</strong>
+            </div>
+            <div class="inspector-stat">
+              <span class="stat-lbl">Dimensions</span>
+              <strong class="stat-val" id="shipDimensions">—</strong>
+            </div>
+            <div class="inspector-stat full-width">
+              <span class="stat-lbl">Destination &amp; ETA</span>
+              <strong class="stat-val" id="shipDest">—</strong>
+            </div>
+          </div>
+
+          <!-- Keel Subsurface Ocean Environment Box -->
+          <div class="keel-ocean-box">
+            <div class="keel-header">
+              <span>🌊</span> SUB-SURFACE KEEL ENVIRONMENT AT SHIP POSITION
+            </div>
+            <div class="keel-metrics-grid">
+              <div class="keel-metric">
+                <span>Surface SST</span>
+                <strong id="keelSST">—</strong>
+              </div>
+              <div class="keel-metric">
+                <span>Mixed Layer (MLD)</span>
+                <strong id="keelMLD">—</strong>
+              </div>
+              <div class="keel-metric">
+                <span>Thermocline Depth</span>
+                <strong id="keelThermocline">—</strong>
+              </div>
+              <div class="keel-metric">
+                <span>TCHP (kJ/cm²)</span>
+                <strong id="keelTCHP">—</strong>
+              </div>
+              <div class="keel-metric">
+                <span>Sound Velocity</span>
+                <strong id="keelSoundVel">—</strong>
+              </div>
+              <div class="keel-metric">
+                <span>Salinity (PSU)</span>
+                <strong id="keelSalinity">—</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="inspector-actions">
+            <button class="btn-tool-pill" id="btnQueryOcean" disabled>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12c2-3 5-5 10-5s8 2 10 5"/><path d="M2 17c2-3 5-5 10-5s8 2 10 5" opacity=".5"/></svg>
+              Query OceanEmbed at Keel
+            </button>
+          </div>
+        </div>
+
+        <!-- Fleet Composition Analytics -->
+        <div class="fleet-analytics-card bento-card">
+          <h4 class="view-title">Fleet Composition — North Indian Ocean</h4>
+          <canvas id="fleetPieChart" height="200"></canvas>
+          <div class="fleet-stats-row" id="fleetStatsRow">
+            <div class="fleet-stat">
+              <span class="fleet-stat-label">Total Ships</span>
+              <strong class="fleet-stat-value" id="statTotalShips">—</strong>
+            </div>
+            <div class="fleet-stat">
+              <span class="fleet-stat-label">Avg Speed</span>
+              <strong class="fleet-stat-value" id="statAvgSpeed">—</strong>
+            </div>
+            <div class="fleet-stat">
+              <span class="fleet-stat-label">Fastest</span>
+              <strong class="fleet-stat-value" id="statFastest">—</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Maritime Legend -->
+    <div class="ais-legend" id="aisLegend">
+      <span class="legend-title">VESSEL TYPE LEGEND</span>
+      <span class="legend-item"><span class="dot-cargo">●</span> Cargo</span>
+      <span class="legend-item"><span class="dot-tanker">●</span> Tanker</span>
+      <span class="legend-item"><span class="dot-fishing">●</span> Fishing</span>
+      <span class="legend-item"><span class="dot-passenger">●</span> Passenger</span>
+      <span class="legend-item"><span class="dot-military">●</span> Naval</span>
+      <span class="legend-item"><span class="dot-tug">●</span> Tug/OSV</span>
+      <span class="legend-item"><span class="dot-other">●</span> Other</span>
+    </div>
+
+    <!-- Floating tooltip for vessel hover (MarineTraffic style) -->
+    <div id="aisFloatingTooltip" class="ais-floating-tooltip" style="display:none;"></div>
+  </section>
+
+  <!-- ============================================ -->
+  <!--  FOOTER                                      -->
+  <!-- ============================================ -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="footer-logo">⚓</span>
+        <span>OceanEmbed<sup>PG</sup> — Physics-Guided Subsurface Temperature Reconstruction</span>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>Platform</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="dashboard.html">Ocean Dashboard</a></li>
+            <li><a href="fleet.html">Fleet Radar</a></li>
+            <li><a href="technical.html">Technical Documentation</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Government Partners</h4>
+          <ul>
+            <li>INCOIS — Indian National Centre for Ocean Information Services</li>
+            <li>MoES — Ministry of Earth Sciences</li>
+            <li>Smart India Hackathon 2026 · Problem SIH26066</li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Data Sources</h4>
+          <ul>
+            <li>CMEMS Copernicus Marine (SST, SSS, SLA)</li>
+            <li>ERA5 Reanalysis (Winds, Sea-State)</li>
+            <li>WOA23 (In-situ Validation)</li>
+            <li>AISStream WebSocket API (Maritime AIS)</li>
+            <li>Argo Float Network (GDAC)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 OceanEmbed-PG Research Platform · SIH26066</span>
+        <span>Built for INCOIS / MoES under Smart India Hackathon 2026</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

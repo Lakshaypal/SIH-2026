@@ -3,549 +3,67 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#ffffff">
-  <meta name="description" content="OceanEmbed-PG: Physics-Guided Subsurface Temperature Reconstruction for the North Indian Ocean — SIH26066 / INCOIS / MoES">
-  <title>OceanEmbed-PG — Subsurface Temperature Reconstruction · SIH26066</title>
-
-  <!-- Fonts -->
+  <meta name="theme-color" content="#f4f7f7">
+  <meta name="description" content="OceanEmbed-PG, SIH26066 - subsurface ocean reconstruction and maritime context for the North Indian Ocean.">
+  <title>OceanEmbed-PG · SIH26066</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-
-  <!-- Leaflet Heat -->
-  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
-
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-
-  <!-- Plotly.js (For SubOceanNet 3D Volume Point Cloud Rendering) -->
-  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
-
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-
-  <!-- ============================================ -->
-  <!--  ULTRA-LIGHT BACKGROUND CANVAS (ZERO LAG)    -->
-  <!-- ============================================ -->
-  <canvas id="oceanCanvas"></canvas>
-
-  <!-- ============================================ -->
-  <!--  NAVIGATION                                  -->
-  <!-- ============================================ -->
-  <header id="topbar" class="topbar">
-    <a class="brand" href="#hero">
-      <span class="brand-icon">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2">
-          <path d="M2 12c2-3 5-5 10-5s8 2 10 5"/>
-          <path d="M2 17c2-3 5-5 10-5s8 2 10 5" opacity=".5"/>
-          <circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none"/>
-        </svg>
-      </span>
-      <span class="brand-text">OceanEmbed<sup>PG</sup></span>
-    </a>
-    <nav id="mainNav">
-      <a href="index.html" class="nav-link active">Home</a>
-      <a href="dashboard.html" class="nav-link">Dashboard</a>
-      <a href="technical.html" class="nav-link">Technical Docs</a>
+<body class="home-page">
+  <header class="site-nav clean-nav">
+    <a class="clean-brand" href="index.html"><span>◒</span> OceanEmbed<sup>PG</sup></a>
+    <nav aria-label="Primary navigation">
+      <a class="active" href="index.html">Home</a>
+      <a href="dashboard.html">Ocean Explorer</a>
+      <a href="fleet.html">Fleet Radar</a>
+      <a href="technical.html">Method &amp; Validation</a>
     </nav>
-    <div class="topbar-actions">
-      <a href="OceanEmbed_PG_SIH2026_Engineering_and_Data_Specification.pdf" download class="btn-pdf-spec" title="Download Official ML & Data Scraper Engineering Specification (PDF)">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        <span>Technical PDF</span>
-      </a>
-      <div id="liveBadge" class="live-badge">
-        <span class="badge-dot"></span>
-        <span class="badge-text">AIS STANDBY</span>
-      </div>
-    </div>
+    <div id="homeLiveStatus" class="source-status">Loading basin telemetry…</div>
   </header>
 
-  <!-- ============================================ -->
-  <!--  PIPELINE WORKFLOW BAR (SubOceanNet Architecture) -->
-  <!-- ============================================ -->
-  <div class="pipeline-breadcrumb-bar">
-    <div class="breadcrumb-container">
-      <div class="breadcrumb-step active">
-        <span class="step-badge">01</span>
-        <div class="step-text">
-          <span class="step-title">INPUT VARIABLES</span>
-          <span class="step-sub">SST · SSS · SLA · currents · winds</span>
-        </div>
-      </div>
-      <div class="breadcrumb-arrow">➔</div>
-      <div class="breadcrumb-step active">
-        <span class="step-badge">02</span>
-        <div class="step-text">
-          <span class="step-title">DEEP LEARNING FRAMEWORK</span>
-          <span class="step-sub">Encoder ➔ Latent Vector ➔ Decoder</span>
-        </div>
-      </div>
-      <div class="breadcrumb-arrow">➔</div>
-      <div class="breadcrumb-step active">
-        <span class="step-badge">03</span>
-        <div class="step-text">
-          <span class="step-title">TEMPERATURE PREDICTION</span>
-          <span class="step-sub">15 depth levels + MC uncertainty</span>
-        </div>
-      </div>
-      <div class="breadcrumb-system-pills">
-        <span class="pill-live"><span class="pill-dot"></span> LIVE DATA · REAL</span>
-        <span class="pill-ready">MODEL READY</span>
-        <span class="pill-date">2026-09-14</span>
-      </div>
-    </div>
-  </div>
-
   <main>
-
-    <!-- ============================================ -->
-    <!--  SECTION 1: CINEMATIC HERO                   -->
-    <!-- ============================================ -->
-    <section id="hero" class="section hero-asymmetric">
-      <div class="hero-col-left">
-        <div class="hero-eyebrow">Built for INCOIS · SIH26066</div>
-        <h1 class="hero-title-new">Reconstructing the hidden ocean depth from surface satellite signals.</h1>
-        <p class="hero-subtitle-new">
-          OceanEmbed-PG inverts seven disparate surface satellite channels into a continuous 3D subsurface temperature cube down to 1000 meters, in real time.
-        </p>
-        
-        <div class="hero-capabilities">
-          <div class="cap-item"><span class="cap-num">01</span> PHYSICS-GUIDED RECONSTRUCTION</div>
-          <div class="cap-item"><span class="cap-num">02</span> 3D SUBSURFACE CUBE</div>
-          <div class="cap-item"><span class="cap-num">03</span> SATELLITE FAULT TOLERANCE</div>
-          <div class="cap-item"><span class="cap-num">04</span> OPERATIONAL DECISION SUPPORT</div>
+    <section class="home-hero">
+      <div class="home-hero-copy">
+        <span class="home-kicker">SIH26066 · INCOIS / MoES · NORTH INDIAN OCEAN</span>
+        <h1>See the heat<br><em>below the surface.</em></h1>
+        <p>OceanEmbed turns daily surface satellite fields into a 15-depth temperature reconstruction for the Bay of Bengal and Arabian Sea.</p>
+        <div class="home-actions">
+          <a class="home-primary" href="dashboard.html">Explore the water column <span>→</span></a>
+          <a class="home-secondary" href="fleet.html">Open Fleet Radar</a>
         </div>
-
-        <div class="hero-actions">
-          <a href="#explorer" class="btn-primary-pill">Open the live model <span class="arrow-glyph">→</span></a>
-          <a href="OceanEmbed_PG_SIH2026_Engineering_and_Data_Specification.pdf" download class="btn-ghost-pill">Read the technical brief</a>
-        </div>
+        <p class="home-disclaimer">Ocean fields in this prototype are labelled demo fixtures. AIS records are separately marked as <b>LIVE</b> or <b>DEMO</b>.</p>
       </div>
-      
-      <div class="hero-col-right">
-        <div class="stylized-ocean-mesh"></div>
-        <div class="floating-readout-panel">
-          <div class="readout-header">Live Telemetry &middot; Northern Bay of Bengal</div>
-          <div class="readout-grid">
-            <div class="r-label">LAT / LON</div><div class="r-val">17.80°N, 89.40°E</div>
-            <div class="r-label">DEPTH PROBE</div><div class="r-val">0m &rarr; 1000m Active</div>
-            <div class="r-label">INFERENCE</div><div class="r-val highlight">74ms (ONNX CPU)</div>
-            <div class="r-label">THERMAL FUEL</div><div class="r-val danger">TCHP: 78.4 kJ/cm²</div>
-          </div>
-        </div>
+      <div class="basin-visual" aria-label="North Indian Ocean basin visual">
+        <svg viewBox="0 0 600 420" role="img" aria-label="Illustration of the Bay of Bengal and Arabian Sea"><defs><linearGradient id="sea" x1="0" x2="1"><stop stop-color="#064462"/><stop offset=".5" stop-color="#087f96"/><stop offset="1" stop-color="#f1c566"/></linearGradient><filter id="soft"><feGaussianBlur stdDeviation="18"/></filter></defs><rect width="600" height="420" fill="url(#sea)"/><g opacity=".72" filter="url(#soft)"><ellipse cx="120" cy="110" rx="150" ry="95" fill="#17b5b0"/><ellipse cx="360" cy="220" rx="180" ry="120" fill="#f3b851"/><ellipse cx="470" cy="76" rx="100" ry="65" fill="#e36937"/></g><path d="M465 0c-3 61-19 100-50 141-33 42-20 78 13 105l32 25-13 42 30 47 0 60 123 0V0z" fill="#e8ead8" stroke="#365763" stroke-width="2"/><path d="M430 296l18 9-4 26-16-10z" fill="#e8ead8" stroke="#365763" stroke-width="2"/><g fill="none" stroke="#dbf0e8" stroke-opacity=".35"><path d="M0 98c141 8 244-36 390 18s135 89 210 49"/><path d="M0 173c181-48 294 72 460-10s97 40 140 30"/><path d="M0 249c130-22 296 56 438-1s102 21 162 9"/><path d="M0 324c160 54 277-49 446 2s95-2 154 18"/></g></svg>
+        <span class="basin-label arabian">ARABIAN<br>SEA</span><span class="basin-label bob">BAY OF<br>BENGAL</span><span class="basin-label india">INDIA</span>
+        <div class="basin-caption"><span class="dot"></span> 5°N–30°N · 45°E–105°E</div>
       </div>
     </section>
 
-    <!-- Trust / Validation Strip -->
-    <div class="trust-strip">
-      <div class="trust-label">TRAINED & VALIDATED AGAINST:</div>
-      <div class="marquee-container">
-        <div class="marquee-content">
-          <span>ARGO Float Network</span> &bull; 
-          <span>RAMA Buoy Array</span> &bull; 
-          <span>WOA18 Climatology</span> &bull; 
-          <span>INCOIS</span> &bull; 
-          <span>ECMWF / CDS</span> &bull; 
-          <span>Copernicus Marine</span> &bull;
-          <span>ARGO Float Network</span> &bull; 
-          <span>RAMA Buoy Array</span> &bull; 
-          <span>WOA18 Climatology</span> &bull; 
-          <span>INCOIS</span> &bull; 
-          <span>ECMWF / CDS</span> &bull; 
-          <span>Copernicus Marine</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- ============================================ -->
-    <!--  THE PROBLEM & VALUE                         -->
-    <!-- ============================================ -->
-    <section id="about" class="section about-two-col">
-      <div class="about-left">
-        <span class="section-kicker">THE CHALLENGE</span>
-        <h2 class="section-title">Surface sensors cannot see the deep ocean.</h2>
-      </div>
-      <div class="about-right">
-        <p class="about-desc">
-          Current operational models rely on sparse ARGO floats or computationally heavy, delayed physics simulations. OceanEmbed-PG replaces hours of supercomputer simulation with a lightweight ONNX neural network that instantly maps surface anomalies to deep 3D thermal structures.
-        </p>
-        <div class="inline-stat-row">
-          <div class="i-stat"><span class="i-val">74ms</span><span class="i-lab">Inference</span></div>
-          <div class="i-stat"><span class="i-val">427k</span><span class="i-lab">Parameters</span></div>
-          <div class="i-stat"><span class="i-val">24,341</span><span class="i-lab">Cells / Grid</span></div>
-        </div>
+    <section class="telemetry-wrap" aria-labelledby="telemetry-title">
+      <div class="telemetry-heading"><span class="home-kicker">BASIN TELEMETRY</span><h2 id="telemetry-title">What the system is watching now</h2><p>Current feed status at the top; research output and demonstration data stay clearly separated.</p></div>
+      <div class="telemetry-grid">
+        <article><span class="telemetry-label">LIVE AIS REPORTS</span><strong id="liveVesselCount">—</strong><small>authenticated positions in the domain</small></article>
+        <article><span class="telemetry-label">DEMO FLEET</span><strong id="demoVesselCount">—</strong><small>simulated vessels for presentation mode</small></article>
+        <article><span class="telemetry-label">OCEAN GRID</span><strong>0.25°</strong><small>daily standardised spatial output</small></article>
+        <article><span class="telemetry-label">VERTICAL LEVELS</span><strong>15</strong><small>surface through 1000 m</small></article>
       </div>
     </section>
 
-    <!-- ============================================ -->
-    <!--  LIVE PLATFORM PREVIEW (STAGE 03)            -->
-    <!-- ============================================ -->
-    <section id="explorer" class="section explorer-preview-section">
-      <div class="section-header center">
-        <span class="section-kicker">INTERACTIVE MODEL PREVIEW</span>
-        <h2 class="section-title">Subsurface Temperature Depth Slicer</h2>
-        <p class="section-desc">Test real-time model inference across the North Indian Ocean basin. Select depth levels and inspect thermal stratification instantly.</p>
-      </div>
-      <div class="explorer-card">
-        <div class="explorer-toolbar">
-          <div class="explorer-tab active" data-depth="0">Surface (0m)</div>
-          <div class="explorer-tab" data-depth="50">50m</div>
-          <div class="explorer-tab" data-depth="100">100m</div>
-          <div class="explorer-tab" data-depth="200">200m</div>
-          <div class="explorer-tab" data-depth="500">500m</div>
-          <div class="explorer-tab" data-depth="1000">1000m</div>
-        </div>
-        <div class="explorer-viewport">
-          <div id="previewMap" style="width: 100%; height: 450px; border-radius: 12px;"></div>
-        </div>
+    <section class="workspaces" aria-labelledby="workspaces-title">
+      <div class="section-title-row"><div><span class="home-kicker">WORKSPACES</span><h2 id="workspaces-title">One question per page.</h2></div><p>Each workspace has a specific role, so the demo is easy to follow and the team can own one part of the story.</p></div>
+      <div class="workspace-grid">
+        <a class="workspace-card ocean" href="dashboard.html"><span>01</span><h3>Ocean Explorer</h3><p>Choose a basin point, change depth, and inspect the reconstructed profile, uncertainty, D26, and TCHP.</p><b>Open explorer →</b></a>
+        <a class="workspace-card fleet" href="fleet.html"><span>02</span><h3>Fleet Radar</h3><p>View live AIS reports beside a labelled moving demo fleet. Select a vessel to inspect movement and route history.</p><b>Open radar →</b></a>
+        <a class="workspace-card method" href="technical.html"><span>03</span><h3>Method &amp; Validation</h3><p>Explain the satellite embedding, GLORYS training target, independent ARGO comparison, and known limits.</p><b>Read the method →</b></a>
       </div>
     </section>
 
-    <!-- ============================================ -->
-    <!--  SECTION 3: SYSTEM CAPABILITIES & PORTAL     -->
-    <!-- ============================================ -->
-    <section id="capabilities" class="section capabilities-section">
-      <div class="section-header center">
-        <span class="section-kicker">SUITE DIRECTORY · 8 OPERATIONAL MODULES</span>
-        <h2 class="section-title">Explore the OceanEmbed Platform</h2>
-        <p class="section-desc">Direct access to all real-time tools, deep-learning models, in-situ verification benchmarks, and live maritime intelligence feeds.</p>
-      </div>
-
-      <div class="portal-grid">
-        <!-- Module 1: 2D Prediction Maps -->
-        <div class="portal-card featured">
-          <div class="portal-card-badge">LIVE SURROGATE MODEL</div>
-          <div class="portal-icon">🗺️</div>
-          <h3>2D Vertical Depth Slicing Maps</h3>
-          <p>Slice through 15 standardized depth layers (0m to 1000m) across the North Indian Ocean. Click any station or preset to view instant in-situ T(z) thermal soundings, sound speed profiles, and ARGO float matchups.</p>
-          <div class="portal-metrics-pill">
-            <span>0m–1000m Water Column</span> &bull; <span>74ms Inference</span> &bull; <span>0.25° Grid</span>
-          </div>
-          <div class="portal-actions">
-            <a href="dashboard.html#maps" class="btn-primary-pill">Launch Prediction Maps →</a>
-          </div>
-        </div>
-
-        <!-- Module 2: Dual 3D Temperature Volume -->
-        <div class="portal-card">
-          <div class="portal-card-badge info">WEBGL ACCELERATED</div>
-          <div class="portal-icon">🧊</div>
-          <h3>Dual 3D Subsurface Volume &amp; Slicer</h3>
-          <p>Explore an interactive 3D voxel point cloud with 8,277 cells, or sweep a continuous physical depth-slice probe from surface down to 1000m with dynamic vertical temperature gradients and density diagnostics.</p>
-          <div class="portal-metrics-pill">
-            <span>WebGL 3D Scatter</span> &bull; <span>Continuous Probe</span> &bull; <span>cmocean.thermal</span>
-          </div>
-          <div class="portal-actions">
-            <a href="dashboard.html#volume" class="btn-tool-pill">Explore 3D Volume →</a>
-          </div>
-        </div>
-
-        <!-- Module 3: Live AIS Maritime Radar -->
-        <div class="portal-card highlight-border">
-          <div class="portal-card-badge live"><span class="badge-dot"></span> 32,000+ VESSELS LIVE</div>
-          <div class="portal-icon">🚢</div>
-          <h3>Real-Time AIS Fleet Radar</h3>
-          <p>Ultra-optimized HTML5 Canvas engine tracking 32,000+ live commercial cargo, tanker, passenger, and naval vessels with sub-keel subsurface temperature, MLD, and sound velocity telemetry.</p>
-          <div class="portal-metrics-pill">
-            <span>Zero Lag Canvas Engine</span> &bull; <span>Keel Subsurface Intelligence</span> &bull; <span>Instant Filtering</span>
-          </div>
-          <div class="portal-actions">
-            <a href="dashboard.html#ais-tracking" class="btn-tool-pill">Open Live AIS Radar →</a>
-          </div>
-        </div>
-
-        <!-- Module 4: Multi-Station Profiles & Marine Heatwaves -->
-        <div class="portal-card">
-          <div class="portal-card-badge warning">MULTI-STATION</div>
-          <div class="portal-icon">📈</div>
-          <h3>Vertical Profiles &amp; Time Series</h3>
-          <p>Drop multi-station sounding pins (P1..P5) across Arabian Sea and Bay of Bengal to overlay comparative vertical stratification curves, plus track temporal subsurface heat anomalies across 18 calendar months.</p>
-          <div class="portal-metrics-pill">
-            <span>Multi-Point Drop Mode</span> &bull; <span>18-Month Time Series</span> &bull; <span>Marine Heatwaves</span>
-          </div>
-          <div class="portal-actions">
-            <a href="dashboard.html#profiles" class="btn-tool-pill">View Profile Soundings →</a>
-          </div>
-        </div>
-
-        <!-- Module 5: Basin Zonal Transect -->
-        <div class="portal-card">
-          <div class="portal-card-badge neutral">PHYSICAL DYNAMICS</div>
-          <div class="portal-icon">🌊</div>
-          <h3>Basin Zonal &amp; Meridional Transect</h3>
-          <p>Generate high-contrast cross-sectional contour cuts from 45°E to 105°E, revealing how intense summer Somali Ekman upwelling contrasts against deep Bay of Bengal freshwater barrier layer capping.</p>
-          <div class="portal-metrics-pill">
-            <span>Cross-Basin Section</span> &bull; <span>D20 Isotherm Lift</span> &bull; <span>Halocline Barrier</span>
-          </div>
-          <div class="portal-actions">
-            <a href="dashboard.html#transect" class="btn-tool-pill">Examine Basin Transect →</a>
-          </div>
-        </div>
-
-        <!-- Module 6: In-Situ ARGO Matchup -->
-        <div class="portal-card">
-          <div class="portal-card-badge success">IN-SITU VERIFIED</div>
-          <div class="portal-icon">🛰️</div>
-          <h3>ARGO Float Matchup &amp; Skill Score</h3>
-          <p>Direct matchups against 1,284 held-out Coriolis GDAC CTD profilers. Layer-by-layer verification demonstrates a +72% skill improvement over climatology (WOA18) and matching numerical reanalysis (GLORYS12).</p>
-          <div class="portal-metrics-pill">
-            <span>1,284 Held-out Floats</span> &bull; <span>RMSE 0.38°C</span> &bull; <span>ACC 0.942</span>
-          </div>
-          <div class="portal-actions">
-            <a href="dashboard.html#argo" class="btn-tool-pill">Inspect ARGO Matchup →</a>
-          </div>
-        </div>
-
-        <!-- Module 7: Cyclone Rapid Intensification -->
-        <div class="portal-card">
-          <div class="portal-card-badge danger">DISASTER INTELLIGENCE</div>
-          <div class="portal-icon">🌀</div>
-          <h3>Tropical Cyclone Heat Potential (TCHP)</h3>
-          <p>Compute upper-ocean heat energy integrated down to the 26°C isotherm. Identifies explosive rapid-intensification danger zones (&gt;75 kJ/cm²) that fueled Super Cyclone Amphan in May 2020.</p>
-          <div class="portal-metrics-pill">
-            <span>TCHP Formula</span> &bull; <span>D26 Isotherm Tracking</span> &bull; <span>Cyclone Warnings</span>
-          </div>
-          <div class="portal-actions">
-            <a href="dashboard.html#tchp" class="btn-tool-pill">Assess Cyclone TCHP →</a>
-          </div>
-        </div>
-
-        <!-- Module 8: Satellite Sensor Fault Lab -->
-        <div class="portal-card">
-          <div class="portal-card-badge info">RESILIENCE TESTING</div>
-          <div class="portal-icon">🔬</div>
-          <h3>Satellite Sensor Fault-Tolerance Lab</h3>
-          <p>Simulate satellite sensor dropouts (infrared cloud-masking, L-band microwave interference, altimeter track gaps) to verify that cross-attention latent encoding preserves continuous 3D reconstruction.</p>
-          <div class="portal-metrics-pill">
-            <span>Channel Dropout</span> &bull; <span>Noise Injection</span> &bull; <span>Surrogate Fallback</span>
-          </div>
-          <div class="portal-actions">
-            <a href="dashboard.html#fault-tolerance" class="btn-tool-pill">Test Sensor Fault Lab →</a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================ -->
-    <!--  SECTION 4: ARCHITECTURE & TECHNICAL HUB     -->
-    <!-- ============================================ -->
-    <section id="technical-overview" class="section tech-overview-section">
-      <div class="section-header">
-        <span class="section-kicker">PHYSICS-GUIDED DEEP LEARNING ARCHITECTURE</span>
-        <h2 class="section-title">Governed by the Laws of Ocean Dynamics</h2>
-        <p class="section-desc">Black-box models predict unphysical water columns. OceanEmbed-PG embeds thermodynamic constraints and Navier-Stokes conservation laws directly into its neural loss function.</p>
-      </div>
-
-      <div class="tech-teaser-grid">
-        <div class="tech-teaser-card">
-          <div class="tt-kicker">EQUATION 01 · COMPOSITE LOSS FORMULATION</div>
-          <h3>Thermodynamic Stability with Halocline Exception</h3>
-          <p>The total loss combines data fidelity with vertical smoothness and hydrostatic stability penalization ($\text{ReLU}(-\partial \rho/\partial z)$), conditioned on seasonal river discharge to preserve genuine thermal inversions in the Bay of Bengal.</p>
-          <div class="tt-formula">
-            <code>ℒ_total = ℒ_MSE(Y, Ŷ) + λ₁·||∂Ŷ/∂z|| + λ₂·ReLU(-∂ρ/∂z)</code>
-          </div>
-        </div>
-
-        <div class="tech-teaser-card">
-          <div class="tt-kicker">NEURAL TENSOR FLOW</div>
-          <h3>Multiscale U-Net Spatial Encoder</h3>
-          <p>7 surface satellite variables ($SST, SSS, SLA, U_{cur}, V_{cur}, W_x, W_y$) pass through deep convolutional downsampling to extract baroclinic modes before decoding into 15 standard depth layers with Monte Carlo epistemic uncertainty bounds.</p>
-          <div class="tt-formula">
-            <code>[7, 101, 241] → Conv2D Encoder → Latent Embedding → [15, 101, 241]</code>
-          </div>
-        </div>
-      </div>
-
-      <div class="tech-cta-row">
-        <a href="technical.html" class="btn-primary-pill">Open Technical Architecture &amp; Benchmark Dossier →</a>
-        <a href="technical.html#amphan" class="btn-ghost-pill">View Cyclone Amphan Case Study</a>
-      </div>
-    </section>
-
-    <!-- ============================================ -->
-    <!--  SECTION 5: OPERATIONAL MISSIONS             -->
-    <!-- ============================================ -->
-    <section id="missions" class="section missions-section">
-      <div class="section-header center">
-        <span class="section-kicker">OPERATIONAL DEPLOYMENT</span>
-        <h2 class="section-title">Serving Three Strategic National Missions</h2>
-      </div>
-
-      <div class="missions-grid">
-        <div class="mission-card">
-          <div class="mission-icon">🛡️</div>
-          <span class="mission-badge badge-navy">NAVAL DEFENSE &amp; ASW</span>
-          <h3>Submarine Acoustic Shadow Zones</h3>
-          <p>Sound refraction follows the Sound Velocity Profile calculated via the Mackenzie equation. Beneath the Sonic Layer Depth (SLD), downward refraction creates acoustic shadow zones crucial for stealth submarine navigation and active surface sonar evasion.</p>
-          <div class="mission-highlight">Sonic Layer Depth (SLD): <strong>48 metres</strong></div>
-        </div>
-
-        <div class="mission-card">
-          <div class="mission-icon">🐟</div>
-          <span class="mission-badge badge-fisheries">COMMERCIAL FISHERIES</span>
-          <h3>Potential Fishing Zone (PFZ) Targeting</h3>
-          <p>Pelagic fisheries concentrate along the sharp thermocline boundary where nutrient-rich cold upwelling meets sunlight. Real-time thermocline forecasting guides deep-sea trawlers to optimal net depths, slashing exploratory fuel burn by ~30%.</p>
-          <div class="mission-highlight">Optimal Trawl Depth: <strong>60m – 75m</strong></div>
-        </div>
-
-        <div class="mission-card">
-          <div class="mission-icon">🌀</div>
-          <span class="mission-badge badge-asv">DISASTER MANAGEMENT</span>
-          <h3>Explosive Cyclone Rapid Intensification</h3>
-          <p>Surface satellites cannot see deep heat reserves. Reconstructing D26 and TCHP reveals when storms will rapidly intensify from Category 1 to Super Cyclone within hours, empowering NDRF and coastal authorities with proactive evacuation lead times.</p>
-          <div class="mission-highlight">TCHP Disaster Threshold: <strong>&gt; 75 kJ/cm²</strong></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================ -->
-    <!--  SECTION 6: COMPETITIVE SUPERIORITY MATRIX   -->
-    <!-- ============================================ -->
-    <section id="competitive-matrix" class="section matrix-section">
-      <div class="section-header center">
-        <span class="section-kicker">BENCHMARK CALIBRATION</span>
-        <h2 class="section-title">Why OceanEmbed-PG Outperforms Existing Solutions</h2>
-      </div>
-
-      <div class="matrix-container">
-        <table class="competitive-table">
-          <thead>
-            <tr>
-              <th>Evaluation Metric</th>
-              <th>OceanEmbed-PG (Ours)</th>
-              <th>Numerical Models (GLORYS12)</th>
-              <th>Standard Black-Box AI</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Inference Latency</strong></td>
-              <td class="highlight-cell">~74ms (Real-Time Edge CPU)</td>
-              <td>Hours to Days (Supercomputer)</td>
-              <td>Seconds to Minutes (Heavy GPU)</td>
-            </tr>
-            <tr>
-              <td><strong>Thermodynamic Stability</strong></td>
-              <td class="highlight-cell">PINN Loss Enforced (Hydrostatic)</td>
-              <td>Full Navier-Stokes Equations</td>
-              <td>None (Prone to inverted density errors)</td>
-            </tr>
-            <tr>
-              <td><strong>Halocline Exception</strong></td>
-              <td class="highlight-cell">Preserves Salinity Inversions</td>
-              <td>High accuracy, but delayed</td>
-              <td>Fails (Forces monotonic temperature drop)</td>
-            </tr>
-            <tr>
-              <td><strong>In-Situ Validation (ARGO)</strong></td>
-              <td class="highlight-cell">RMSE 0.38°C (+72% Skill Score)</td>
-              <td>RMSE 0.42°C (Reanalysis)</td>
-              <td>RMSE 0.95°C – 1.40°C</td>
-            </tr>
-            <tr>
-              <td><strong>Satellite Fault Tolerance</strong></td>
-              <td class="highlight-cell">Adaptive Latent Surrogate Fill</td>
-              <td>Fails if boundary forcing missing</td>
-              <td>Severe hallucinations under cloud cover</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- ============================================ -->
-    <!--  SECTION 7: LIVE TELEMETRY TICKER            -->
-    <!-- ============================================ -->
-    <div class="telemetry-ticker-bar">
-      <div class="ticker-label">LIVE BASIN TELEMETRY:</div>
-      <div class="ticker-items">
-        <span>📍 <strong>Bay of Bengal Central (17.8°N, 89.4°E):</strong> SST 29.38°C · MLD 24m · D26 94m · TCHP 78.4 kJ/cm² (Explosive Fuel)</span>
-        <span>📍 <strong>Arabian Sea Somali Gyre (12.0°N, 55.0°E):</strong> SST 24.12°C · MLD 62m · D20 58m (Intense Ekman Upwelling)</span>
-        <span>📍 <strong>Gujarat Coastal Shelf (21.5°N, 68.8°E):</strong> SST 27.80°C · Sound Speed 1,532 m/s · MLD 42m</span>
-        <span>📍 <strong>Equatorial Channel (5.5°N, 79.0°E):</strong> SST 28.95°C · MLD 35m · D20 128m (Thermally Stratified)</span>
-      </div>
-    </div>
-
-    <!-- ============================================ -->
-    <!--  SECTION 8: EXECUTIVE ACTION BANNER          -->
-    <!-- ============================================ -->
-    <section class="section action-banner-section">
-      <div class="action-banner-card">
-        <div class="action-banner-content">
-          <span class="section-kicker">GOVERNMENT &amp; RESEARCH READY</span>
-          <h2>Deploy Real-Time 3D Ocean Intelligence Today</h2>
-          <p>Built for the Indian National Centre for Ocean Information Services (INCOIS) under the Ministry of Earth Sciences (MoES) — Smart India Hackathon 2026.</p>
-          <div class="action-banner-btns">
-            <a href="dashboard.html" class="btn-primary-pill">Launch Operational Dashboard →</a>
-            <a href="technical.html" class="btn-ghost-pill">Review Technical Docs</a>
-            <a href="OceanEmbed_PG_SIH2026_Engineering_and_Data_Specification.pdf" download class="btn-ghost-pill">Download Official Specification (PDF)</a>
-          </div>
-        </div>
-      </div>
-    </section>
-
+    <section class="handoff-strip"><div><span class="home-kicker">DEMO PATH</span><h2>Surface signal → subsurface profile → maritime context.</h2></div><ol><li>Start in Ocean Explorer.</li><li>Open Fleet Radar for live and demo traffic.</li><li>Close with Method &amp; Validation.</li></ol></section>
   </main>
-
-  <!-- ============================================ -->
-  <!--  GOVERNMENT & SYSTEM FOOTER                  -->
-  <!-- ============================================ -->
-  <footer class="site-footer">
-    <div class="footer-top-grid">
-      <div class="footer-col brand-col">
-        <div class="footer-brand-title">OceanEmbed<sup>PG</sup> · SIH26066</div>
-        <p class="footer-brand-sub">Physics-Guided Deep Learning Subsurface Temperature Reconstruction for the North Indian Ocean.</p>
-        <div class="footer-badge-list">
-          <span class="footer-pill">MoES / INCOIS Ocean Valley</span>
-          <span class="footer-pill">Disaster Management Theme</span>
-          <span class="footer-pill">Domain: 5°N–30°N, 45°E–105°E</span>
-        </div>
-      </div>
-      <div class="footer-col">
-        <h4>Operational Tools</h4>
-        <ul>
-          <li><a href="dashboard.html#maps">2D Depth Slicing Maps</a></li>
-          <li><a href="dashboard.html#volume">3D Temperature Volume &amp; Slicer</a></li>
-          <li><a href="dashboard.html#ais-tracking">Real-Time AIS Maritime Radar</a></li>
-          <li><a href="dashboard.html#profiles">Multi-Station Vertical Profiles</a></li>
-          <li><a href="dashboard.html#transect">Basin Zonal Transect</a></li>
-          <li><a href="dashboard.html#argo">ARGO Float In-Situ Verification</a></li>
-          <li><a href="dashboard.html#tchp">Cyclone Heat Potential (TCHP)</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Technical Documentation</h4>
-        <ul>
-          <li><a href="technical.html#amphan">Cyclone Amphan Case Study</a></li>
-          <li><a href="technical.html#validation">Error Metrics &amp; ARGO Benchmarks</a></li>
-          <li><a href="technical.html#architecture">U-Net Neural Architecture</a></li>
-          <li><a href="technical.html#physics">PINN Composite Loss &amp; Halocline</a></li>
-          <li><a href="technical.html#applications">Mission Operations (ASW &amp; PFZ)</a></li>
-          <li><a href="technical.html#developer">REST API &amp; WebSocket Endpoints</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>System Artifacts</h4>
-        <ul>
-          <li><a href="OceanEmbed_PG_SIH2026_Engineering_and_Data_Specification.pdf" download>Engineering Specification (PDF)</a></li>
-          <li><a href="SIH_2026_COMPLETE_TECHNICAL_DOSSIER.md">Complete Technical Dossier</a></li>
-          <li><a href="OCEANEMBED_COMPLETE_DOCUMENTATION.txt">System Architecture Specification</a></li>
-          <li><a href="HANDOFF.md">Developer Handoff Guide</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom-bar">
-      <span>Smart India Hackathon 2026 &bull; Problem Statement SIH26066 &bull; Ministry of Earth Sciences (MoES)</span>
-      <span>74ms ONNX CPU Surrogate &bull; GLORYS12 &amp; ARGO Ground Truth &bull; Status: Operational Live</span>
-    </div>
-  </footer>
-
-  <script src="app.js"></script>
+  <footer class="clean-footer"><span>OCEANEMBED-PG · SIH26066</span><span>North Indian Ocean · Disaster Management</span><span>Live and demo sources are visibly labelled.</span></footer>
+  <script src="home.js"></script>
 </body>
 </html>

@@ -12,10 +12,26 @@
   const DEPTHS = [0, 5, 10, 20, 30, 50, 75, 100, 125, 150, 200, 300, 500, 700, 1000];
   const DOMAIN = { latMin: 5, latMax: 30, lonMin: 45, lonMax: 105 };
   
-  // CartoDB Positron / Light Basemap with API Key
-  const CARTO_KEY = 'cb1_3ksl_1_bd708fd1f4aef946ad54a86d';
-  const TILE_URL = `https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?api_key=${CARTO_KEY}`;
+  // Basemap tiles are proxied by the server using CARTO_API_KEY from .env
+  const TILE_URL = '/tiles/carto/{z}/{x}/{y}.png';
   const TILE_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>';
+  const MAP_OPTS = {
+    fadeAnimation: false,
+    zoomAnimation: false,
+    markerZoomAnimation: false,
+    preferCanvas: true
+  };
+
+  function addBasemap(map) {
+    if (!map || !window.L) return;
+    L.tileLayer(TILE_URL, {
+      attribution: TILE_ATTR,
+      maxZoom: 20,
+      keepBuffer: 2,
+      updateWhenZooming: false,
+      updateWhenIdle: true
+    }).addTo(map);
+  }
 
   // ─── State ─────────────────────────────────────────────
   let depthIndex = 5;
@@ -39,6 +55,7 @@
   let heatLayer, selectionMarker;
   let profileChart, rmseChart, comparisonChart, crossChart;
   let aisVessels = new Map();
+  let aisTracks = new Map(); // Reported AIS positions only; never extrapolated client-side.
   let aisMarkers = new Map();
   let isAisInitialized = false;
   let isAmphanInitialized = false;
@@ -179,21 +196,8 @@
   // ═══════════════════════════════════════════════════════
 
   function initNav() {
-    const sections = $$('.section');
-    const navLinks = $$('.nav-link');
     const topbar = $('#topbar');
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          navLinks.forEach(l => l.classList.remove('active'));
-          const activeLink = $(`[data-section="${entry.target.id}"]`);
-          if (activeLink) activeLink.classList.add('active');
-        }
-      });
-    }, { threshold: 0.2, rootMargin: '-64px 0px 0px 0px' });
-
-    sections.forEach(s => observer.observe(s));
+    if (!topbar) return;
 
     let lastScroll = 0;
     window.addEventListener('scroll', () => {
@@ -280,16 +284,20 @@
   }
 
   function initExplorerMap() {
-    explorerMap = L.map('explorerMap', {
+    const el = $('#explorerMap');
+    if (!el || !window.L) return;
+
+    explorerMap = L.map(el, {
       center: [16, 76],
       zoom: 4,
       minZoom: 3,
       maxZoom: 8,
       zoomControl: true,
-      attributionControl: false
+      attributionControl: false,
+      ...MAP_OPTS
     });
 
-    L.tileLayer(TILE_URL, { attribution: TILE_ATTR, subdomains: 'abcd' }).addTo(explorerMap);
+    addBasemap(explorerMap);
 
     // Domain boundary in cyan
     L.rectangle(
@@ -1109,11 +1117,7 @@
     };
 
     if (tabKey === 'ais' || tabKey === 'ais-tracking') {
-      const aisSec = $('#ais-tracking') || $('#aisMap');
-      if (aisSec) {
-        if (typeof activateAis === 'function') activateAis();
-        aisSec.scrollIntoView({ behavior: 'smooth' });
-      }
+      window.location.href = 'fleet.html';
       return;
     }
 
@@ -2059,10 +2063,11 @@
       minZoom: 3,
       maxZoom: 8,
       zoomControl: true,
-      attributionControl: false
+      attributionControl: false,
+      ...MAP_OPTS
     });
 
-    L.tileLayer(TILE_URL, { attribution: TILE_ATTR, subdomains: 'abcd' }).addTo(multiProfileMap);
+    addBasemap(multiProfileMap);
 
     L.rectangle(
       [[DOMAIN.latMin, DOMAIN.lonMin], [DOMAIN.latMax, DOMAIN.lonMax]],
@@ -2449,14 +2454,20 @@
 
   function initAISSectionLazy() {
     const aisSection = $('#ais-tracking');
-    if (!aisSection) return;
+    if (!aisSection || !$('#aisMap') || !window.L) return;
 
     function activateAis() {
       if (isAisInitialized) return;
       isAisInitialized = true;
       initAISMap();
       initAISFeed();
-      setTimeout(() => { if (aisMap) aisMap.invalidateSize(); }, 250);
+      setTimeout(() => { if (aisMap) aisMap.invalidateSize(); }, 80);
+    }
+
+    // Dedicated fleet page: load immediately. Dashboard: wait until in view.
+    if (document.body.classList.contains('page-fleet')) {
+      activateAis();
+      return;
     }
 
     const observer = new IntersectionObserver((entries) => {
@@ -2464,16 +2475,9 @@
         activateAis();
         observer.disconnect();
       }
-    }, { rootMargin: '200px' });
+    }, { rootMargin: '120px' });
 
     observer.observe(aisSection);
-
-    const aisNavLink = $('[data-section="ais-tracking"]');
-    if (aisNavLink) {
-      aisNavLink.addEventListener('click', () => {
-        activateAis();
-      });
-    }
   }
 
   function initAISMap() {
@@ -2483,10 +2487,11 @@
       minZoom: 3,
       maxZoom: 10,
       zoomControl: true,
-      attributionControl: false
+      attributionControl: false,
+      ...MAP_OPTS
     });
 
-    L.tileLayer(TILE_URL, { attribution: TILE_ATTR, subdomains: 'abcd' }).addTo(aisMap);
+    addBasemap(aisMap);
 
     // Domain boundary
     L.rectangle(
@@ -2538,24 +2543,7 @@
     initAisCanvasLayer();
     initAisToolbar();
 
-    // Default featured ship so inspector is never blank
-    const defaultFeaturedShip = {
-      mmsi: '419000111',
-      name: 'INS VIKRANT (R11)',
-      type: 'Military / Naval Taskforce',
-      callsign: 'AWVR',
-      flag: '🇮🇳',
-      lat: 16.4,
-      lon: 86.8,
-      sog: 21.4,
-      cog: 68,
-      draught: 8.4,
-      length: 262,
-      width: 62,
-      destination: 'BAY OF BENGAL PATROL',
-      eta: '15 Sep 14:00'
-    };
-    inspectVessel(defaultFeaturedShip);
+    // The inspector stays empty until the user selects a verified AIS report.
   }
 
   let aisTooltipEl = null;
@@ -2718,28 +2706,36 @@
   }
 
   function initAISFeed() {
-    // 1. Initial bulk fleet fetch (all vessels)
-    fetch('/api/vessels?limit=40000')
+    // Initial snapshot contains only reports already received from AISStream.
+    fetch('/api/vessels?limit=2500')
       .then(r => r.json())
       .then(vessels => {
         if (Array.isArray(vessels) && vessels.length > 0) {
           vessels.forEach(v => aisVessels.set(v.mmsi, v));
           scheduleAisRedraw();
-          updateAISStatus(true, `Tracking ${vessels.length.toLocaleString()} Live Commercial & Naval Vessels`);
-          const featured = vessels.find(v => (v.name && (v.name.includes('VIKRANT') || v.name.includes('MAERSK') || v.name.includes('EVER')))) || vessels[0];
-          if (featured) inspectVessel(featured);
+          const demoCount = vessels.filter(v => v.isDemo).length;
+          const liveCount = vessels.length - demoCount;
+          updateAISStatus(liveCount > 0, `${liveCount} live AIS · ${demoCount} demo vessels`);
         }
       })
       .catch(err => console.warn('Bulk fleet fetch warning:', err));
 
-    // 2. Connect to real-time SSE stream
+    // Real-time event stream. A connected socket is not the same as a vessel count.
     fetch('/api/status')
       .then(r => r.json())
       .then(status => {
+        if (!status.aisConfigured) {
+          updateAISStatus(false, `${status.demoVessels || 0} demo vessels · AIS key missing`);
+          return;
+        }
         const source = new EventSource('/api/ais/stream');
 
         source.addEventListener('ais-status', (e) => {
-          updateAISStatus(true, `Live Feed Active · ${aisVessels.size.toLocaleString()} Ships Tracking`);
+          const live = JSON.parse(e.data);
+          const message = live.connected
+            ? `${live.liveVessels ?? 0} live AIS · ${live.demoVessels ?? 0} demo vessels`
+            : `AIS reconnecting · ${live.demoVessels ?? 0} demo vessels remain visible`;
+          updateAISStatus(Boolean(live.connected), message);
         });
 
         source.addEventListener('vessels', (e) => {
@@ -2754,7 +2750,7 @@
         });
       })
       .catch(() => {
-        updateAISStatus(true, `Active fleet · ${aisVessels.size.toLocaleString()} Ships`);
+        updateAISStatus(false, 'Unable to reach the local AIS service');
       });
   }
 
@@ -2870,6 +2866,24 @@
       const color = getShipColor(v.type);
       const isSelected = selectedShipMmsi === v.mmsi;
 
+      // A selected vessel's tail consists only of observed reports received in this browser session.
+      if (isSelected) {
+        const track = aisTracks.get(v.mmsi) || [];
+        if (track.length > 1) {
+          ctx.save();
+          ctx.beginPath();
+          track.forEach((point, index) => {
+            const position = aisMap.latLngToContainerPoint([point.lat, point.lon]);
+            if (index === 0) ctx.moveTo(position.x, position.y); else ctx.lineTo(position.x, position.y);
+          });
+          ctx.strokeStyle = 'rgba(8, 145, 178, 0.7)';
+          ctx.lineWidth = 2;
+          ctx.setLineDash([4, 4]);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
       ctx.save();
       ctx.translate(pt.x, pt.y);
 
@@ -2936,6 +2950,10 @@
 
   function upsertVessel(v) {
     aisVessels.set(v.mmsi, v);
+    const track = aisTracks.get(v.mmsi) || [];
+    const last = track[track.length - 1];
+    if (!last || last.lat !== v.lat || last.lon !== v.lon) track.push({ lat: v.lat, lon: v.lon, receivedAt: v.receivedAt });
+    aisTracks.set(v.mmsi, track.slice(-120));
     if (selectedShipMmsi === v.mmsi) {
       updateInspectorValues(v);
     }
@@ -2946,6 +2964,15 @@
     selectedShipMmsi = v.mmsi;
     updateInspectorValues(v);
     scheduleAisRedraw();
+    fetch(`/api/vessels/history?mmsi=${encodeURIComponent(v.mmsi)}`)
+      .then(r => r.ok ? r.json() : [])
+      .then(history => {
+        if (Array.isArray(history) && history.length) {
+          aisTracks.set(v.mmsi, history);
+          scheduleAisRedraw();
+        }
+      })
+      .catch(() => { /* The live marker remains useful if local history is unavailable. */ });
   }
 
   function updateInspectorValues(v) {
@@ -2962,14 +2989,14 @@
 
     if (flagEl) flagEl.textContent = v.flag || '🚢';
     if (nameEl) nameEl.textContent = (v.name || 'VESSEL ' + v.mmsi).toUpperCase();
-    if (typeEl) typeEl.textContent = `${v.type || 'Commercial Vessel'} · Callsign ${v.callsign || 'N/A'}`;
+    if (typeEl) typeEl.textContent = `${v.isDemo ? 'DEMO SCENARIO · ' : ''}${v.type || 'Commercial Vessel'} · Callsign ${v.callsign || 'N/A'}`;
     if (mmsiEl) mmsiEl.textContent = v.mmsi;
-    if (imoEl) imoEl.textContent = v.imo || ('IMO ' + (9000000 + (Number(v.mmsi) % 999999 || 12345)));
+    if (imoEl) imoEl.textContent = v.imo || 'Not reported';
     if (sogEl) sogEl.textContent = `${(v.sog || 0).toFixed(1)} kn`;
     if (cogEl) cogEl.textContent = `${(v.cog || 0).toFixed(0)}°`;
-    if (drtEl) drtEl.textContent = `${v.draught ? v.draught.toFixed(1) + ' m' : '11.4 m'}`;
-    if (dimEl) dimEl.textContent = `${v.length || 240}m × ${v.width || 36}m`;
-    if (destEl) destEl.textContent = `${v.destination || 'INCOIS Corridor'} · ETA ${v.eta || '16 Sep 08:30'}`;
+    if (drtEl) drtEl.textContent = v.draught ? `${v.draught.toFixed(1)} m` : 'Not reported';
+    if (dimEl) dimEl.textContent = v.length && v.width ? `${v.length}m × ${v.width}m` : 'Not reported';
+    if (destEl) destEl.textContent = v.destination || 'Not reported by AIS';
 
     const temps = profileTemps(v.lat, v.lon);
     const ocean = calculateDerivedOceanMetrics(v.lat, v.lon, temps);
@@ -2991,8 +3018,12 @@
       btnQuery.disabled = false;
       btnQuery.onclick = () => {
         selectPoint(v.lat, v.lon);
-        const exp = $('#explorer');
-        if (exp) exp.scrollIntoView({ behavior: 'smooth' });
+        if ($('#explorerMap')) {
+          const exp = $('#explorer');
+          if (exp) exp.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          window.location.href = `dashboard.html#maps`;
+        }
       };
     }
   }
@@ -3052,10 +3083,11 @@
       minZoom: 4,
       maxZoom: 8,
       zoomControl: true,
-      attributionControl: false
+      attributionControl: false,
+      ...MAP_OPTS
     });
 
-    L.tileLayer(TILE_URL, { attribution: TILE_ATTR, subdomains: 'abcd' }).addTo(amphanMap);
+    addBasemap(amphanMap);
 
     // Warm pool overlay
     L.rectangle([[6, 82], [18, 92]], {
@@ -3385,41 +3417,36 @@
   // ═══════════════════════════════════════════════════════
 
   function init() {
-    initOceanCanvas();
     initNav();
+    if ($('#oceanCanvas')) initOceanCanvas();
     initHero();
-    
-    // Core Explorer
-    initExplorerMap();
-    initDepthControls();
-    initMapToggles();
-    initProfileChart();
-    initRandomPoint();
 
-    // Competitor Features: Presets, Land Validation, Sound Velocity, Report Export
-    initSectorPresets();
-    initScenariosCarousel();
-    initCoordForm();
-    initProfileToggles();
-    initReportExport();
+    if ($('#explorerMap')) {
+      initExplorerMap();
+      initDepthControls();
+      initMapToggles();
+      initProfileChart();
+      initRandomPoint();
+      initSectorPresets();
+      initScenariosCarousel();
+      initCoordForm();
+      initProfileToggles();
+      initReportExport();
+      initSurfaceLayerSwitcher();
+      initSensorFaultLab();
+      initStage03Tabs();
+      initAnimateSweep();
+      initPredictionSimulation();
+      initAICopilotActions();
 
-    // SubOceanNet & OceanEmbed-Suite Features: 7 Surface Layers, Animate Sweep, 8 MC Passes, Fault Lab, Stage 03 Views
-    initSurfaceLayerSwitcher();
-    initSensorFaultLab();
-    initStage03Tabs();
-    initAnimateSweep();
-    initPredictionSimulation();
-    initAICopilotActions();
-
-    // Initial population for Copilot & TCHP cards
-    if (typeof updateAICopilot === 'function' && selected) {
-      updateAICopilot(selected.lat, selected.lon);
-    }
-    if (typeof updateTchpCard === 'function' && selected) {
-      updateTchpCard(selected.lat, selected.lon);
+      if (typeof updateAICopilot === 'function' && selected) {
+        updateAICopilot(selected.lat, selected.lon);
+      }
+      if (typeof updateTchpCard === 'function' && selected) {
+        updateTchpCard(selected.lat, selected.lon);
+      }
     }
 
-    // Lazy load AIS, Amphan, and Validation when scrolled to
     initAISSectionLazy();
     initAmphanSectionLazy();
     initValidationLazy();

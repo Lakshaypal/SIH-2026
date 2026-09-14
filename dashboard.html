@@ -52,8 +52,9 @@
     </a>
     <nav id="mainNav">
       <a href="index.html" class="nav-link">Home</a>
-      <a href="dashboard.html" class="nav-link active">Dashboard</a>
-      <a href="technical.html" class="nav-link">Technical Docs</a>
+      <a href="dashboard.html" class="nav-link active">Ocean Explorer</a>
+      <a href="fleet.html" class="nav-link">Fleet Radar</a>
+      <a href="technical.html" class="nav-link">Method &amp; Validation</a>
     </nav>
     <div class="topbar-actions">
       <a href="OceanEmbed_PG_SIH2026_Engineering_and_Data_Specification.pdf" download class="btn-pdf-spec" title="Download Official ML & Data Scraper Engineering Specification (PDF)">
@@ -96,8 +97,8 @@
         </div>
       </div>
       <div class="breadcrumb-system-pills">
-        <span class="pill-live"><span class="pill-dot"></span> LIVE DATA · REAL</span>
-        <span class="pill-ready">MODEL READY</span>
+        <span class="pill-live"><span class="pill-dot"></span> DEMO DATA · LABELLED</span>
+        <span class="pill-ready">MODEL PROTOTYPE</span>
         <span class="pill-date">2026-09-14</span>
       </div>
     </div>
@@ -111,22 +112,21 @@
     <section id="explorer" class="section explorer-section">
       <div class="dashboard-header-banner">
         <div class="dh-title-col">
-          <span class="section-kicker">INCOIS OPERATIONAL COMMAND CONSOLE · STAGE 03</span>
-          <h1 class="section-title">Subsurface Ocean &amp; Maritime Reconnaissance Suite</h1>
-          <p class="section-desc">Real-time 3D subsurface thermal field inference down to 1000m, sound velocity estimation via the Mackenzie equation, and in-situ validation across the North Indian Ocean.</p>
+          <span class="section-kicker">OCEANEMBED · SIH26066</span>
+          <h1 class="section-title">Subsurface ocean explorer</h1>
+          <p class="section-desc">Inspect a 15-depth reconstruction for the North Indian Ocean, then compare the vertical profile with its uncertainty and ARGO validation layer.</p>
         </div>
         <div class="dh-status-col">
-          <div class="dh-telemetry-badge"><span class="badge-dot"></span> LIVE DATA FEED · CONNECTED</div>
-          <div class="dh-meta-pill">INFERENCE: <strong>74ms (ONNX CPU)</strong></div>
+          <div class="dh-telemetry-badge"><span class="badge-dot"></span> DEMO MODEL SNAPSHOT</div>
+          <div class="dh-meta-pill">GRID: <strong>0.25° · DAILY</strong></div>
           <div class="dh-meta-pill">DOMAIN: <strong>5°N–30°N, 45°E–105°E</strong></div>
         </div>
       </div>
 
-      <!-- Extreme Ocean Scenarios Bar (Competitor feature from ocean-embed-suite.vercel.app) -->
       <div class="scenarios-carousel">
         <div class="scenarios-header">
-          <span class="scenarios-kicker">EXTREME OCEAN SCENARIOS · BENCHMARK CALIBRATION</span>
-          <span class="scenarios-subtitle">Select any oceanographic regime to load calibrated in-situ parameters</span>
+          <span class="scenarios-kicker">INVESTIGATION POINTS</span>
+          <span class="scenarios-subtitle">Choose a regional ocean condition to update the explorer.</span>
         </div>
         <div class="scenarios-grid">
           <div class="scenario-card" data-lat="18.0" data-lon="88.0">
@@ -162,9 +162,8 @@
         </div>
       </div>
 
-      <!-- Sector Presets Bar (Competitor feature implemented) -->
       <div class="sector-presets-bar">
-        <span style="font-size:0.75rem;font-weight:700;font-family:var(--font-mono);color:var(--text-muted);white-space:nowrap">SECTOR PRESETS:</span>
+        <span style="font-size:0.75rem;font-weight:700;font-family:var(--font-mono);color:var(--text-muted);white-space:nowrap">QUICK LOCATIONS:</span>
         <button class="sector-chip active" data-lat="17.8" data-lon="89.4">📍 Central Bay of Bengal</button>
         <button class="sector-chip" data-lat="14.2" data-lon="73.8">⚓ Karnataka / Goa Coast</button>
         <button class="sector-chip" data-lat="21.5" data-lon="68.8">🌊 Gujarat / Gulf of Kutch</button>
@@ -223,86 +222,7 @@
         </div>
       </div>
 
-      <!-- Satellite Sensor Fault Simulator & Cloud Obscuration Lab (ocean-embed-suite.vercel.app) -->
-      <div class="sensor-fault-lab">
-        <div class="fault-lab-header">
-          <div class="fault-title-group">
-            <span class="fault-icon">📡</span>
-            <div>
-              <h4>Satellite Sensor Fault Simulator &amp; Cloud Obscuration Lab</h4>
-              <p>Toggle individual satellite channels to simulate heavy cloud cover, instrument failure, or orbital sensor dropouts. OceanEmbed's zero-out mask training guarantees continuous inversion with calibrated uncertainty.</p>
-            </div>
-          </div>
-          <div class="fault-status-pill" id="faultStatusPill">
-            <span class="fault-status-dot"></span>
-            <span id="faultStatusText">ALL 7 SENSORS ACTIVE · NOMINAL σ</span>
-          </div>
-        </div>
-        <div class="fault-toggles-grid">
-          <div class="fault-channel-card" data-sensor="sst">
-            <div class="fault-channel-info">
-              <strong>Sea Surface Temp (SST Skin)</strong>
-              <span>MODIS / OSTIA 1mm thermal skin layer</span>
-            </div>
-            <button class="sensor-toggle-btn active" data-sensor="sst">✓ ACTIVE</button>
-          </div>
-          <div class="fault-channel-card" data-sensor="sss">
-            <div class="fault-channel-info">
-              <strong>Sea Surface Salinity (SSS)</strong>
-              <span>SMAP / SMOS halocline &amp; freshwater capping</span>
-            </div>
-            <button class="sensor-toggle-btn active" data-sensor="sss">✓ ACTIVE</button>
-          </div>
-          <div class="fault-channel-card" data-sensor="sla">
-            <div class="fault-channel-info">
-              <strong>Sea Surface Height (SSH / SLA)</strong>
-              <span>AVISO / DUACS altimetry geostrophic eddies</span>
-            </div>
-            <button class="sensor-toggle-btn active" data-sensor="sla">✓ ACTIVE</button>
-          </div>
-          <div class="fault-channel-card" data-sensor="wind">
-            <div class="fault-channel-info">
-              <strong>Wind Stress Vectors (U, V)</strong>
-              <span>ERA5 ECMWF Ekman pumping &amp; upwelling curl</span>
-            </div>
-            <button class="sensor-toggle-btn active" data-sensor="wind">✓ ACTIVE</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- AI Oceanographic Hydrographic Copilot & Top Suite Actions (Competitor Feature) -->
-      <div class="ai-copilot-banner">
-        <div class="copilot-badge-box">
-          <span class="copilot-robot-icon">🤖</span>
-          <div>
-            <span class="copilot-tag">AI HYDROGRAPHIC COPILOT</span>
-            <span class="copilot-subtag">Dynamic Real-Time Multi-Mission Diagnosis</span>
-          </div>
-        </div>
-        <div class="copilot-content">
-          <p id="aiCopilotDiagnosis" class="copilot-text">
-            <strong>Diagnosis (17.80°N, 89.40°E · Bay of Bengal):</strong> Strong halocline barrier layer detected at 22m (BLT = 38m). Subsurface thermal inversion (+0.34°C) trapped beneath freshwater capping. Extreme cyclonic intensification fuel (TCHP: 78.4 kJ/cm²). Naval acoustic shadow zone confirmed from 48m to 165m.
-          </p>
-          <div class="copilot-meta-pills">
-            <span class="meta-pill-item">SATELLITE CONFIDENCE: <strong id="copilotConfScore">98.4%</strong></span>
-            <span class="meta-pill-item">PHYSICS CONSISTENCY: <strong>STABLE (∂T/∂z ≤ 0)</strong></span>
-            <span class="meta-pill-item">INFERENCE RUNTIME: <strong>74ms (ONNX CPU)</strong></span>
-          </div>
-        </div>
-        <div class="copilot-actions">
-          <button id="btnPlayMonsoon" class="btn-copilot-action" title="Animate through seasonal monsoon transition cycle">
-            <span>▶ Play Monsoon Cycle</span>
-          </button>
-          <button id="btnExportCSV" class="btn-copilot-action secondary" title="Export station sounding profile as CSV">
-            <span>📥 Export CSV</span>
-          </button>
-          <button id="btnExportJSON" class="btn-copilot-action secondary" title="Export complete 3D station sounding tensor as JSON">
-            <span>📥 Export JSON</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Master Operational Workspace Hub -->
+      <!-- Explorer panels -->
       <div class="master-hub-bar">
         <div class="stage03-tab-bar">
           <button class="stage-tab-btn active" data-tab="maps" title="2D Vertical Depth Slicing Maps">
@@ -344,7 +264,7 @@
             <span class="tab-emoji">🛰️</span>
             <div class="tab-content-group">
               <span class="tab-main">ARGO Matchup</span>
-              <small>+72% Skill vs WOA18</small>
+              <small>Hold-out comparison</small>
             </div>
           </button>
           <button class="stage-tab-btn" data-tab="tchp" title="Cyclone Heat Potential & Rapid Intensification">
@@ -354,11 +274,11 @@
               <small>Rapid Intensification Fuel</small>
             </div>
           </button>
-          <button class="stage-tab-btn" data-tab="ais" title="Real-Time 32,000+ Ship AIS Radar">
+          <button class="stage-tab-btn" data-tab="ais" title="Verified live AIS radar">
             <span class="tab-emoji">🚢</span>
             <div class="tab-content-group">
               <span class="tab-main">Live AIS Radar</span>
-              <small>32,000+ Ships Tracked</small>
+              <small>Verified reports only</small>
             </div>
           </button>
         </div>
@@ -974,25 +894,25 @@
     <section id="ais-tracking" class="section ais-section">
       <div class="section-header">
         <span class="section-kicker">MARITIME CONTEXT · LIVE AIS INTELLIGENCE</span>
-        <h2 class="section-title">MarineTraffic-Scale Ship Tracking &amp; Subsurface Radar</h2>
-        <p class="section-desc">Live commercial and naval vessel tracking across the North Indian Ocean via authenticated AISStream WebSocket proxy merged with real-time dead-reckoning maritime navigation.</p>
+        <h2 class="section-title">Live AIS position radar</h2>
+        <p class="section-desc">Live AISStream reports appear alongside a clearly marked demo fleet for presentation mode. Demo routes are simulated; live route tails use received AIS reports.</p>
       </div>
 
       <!-- MarineTraffic Fleet Search & Type Filters -->
       <div class="ais-toolbar">
         <div class="ais-search-box">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="aisSearchInput" placeholder="Search 1,900+ vessels by name, MMSI, IMO, destination..." autocomplete="off">
+          <input type="text" id="aisSearchInput" placeholder="Search received AIS reports by name, MMSI, IMO, destination..." autocomplete="off">
           <button id="aisSearchClear" class="search-clear-btn" style="display:none">✕</button>
         </div>
         <div class="ais-filter-chips">
-          <button class="vessel-filter-chip active" data-type="all">All (<span id="countAll">1,930</span>)</button>
-          <button class="vessel-filter-chip" data-type="cargo"><span class="dot-cargo">●</span> Cargo (<span id="countCargo">620</span>)</button>
-          <button class="vessel-filter-chip" data-type="tanker"><span class="dot-tanker">●</span> Tankers (<span id="countTanker">430</span>)</button>
-          <button class="vessel-filter-chip" data-type="fishing"><span class="dot-fishing">●</span> Fishing (<span id="countFishing">480</span>)</button>
-          <button class="vessel-filter-chip" data-type="passenger"><span class="dot-passenger">●</span> Passenger (<span id="countPassenger">85</span>)</button>
-          <button class="vessel-filter-chip" data-type="military"><span class="dot-military">●</span> Naval (<span id="countMilitary">35</span>)</button>
-          <button class="vessel-filter-chip" data-type="tug"><span class="dot-tug">●</span> Tugs &amp; OSV (<span id="countTug">280</span>)</button>
+          <button class="vessel-filter-chip active" data-type="all">All (<span id="countAll">—</span>)</button>
+          <button class="vessel-filter-chip" data-type="cargo"><span class="dot-cargo">●</span> Cargo (<span id="countCargo">—</span>)</button>
+          <button class="vessel-filter-chip" data-type="tanker"><span class="dot-tanker">●</span> Tankers (<span id="countTanker">—</span>)</button>
+          <button class="vessel-filter-chip" data-type="fishing"><span class="dot-fishing">●</span> Fishing (<span id="countFishing">—</span>)</button>
+          <button class="vessel-filter-chip" data-type="passenger"><span class="dot-passenger">●</span> Passenger (<span id="countPassenger">—</span>)</button>
+          <button class="vessel-filter-chip" data-type="military"><span class="dot-military">●</span> Naval (<span id="countMilitary">—</span>)</button>
+          <button class="vessel-filter-chip" data-type="tug"><span class="dot-tug">●</span> Tugs &amp; OSV (<span id="countTug">—</span>)</button>
         </div>
         <div class="ais-mode-toggle">
           <button id="btnAisMarkers" class="ais-mode-btn active">🚢 Ships View</button>
@@ -1005,12 +925,12 @@
           <div id="aisMap" class="leaflet-map ais-map"></div>
           <div class="ais-overlay">
             <div id="vesselCount" class="vessel-counter">
-              <span class="counter-value" id="vesselCountVal">1,930</span>
-              <span class="counter-label">Vessels Tracked</span>
+              <span class="counter-value" id="vesselCountVal">—</span>
+              <span class="counter-label">Live + demo vessels</span>
             </div>
             <div id="aisStatus" class="ais-status-badge">
               <span class="status-dot"></span>
-              <span class="status-text" id="aisStatusText">Live Feed Active · 1,930 Ships</span>
+              <span class="status-text" id="aisStatusText">Connecting to AIS feed…</span>
             </div>
           </div>
         </div>
@@ -1107,7 +1027,7 @@
             </div>
             <div class="meta-row">
               <span>REFRESH CYCLE:</span>
-              <strong>3-Second Dead Reckoning + AISStream Live Packets</strong>
+              <strong>Live AIS reports + labelled demo simulation</strong>
             </div>
           </div>
         </div>
