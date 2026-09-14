@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OceanEmbed-PG — Theory Primer and Build Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+@page {
+    size: A4;
+    margin: 20mm 18mm 22mm 18mm;
+}
+
+@media print {
+    body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    .page-break { page-break-before: always; }
+    h3 { page-break-before: always; }
+    h5 { page-break-after: avoid; }
+    .no-break { page-break-inside: avoid; }
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.7;
+    color: #1e293b;
+    background: #ffffff;
+    -webkit-font-smoothing: antialiased;
+    padding: 0;
+    max-width: 100%;
+}
+
+/* ═══════════════════════════════════════
+   COVER / HEADER 
+   ═══════════════════════════════════════ */
+
+body > p:first-child {
+    text-align: center;
+    font-size: 7.5pt;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: #94a3b8;
+    margin-top: 50px;
+    margin-bottom: 35px;
+    font-weight: 500;
+}
+
+h1 {
+    font-size: 36pt;
+    font-weight: 900;
+    text-align: center;
+    margin: 12px 0 10px 0;
+    letter-spacing: -1.5px;
+    line-height: 1.05;
+    color: #0f172a;
+    background: linear-gradient(135deg, #0f172a 0%, #1e40af 40%, #0891b2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+h1 + h4 {
+    font-size: 11pt;
+    font-weight: 400;
+    color: #64748b;
+    text-align: center;
+    margin-bottom: 28px;
+    letter-spacing: 0.2px;
+    line-height: 1.5;
+    font-style: normal;
+}
+
+/* Problem statement metadata block */
+h1 + h4 + p {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-left: 4px solid #06b6d4;
+    padding: 14px 18px;
+    border-radius: 0 10px 10px 0;
+    font-size: 8.5pt;
+    color: #334155;
+    margin-bottom: 20px;
+    line-height: 1.8;
+}
+
+/* One-line solution paragraph */
+h1 + h4 + p + p {
+    font-size: 10.5pt;
+    color: #1e293b;
+    text-align: center;
+    font-style: italic;
+    padding: 0 30px;
+    margin-bottom: 8px;
+    line-height: 1.75;
+}
+
+/* Page header marker "OceanEmbed-PG · SIH26066" */
+body > p:nth-child(n) {
+    /* Default paragraph */
+}
+
+
+/* ═══════════════════════════════════════
+   HEADINGS 
+   ═══════════════════════════════════════ */
+
+h2 {
+    font-size: 12pt;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 30px 0 16px 0;
+    letter-spacing: 0.3px;
+}
+
+h3 {
+    font-size: 16pt;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 18px 0;
+    padding: 16px 0 12px 0;
+    border-bottom: 3.5px solid;
+    border-image: linear-gradient(90deg, #14b8a6, #06b6d4, #3b82f6, #6366f1) 1;
+    letter-spacing: -0.4px;
+}
+
+h4 {
+    font-size: 10.5pt;
+    font-weight: 600;
+    color: #475569;
+    margin: 18px 0 8px 0;
+}
+
+h5 {
+    font-size: 12pt;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 24px 0 10px 0;
+    padding-left: 14px;
+    border-left: 4px solid #14b8a6;
+    line-height: 1.4;
+}
+
+h6 {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #475569;
+    margin: 18px 0 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+}
+
+
+/* ═══════════════════════════════════════
+   HORIZONTAL RULES 
+   ═══════════════════════════════════════ */
+
+hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, #cbd5e1 20%, #cbd5e1 80%, transparent 100%);
+    margin: 24px 0;
+}
+
+
+/* ═══════════════════════════════════════
+   PARAGRAPHS & TEXT 
+   ═══════════════════════════════════════ */
+
+p {
+    margin: 0 0 11px 0;
+    color: #334155;
+    text-align: justify;
+    hyphens: auto;
+}
+
+strong {
+    font-weight: 700;
+    color: #0f172a;
+}
+
+em {
+    font-style: italic;
+    color: #475569;
+}
+
+
+/* ═══════════════════════════════════════
+   BLOCKQUOTES 
+   ═══════════════════════════════════════ */
+
+blockquote {
+    background: linear-gradient(135deg, #f0fdfa 0%, #ecfdf5 50%, #f0f9ff 100%);
+    border-left: 4px solid #14b8a6;
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 10px 10px 0;
+    font-style: italic;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+blockquote p {
+    margin: 0;
+    color: #0f766e;
+    text-align: left;
+    font-size: 10.5pt;
+    line-height: 1.7;
+}
+
+blockquote strong {
+    color: #065f46;
+    font-weight: 700;
+}
+
+blockquote em {
+    color: #0d9488;
+}
+
+
+/* ═══════════════════════════════════════
+   LISTS 
+   ═══════════════════════════════════════ */
+
+ul, ol {
+    margin: 8px 0 14px 0;
+    padding-left: 24px;
+}
+
+li {
+    margin-bottom: 6px;
+    color: #334155;
+    line-height: 1.65;
+}
+
+li strong {
+    color: #0f172a;
+}
+
+/* Nested lists */
+li ul, li ol {
+    margin: 4px 0 4px 0;
+}
+
+/* Checkbox task lists */
+li code {
+    /* Inline code in list items */
+}
+
+
+/* ═══════════════════════════════════════
+   TABLES 
+   ═══════════════════════════════════════ */
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 16px 0 18px 0;
+    font-size: 9.5pt;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    border: 1px solid #e2e8f0;
+    page-break-inside: avoid;
+}
+
+thead {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+}
+
+th {
+    padding: 11px 14px;
+    text-align: left;
+    font-weight: 600;
+    color: #ffffff;
+    font-size: 8.5pt;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    border-bottom: 2px solid #14b8a6;
+}
+
+td {
+    padding: 9px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    vertical-align: top;
+    line-height: 1.55;
+}
+
+tr:nth-child(even) td {
+    background: #f8fafc;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+/* Contents table — special lighter styling */
+h2:first-of-type + table {
+    box-shadow: none;
+    border: 1px solid #e2e8f0;
+    font-size: 9pt;
+    border-radius: 0;
+}
+
+h2:first-of-type + table thead {
+    display: none;
+}
+
+h2:first-of-type + table td {
+    padding: 3.5px 8px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 9pt;
+    background: transparent !important;
+}
+
+h2:first-of-type + table tr:nth-child(even) td {
+    background: #fafbfc !important;
+}
+
+
+/* ═══════════════════════════════════════
+   CODE BLOCKS 
+   ═══════════════════════════════════════ */
+
+code {
+    font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+    font-size: 8.5pt;
+    background: #f1f5f9;
+    color: #0f172a;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+}
+
+pre {
+    background: linear-gradient(160deg, #0f172a 0%, #1e293b 60%, #1a2332 100%);
+    color: #e2e8f0;
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin: 14px 0 16px 0;
+    overflow-x: auto;
+    font-size: 8.5pt;
+    line-height: 1.6;
+    border: 1px solid #334155;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    page-break-inside: avoid;
+}
+
+pre code {
+    background: none;
+    color: #e2e8f0;
+    padding: 0;
+    border: none;
+    font-size: 8.5pt;
+}
+
+
+/* ═══════════════════════════════════════
+   IMAGES 
+   ═══════════════════════════════════════ */
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 18px auto;
+    border-radius: 12px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+    page-break-inside: avoid;
+}
+
+
+/* ═══════════════════════════════════════
+   SPECIAL SECTION MARKERS 
+   ═══════════════════════════════════════ */
+
+/* The repeated "OceanEmbed-PG · SIH26066" and "PART X — ..." lines */
+/* These appear as standalone paragraphs in the converted HTML */
+
+
+/* ═══════════════════════════════════════
+   MATH ($$) BLOCKS 
+   ═══════════════════════════════════════ */
+
+/* Math expressions rendered as code-like blocks */
+p > code {
+    /* Keep inline */
+}
+
+
+/* ═══════════════════════════════════════
+   PRINT OPTIMIZATIONS 
+   ═══════════════════════════════════════ */
+
+p, li {
+    orphans: 3;
+    widows: 3;
+}
+
+table, pre, blockquote, img {
+    page-break-inside: avoid;
+}
+
+h3, h5 {
+    page-break-after: avoid;
+}
+
+/* Checkmark / cross styling in lists */
+
+</style>
+</head>
+<body>
+<p>S M A R T  I N D I A  H A C K A T H O N  2 0 2 6  ·  I N T E R N A L  W O R K I N G  D O C U M E N T</p>
+<h1 id="oceanembed-pg"><strong>OceanEmbed-PG</strong></h1>
+<h4 id="physics-guided-satellite-embedding-framework-for-reconstruction-of-subsurface-ocean-temperature">Physics-Guided Satellite Embedding Framework for Reconstruction of Subsurface Ocean Temperature</h4>
+<p><strong>Problem Statement</strong> SIH26066 — OceanEmbed <strong>Organisation</strong> Ministry of Earth Sciences · INCOIS, Ocean Valley <strong>Category</strong> Software  |  Theme: Disaster Management <strong>Domain</strong> North Indian Ocean, 5°N–30°N / 45°E–105°E <strong>Team</strong> 6 members</p>
+<p>OceanEmbed-PG converts daily surface observations into a physics-aware latent representation of the ocean, then reconstructs its vertical temperature structure while explicitly accounting for thermocline displacement, wind-driven mixing, salinity-driven stratification and ocean-density stability.</p>
+<p>OceanEmbed-PG · SIH26066</p>
+<hr />
+<h2 id="contents"><strong>Contents</strong></h2>
+<table>
+<thead>
+<tr>
+<th><strong>PART 1 — THE SCIENTIFIC FOUNDATION</strong><br><strong>................................................</strong></th>
+<th><strong>........................</strong><br><strong>3</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.1 What exactly are we solving?<br>...........................................................................</td>
+<td>.............................<br>3</td>
+</tr>
+<tr>
+<td>1.2 The key scientific insight — surface signatures reveal subsurface state<br>.........</td>
+<td>.............................<br>3</td>
+</tr>
+<tr>
+<td>1.3 Why SLA is especially important<br>....................................................................</td>
+<td>.............................<br>4</td>
+</tr>
+<tr>
+<td>1.4 Why SSS is critical in the Bay of Bengal<br>........................................................</td>
+<td>.............................<br>5</td>
+</tr>
+<tr>
+<td>1.5 Bay of Bengal vs Arabian Sea — two opposite regimes<br>...................................</td>
+<td>.............................<br>5</td>
+</tr>
+<tr>
+<td><strong>PART 2 — ARCHITECTURE</strong><br><strong>...............................................................</strong></td>
+<td><strong>........................</strong><br><strong>6</strong></td>
+</tr>
+<tr>
+<td>2.1 Final architecture overview<br>.............................................................................</td>
+<td>.............................<br>6</td>
+</tr>
+<tr>
+<td>2.2 Input layer — the ten channels<br>.......................................................................</td>
+<td>.............................<br>7</td>
+</tr>
+<tr>
+<td>2.3 Physics Feature Branch<br>..................................................................................</td>
+<td>.............................<br>7</td>
+</tr>
+<tr>
+<td>2.4 The Satellite Ocean Embedding<br>......................................................................</td>
+<td>.............................<br>8</td>
+</tr>
+<tr>
+<td>2.5 Why U-Net?<br>....................................................................................................</td>
+<td>.............................<br>8</td>
+</tr>
+<tr>
+<td>2.6 Lightweight attention at the bottleneck<br>..........................................................</td>
+<td>.............................<br>9</td>
+</tr>
+<tr>
+<td>2.7 Temperature decoder — 15 depths<br>.................................................................</td>
+<td>.............................<br>9</td>
+</tr>
+<tr>
+<td>2.8 Auxiliary salinity decoder<br>...............................................................................</td>
+<td>.............................<br>9</td>
+</tr>
+<tr>
+<td>2.9 Anomaly learning<br>..........................................................................................</td>
+<td>.............................<br>10</td>
+</tr>
+<tr>
+<td><strong>PART 3 — PHYSICS-GUIDED LOSS</strong><br><strong>...................................................</strong></td>
+<td><strong>........................</strong><br><strong>10</strong></td>
+</tr>
+<tr>
+<td>3.1 Temperature reconstruction loss<br>.....................................................................</td>
+<td>.............................<br>10</td>
+</tr>
+<tr>
+<td>3.2 Thermocline-aware depth weighting<br>...............................................................</td>
+<td>.............................<br>11</td>
+</tr>
+<tr>
+<td>3.3 Vertical smoothness loss<br>................................................................................</td>
+<td>.............................<br>11</td>
+</tr>
+<tr>
+<td>3.4 Why NOT to impose monotonic temperature<br>..................................................</td>
+<td>.............................<br>11</td>
+</tr>
+<tr>
+<td>3.5 Density stability loss<br>.....................................................................................</td>
+<td>.............................<br>11</td>
+</tr>
+<tr>
+<td>3.6 D26 auxiliary objective<br>..................................................................................</td>
+<td>.............................<br>12</td>
+</tr>
+<tr>
+<td>3.7 Final composite loss<br>......................................................................................</td>
+<td>.............................<br>12</td>
+</tr>
+<tr>
+<td><strong>PART 4 — UNCERTAINTY</strong><br><strong>................................................................</strong></td>
+<td><strong>........................</strong><br><strong>13</strong></td>
+</tr>
+<tr>
+<td><strong>PART 5 — DATA PIPELINE</strong><br><strong>..............................................................</strong></td>
+<td><strong>........................</strong><br><strong>13</strong></td>
+</tr>
+<tr>
+<td><strong>PART 6 — VALIDATION</strong><br><strong>...................................................................</strong></td>
+<td><strong>........................</strong><br><strong>15</strong></td>
+</tr>
+<tr>
+<td><strong>PART 7 — OPERATIONAL PRODUCTS</strong><br><strong>...............................................</strong></td>
+<td><strong>........................</strong><br><strong>16</strong></td>
+</tr>
+<tr>
+<td><strong>PART 8 — SYSTEM ARCHITECTURE AND DEMO</strong><br><strong>...............................</strong></td>
+<td><strong>........................</strong><br><strong>17</strong></td>
+</tr>
+<tr>
+<td><strong>PART 9 — MVP vs ADVANCED TIERS</strong><br><strong>...............................................</strong></td>
+<td><strong>........................</strong><br><strong>19</strong></td>
+</tr>
+<tr>
+<td><strong>PART 10 — THINGS THAT WILL GO WRONG</strong><br><strong>...................................</strong></td>
+<td><strong>........................</strong><br><strong>20</strong></td>
+</tr>
+<tr>
+<td><strong>PART 11 — THE FIVE QUESTIONS THE JURY WILL ASK</strong><br><strong>..................</strong></td>
+<td><strong>........................</strong><br><strong>21</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>OceanEmbed-PG · SIH26066</p>
+<p>PART 1 — THE SCIENTIFIC FOUNDATION</p>
+<h3 id="part-1-the-scientific-foundation"><strong>PART 1 — THE SCIENTIFIC FOUNDATION</strong></h3>
+<h5 id="11-what-exactly-are-we-solving"><strong>1.1 What exactly are we solving?</strong></h5>
+<p>Satellites continuously observe the surface of the ocean, but they cannot directly observe the temperature hundreds of metres below it. Yet the subsurface state affects:</p>
+<ul>
+<li><strong>Cyclone intensification</strong> — warm subsurface reservoirs fuel rapid intensification</li>
+<li><strong>Ocean heat content</strong> — drives global climate variability</li>
+<li><strong>Marine heatwaves</strong> — threaten ecosystems and fisheries</li>
+<li><strong>Stratification and circulation</strong> — govern nutrient transport and biological productivity</li>
+<li><strong>Ocean forecasting</strong> — subsurface initialisation is critical for numerical prediction</li>
+</ul>
+<p>Direct instruments such as ARGO provide valuable vertical profiles but are too sparse — roughly one profile per 3° every 10 days — to provide a continuous daily 0.25° field. The central idea is therefore:</p>
+<blockquote>
+<p><strong>surface observations → learn hidden subsurface state → produce a continuous 3-D temperature field</strong></p>
+</blockquote>
+<p>The scientific basis is that the subsurface is <em>not</em> independent of the surface. Thermocline displacement, mesoscale eddies, wind-driven mixing, surface salinity and surface currents all leave observable signatures at the surface.</p>
+<p>The system produces a <strong>daily 0.25° subsurface temperature field</strong> at the <strong>15 depths</strong> specified by INCOIS:
+<strong>0, 5, 10, 20, 30, 50, 75, 100, 125, 150, 200, 300, 500, 700 and 1000 m.</strong></p>
+<p>The official problem requires the North Indian Ocean domain 5°N–30°N, 45°E–105°E, daily 0.25° output, surface SST/SSS/SSH-SLA/currents/winds as input, GLORYS temperature as the training target and ARGO as independent validation.</p>
+<h5 id="12-the-key-scientific-insight-surface-signatures-reveal-subsurface-state"><strong>1.2 The key scientific insight — surface signatures reveal subsurface state</strong></h5>
+<p>The network should not be presented as <em>"CNN sees seven maps and guesses 15 temperatures."</em> Instead, present it as:</p>
+<blockquote>
+<p><strong>"We infer the hidden ocean state from its surface expression."</strong></p>
+</blockquote>
+<p>The major physical pathways are illustrated below:</p>
+<p><img alt="Physical pathways from surface observations to subsurface temperature" src="/Users/sankalp/Documents/sih/images/physical_pathways.jpg" /></p>
+<p>Each surface variable carries specific information about the hidden ocean state:</p>
+<table>
+<thead>
+<tr>
+<th>Surface Variable</th>
+<th>Physical Information Carried</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SST</strong></td>
+<td>Surface heat state, upper-ocean thermal constraint</td>
+</tr>
+<tr>
+<td><strong>SSS</strong></td>
+<td>Density / halocline / barrier layer — controls stratification in BoB</td>
+</tr>
+<tr>
+<td><strong>SLA / SSH</strong></td>
+<td>Thermocline displacement, eddy structure — most informative predictor</td>
+</tr>
+<tr>
+<td><strong>Surface currents</strong></td>
+<td>Water-mass transport, advective information</td>
+</tr>
+<tr>
+<td><strong>Surface winds</strong></td>
+<td>Mixing energy, Ekman pumping, thermocline displacement</td>
+</tr>
+</tbody>
+</table>
+<p>This is strongly aligned with physical oceanography: SLA contains information about thermocline displacement; SST constrains the upper-ocean thermal state; SSS influences the halocline and barrier layer; winds influence mixing/Ekman transport; and currents carry water-mass information.</p>
+<hr />
+<p>OceanEmbed-PG · SIH26066</p>
+<p>PART 1 — THE SCIENTIFIC FOUNDATION</p>
+<h5 id="13-why-sla-is-especially-important"><strong>1.3 Why SLA is especially important</strong></h5>
+<p>A particularly strong part of the scientific pitch is <strong>sea-level anomaly (SLA)</strong>.</p>
+<p>SSH has a mass component and a steric component. The steric part is the depth-integrated density anomaly. Since density anomalies in the tropics are dominated by thermocline displacement, <strong>SLA is essentially a remote measurement of how deep the thermocline is</strong>. It is the single most informative predictor.</p>
+<p>Mesoscale ocean eddies (100–300 km, the dominant variability) displace the thermocline by tens of metres and show up directly in SLA:</p>
+<p><img alt="SLA reveals thermocline displacement — warm eddies deepen, cold eddies shallow the thermocline" src="/Users/sankalp/Documents/sih/images/sla_thermocline.jpg" /></p>
+<ul>
+<li><strong>Anticyclonic (warm) eddy</strong> → positive SLA → depressed thermocline → anomalously warm subsurface</li>
+<li><strong>Cyclonic (cold) eddy</strong> → negative SLA → elevated thermocline → anomalously cool subsurface</li>
+</ul>
+<p>SLA provides an indirect measurement of the vertical position of subsurface thermal structure. The steric component of sea-level anomaly is linked to integrated density structure and thermocline displacement.</p>
+<p>This gives an excellent judge-facing line:</p>
+<blockquote>
+<p><em>"We are not asking AI to hallucinate the deep ocean. We are learning the physical surface signatures that reveal where the thermocline has moved."</em></p>
+</blockquote>
+<h5 id="14-why-sss-is-critical-in-the-bay-of-bengal"><strong>1.4 Why SSS is critical in the Bay of Bengal</strong></h5>
+<p>The most distinctive feature of the North Indian Ocean is that <strong>temperature alone does not determine stratification</strong>.</p>
+<p>The Bay of Bengal receives strong freshwater input from precipitation and major rivers (Ganges–Brahmaputra, Irrawaddy). This creates strong surface freshening and a <strong>halocline</strong> — a sharp vertical salinity gradient.</p>
+<p>That can produce:</p>
+<div class="codehilite"><pre><span></span><code>fresh surface layer → salinity-driven density stratification → barrier layer → reduced vertical mixing
+</code></pre></div>
+
+<p>This is important for cyclone physics because a deep warm layer can remain beneath the surface even when SST alone looks similar to another location.</p>
+<p><strong>Key numbers:</strong>
+- Thermal expansion coefficient α ≈ 2–3 × 10⁻⁴ per °C
+- Haline contraction coefficient β ≈ 7.6 × 10⁻⁴ per psu
+- <strong>1 psu of salinity ≈ 3 °C in density terms</strong> — in the BoB, salinity, not temperature, controls stratification</p>
+<p>This is why SSS is a particularly important predictor, and why the model must be <strong>salinity-aware even though the official target is temperature</strong>.</p>
+<hr />
+<p>OceanEmbed-PG · SIH26066</p>
+<p>PART 1 — THE SCIENTIFIC FOUNDATION</p>
+<h5 id="15-bay-of-bengal-vs-arabian-sea-two-opposite-regimes"><strong>1.5 Bay of Bengal vs Arabian Sea — two opposite regimes</strong></h5>
+<p>The North Indian Ocean domain covers two fundamentally different oceanographic regimes. A single model must handle both. Report metrics <strong>separately for BoB and Arabian Sea</strong> — if you only report a basin mean you will be asked why, and you won't have an answer.</p>
+<p><img alt="Bay of Bengal vs Arabian Sea — two opposite stratification regimes" src="/Users/sankalp/Documents/sih/images/bob_vs_arabian.jpg" /></p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Bay of Bengal</th>
+<th>Arabian Sea</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Freshwater</strong></td>
+<td>Excess precipitation + rivers → fresh surface</td>
+<td>Evaporation &gt; precipitation → saltier surface</td>
+</tr>
+<tr>
+<td><strong>Stratification driver</strong></td>
+<td>Salinity (halocline)</td>
+<td>Temperature (thermocline)</td>
+</tr>
+<tr>
+<td><strong>Barrier layer</strong></td>
+<td>Thick, suppresses entrainment</td>
+<td>Absent in most of the basin</td>
+</tr>
+<tr>
+<td><strong>Mixed layer</strong></td>
+<td>Shallow, 10–30 m</td>
+<td>Deep, 50–120 m</td>
+</tr>
+<tr>
+<td><strong>Temperature inversions</strong></td>
+<td>Common in winter BoB (0.5–2 °C)</td>
+<td>Rare</td>
+</tr>
+<tr>
+<td><strong>Key features</strong></td>
+<td>River plumes, cyclone barrier layers</td>
+<td>Monsoon upwelling off Somalia/Oman</td>
+</tr>
+</tbody>
+</table>
+<p>This gives us a built-in experiment:</p>
+<ul>
+<li>Does adding SSS improve reconstruction more strongly in the Bay of Bengal?</li>
+<li>Does adding surface currents improve reconstruction particularly in the Arabian Sea / monsoon regime?</li>
+</ul>
+<p>These become genuine empirical research questions — not fake architectural novelties.</p>
+<hr />
+<p>OceanEmbed-PG · SIH26066</p>
+<p>PART 2 — ARCHITECTURE</p>
+<h3 id="part-2-architecture"><strong>PART 2 — ARCHITECTURE</strong></h3>
+<h5 id="21-final-architecture-overview"><strong>2.1 Final architecture overview</strong></h5>
+<p><img alt="OceanEmbed-PG architecture — from surface inputs through physics-guided U-Net to subsurface reconstruction" src="/Users/sankalp/Documents/sih/images/architecture_diagram.jpg" /></p>
+<p>The backbone deliberately follows a <strong>U-Net architecture</strong> with an <strong>explicit bottleneck embedding</strong>. It is the best compromise between spatial modelling, compute and hackathon reliability.</p>
+<p>The architecture has five major stages:</p>
+<ol>
+<li><strong>Input harmonisation</strong> → common 0.25° daily grid</li>
+<li><strong>Dual-branch feature extraction</strong> → raw observations + physics-derived features</li>
+<li><strong>Physics-aware encoder</strong> → U-Net CNN with skip connections</li>
+<li><strong>Satellite Ocean Embedding</strong> → bottleneck + lightweight attention</li>
+<li><strong>Multi-head decoder</strong> → temperature, auxiliary salinity, uncertainty</li>
+</ol>
+<hr />
+<p>OceanEmbed-PG · SIH26066</p>
+<p>PART 2 — ARCHITECTURE</p>
+<h5 id="22-input-layer-the-ten-channels"><strong>2.2 Input layer — the ten channels</strong></h5>
+<p>The official seven surface variables are:</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Variable</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>SST</td>
+<td>NOAA OISST v2.1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>SSS</td>
+<td>SMAP L3 (RSS or JPL)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>SLA / SSH</td>
+<td>CMEMS <code>SEALEVEL_GLO_PHY_L4</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Surface current U</td>
+<td>OSCAR v2</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Surface current V</td>
+<td>OSCAR v2</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Surface wind U</td>
+<td>CCMP v3.0</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Surface wind V</td>
+<td>CCMP v3.0</td>
+</tr>
+</tbody>
+</table>
+<p>The model additionally receives:</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Channel</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>8</td>
+<td>Ocean/land mask</td>
+<td>Prevents prediction over land</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Observation-validity mask</td>
+<td>Distinguishes measurements from interpolation</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Day-of-year encoding (sin/cos)</td>
+<td>Captures seasonal context</td>
+</tr>
+</tbody>
+</table>
+<p>The use of validity masks is important because satellite datasets contain missing/gap-filled regions, and the network should know whether a value represents a measurement or an interpolation.</p>
+<h5 id="23-physics-feature-branch"><strong>2.3 Physics Feature Branch</strong></h5>
+<p>This is where OceanEmbed-PG becomes distinctive. We retain the seven official variables, but derive inexpensive <strong>deterministic physical features</strong> from them.</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Formula</th>
+<th>Physical Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Wind speed</strong></td>
+<td>|W| = √(U²_w + V²_w)</td>
+<td>Magnitude of atmospheric forcing</td>
+</tr>
+<tr>
+<td><strong>Wind stress</strong></td>
+<td>τ = ρ_air · C_D · |W| · W</td>
+<td>Surface momentum forcing on the ocean</td>
+</tr>
+<tr>
+<td><strong>Wind-stress curl</strong></td>
+<td>∇×τ = ∂τ_y/∂x − ∂τ_x/∂y</td>
+<td>Ekman pumping → thermocline displacement</td>
+</tr>
+<tr>
+<td><strong>Current magnitude</strong></td>
+<td>|U_c| = √(U²_c + V²_c)</td>
+<td>Transport intensity</td>
+</tr>
+<tr>
+<td><strong>SLA gradients</strong></td>
+<td>∂SLA/∂x, ∂SLA/∂y</td>
+<td>Spatially organized eddy structures</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key point:</strong> These are not new observational inputs. They are deterministic physics-informed transformations of the officially provided inputs. We do not need a sophisticated atmospheric model — the purpose is simply to transform raw variables into features directly related to ocean dynamics.</p>
+<p><strong>Wind-stress curl</strong> is particularly useful: it contributes to Ekman pumping and therefore vertical displacement of the thermocline. The underlying mechanism is: wind stress / Ekman forcing changes thermocline depth and upper-ocean mixing.</p>
+<hr />
+<p>OceanEmbed-PG · SIH26066</p>
+<p>PART 2 — ARCHITECTURE</p>
+<h5 id="24-the-satellite-ocean-embedding"><strong>2.4 The Satellite Ocean Embedding</strong></h5>
+<p>The raw input is a stack of maps: <code>10 × 100 × 240</code>. The network transforms this into a lower-dimensional representation:</p>
+<div class="codehilite"><pre><span></span><code>surface observations → encoder → latent Z
+</code></pre></div>
+
+<p>We call Z the <strong>Satellite Ocean Embedding</strong>.</p>
+<p>This embedding is intended to capture latent properties such as:
+- Eddy structure
+- Thermocline displacement
+- Surface stratification
+- Mixing regime
+- Water-mass transport
+- Monsoon state</p>
+<p>This directly satisfies the PS's explicit <strong>"satellite embedding engine"</strong> requirement, while making the embedding an inspectable intermediate output. The recommended approach is an explicit bottleneck rather than an opaque end-to-end model.</p>
+<h5 id="25-why-u-net"><strong>2.5 Why U-Net?</strong></h5>
+<p>U-Net provides two critical advantages:</p>
+<p><strong>1. Hierarchical abstraction through the encoder:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="n">surface</span><span class="w"> </span><span class="n">maps</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">local</span><span class="w"> </span><span class="n">patterns</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">eddy</span><span class="w"> </span><span class="n">structures</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">regional</span><span class="w"> </span><span class="n">ocean</span><span class="w"> </span><span class="n">state</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">embedding</span>
+</code></pre></div>
+
+<p><strong>2. Skip connections retain high-resolution spatial information.</strong></p>
+<p>This is important because the final output must also be spatially resolved: <strong>15 depths × 100 × 240</strong>, rather than one scalar.</p>
+<p>U-Net is the recommended practical architecture because the domain is only around 100×240 cells at the requested resolution, making full-grid dense prediction tractable. A full Vision Transformer is unnecessarily data- and compute-hungry for the hackathon.</p>
+<h5 id="26-lightweight-attention-at-the-bottleneck"><strong>2.6 Lightweight attention at the bottleneck</strong></h5>
+<p>At the U-Net bottleneck, we add a small self-attention block:</p>
+<div class="codehilite"><pre><span></span><code>CNN encoder → embedding → small self-attention block → decoder
+</code></pre></div>
+
+<p>The purpose is to give the embedding some ability to relate distant spatial features. For example, western Bay of Bengal mesoscale patterns can influence eastern Bay of Bengal patterns through this mechanism.</p>
+<p>This is preferable to a full ViT, which is considered unnecessarily data- and compute-hungry for the hackathon.</p>
+<hr />
+<p>OceanEmbed-PG · SIH26066</p>
+<p>PART 2 — ARCHITECTURE</p>
+<h5 id="27-temperature-decoder-15-depths"><strong>2.7 Temperature decoder — 15 depths</strong></h5>
+<p>The main decoder outputs T̂(z, x, y) for the 15 standard depths:</p>
+<div class="codehilite"><pre><span></span><code>z = 0, 5, 10, 20, 30, 50, 75, 100, 125, 150, 200, 300, 500, 700, 1000 m
+</code></pre></div>
+
+<p>The final output shape is: <strong>15 × H × W</strong>, where each channel corresponds to a depth.</p>
+<p>This is intentionally simpler than a full continuous-depth neural field. The PS explicitly asks for those 15 standard depths, and a 15-channel output is easier to train, validate and demonstrate within a hackathon.</p>
+<h5 id="28-auxiliary-salinity-decoder"><strong>2.8 Auxiliary salinity decoder</strong></h5>
+<p>This is the main physics-guided modification.</p>
+<p>The official target remains <strong>temperature</strong>. But internally we also predict Ŝ(z, x, y) as an <strong>auxiliary task</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">Embedding</span>
+<span class="w">    </span><span class="err">│</span>
+<span class="w">    </span><span class="err">├────►</span><span class="w"> </span><span class="n">Temperature</span><span class="w"> </span><span class="n">decoder</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">T</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="w">    </span><span class="p">[</span><span class="n">primary</span><span class="w"> </span><span class="n">output</span><span class="p">]</span>
+<span class="w">    </span><span class="err">│</span>
+<span class="w">    </span><span class="err">└────►</span><span class="w"> </span><span class="n">Salinity</span><span class="w"> </span><span class="n">decoder</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">S</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="w">       </span><span class="p">[</span><span class="n">auxiliary</span><span class="w"> </span><span class="n">internal</span><span class="w"> </span><span class="n">target</span><span class="p">]</span>
+</code></pre></div>
+
+<p><strong>Why?</strong> Because seawater density is approximately ρ = ρ(T, S, p), and therefore the vertical density structure depends jointly on temperature and salinity.</p>
+<p>This is especially important in the Bay of Bengal, where salinity strongly affects stratification. Co-predicting salinity enables density-based physical constraints that would otherwise be impossible.</p>
+<p>This gives a very good judge explanation:</p>
+<blockquote>
+<p><em>"We don't force physics onto temperature in isolation. We reconstruct the temperature–salinity state that actually determines ocean stratification."</em></p>
+</blockquote>
+<p>Salinity is an auxiliary internal target; the required final output is still temperature.</p>
+<h5 id="29-anomaly-learning"><strong>2.9 Anomaly learning</strong></h5>
+<p>The model should not primarily learn absolute temperature. Instead:</p>
+<div class="codehilite"><pre><span></span><code>T&#39; = T − T_clim(doy, x, y)
+</code></pre></div>
+
+<p>where T_clim is the day-of-year climatology. Then:</p>
+<div class="codehilite"><pre><span></span><code>GLORYS temperature → seasonal climatology subtraction → temperature anomaly → model → predicted anomaly → + climatology → final temperature
+</code></pre></div>
+
+<p>This removes much of the predictable seasonal background and makes the model focus on dynamically meaningful anomalies. The network then learns deviations from the normal state and naturally falls back toward zero anomaly where surface information is weak.</p>
+<p><strong>Critical:</strong> Compute climatology from the <strong>training years only</strong> — never from test years. That is leakage.</p>
+<hr />
+<p>OceanEmbed-PG · SIH26066</p>
+<p>PART 3 — PHYSICS-GUIDED LOSS</p>
+<h3 id="part-3-physics-guided-loss"><strong>PART 3 — PHYSICS-GUIDED LOSS</strong></h3>
+<p>This is the central differentiator. Instead of a plain MSE loss, we use a composite physics-guided objective:</p>
+<p><img alt="Physics-guided loss components — five terms enforce physical consistency" src="/Users/sankalp/Documents/sih/images/physics_loss.jpg" /></p>
+<p>The complete loss structure is:</p>
+<p>$$L = L_{temp} + \lambda_1 L_{smooth} + \lambda_2 L_{density} + \lambda_3 L_{salinity} + \lambda_4 L_{D26}$$</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>What it enforces</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>L_temp</strong></td>
+<td>Accurate temperature reconstruction (depth-weighted Huber)</td>
+</tr>
+<tr>
+<td><strong>L_smooth</strong></td>
+<td>Physically smooth vertical profiles</td>
+</tr>
+<tr>
+<td><strong>L_density</strong></td>
+<td>Gravitationally stable density structure</td>
+</tr>
+<tr>
+<td><strong>L_salinity</strong></td>
+<td>Consistent T–S relationship for density constraints</td>
+</tr>
+<tr>
+<td><strong>L_D26</strong></td>
+<td>Cyclone-relevant isotherm depth accuracy</td>
+</tr>
+</tbody>
+</table>
+<p>This is what makes the model <strong>physics-guided</strong> rather than merely physics-themed.</p>
+<h5 id="31-temperature-reconstruction-loss"><strong>3.1 Temperature reconstruction loss</strong></h5>
+<p>Use <strong>Huber loss</strong> rather than pure MSE:</p>
+<div class="codehilite"><pre><span></span><code>L_temp = Huber(T̂&#39;, T&#39;)
+</code></pre></div>
+
+<p><strong>Why Huber?</strong> Ocean data contains noisy/outlier values and Huber behaves like:
+- <strong>MSE</strong> for small errors → precise near zero
+- <strong>MAE-like</strong> for large errors → robust to outliers</p>
+<p>Huber is a practical default for noisy geophysical targets.</p>
+<hr />
+<p>OceanEmbed-PG · SIH26066</p>
+<p>PART 3 — PHYSICS-GUIDED LOSS</p>
+<h5 id="32-thermocline-aware-depth-weighting"><strong>3.2 Thermocline-aware depth weighting</strong></h5>
+<p>Not every depth matters equally. The thermocline (20–200 m) is much harder than the deep ocean because a small depth error produces a large temperature error. Therefore:</p>
+<div class="codehilite"><pre><span></span><code>L_temp = Σ_d  w_d · Huber(T̂_d, T_d)
+</code></pre></div>
+
+<p>where w_d is determined from training climatological variability. We deliberately avoid allowing the easiest deep levels to dominate the headline performance.</p>
+<h5 id="33-vertical-smoothness-loss"><strong>3.3 Vertical smoothness loss</strong></h5>
+<p>The predicted ocean profile should be physically smooth. Using finite differences:</p>
+<div class="codehilite"><pre><span></span><code>L_smooth = (1/(D−2)) · Σ_d  (T̂_{d+1} − 2·T̂_d + T̂_{d−1})²
+</code></pre></div>
+
+<p>This penalises unrealistic oscillations (e.g. 27 → 26.8 → 27.5 → 24 → 26.9) but does <strong>not</strong> force the temperature to always decrease monotonically. This distinction matters.</p>
+<h5 id="34-why-not-to-impose-monotonic-temperature"><strong>3.4 Why NOT to impose monotonic temperature</strong></h5>
+<p>A simplistic solution might enforce T(0) ≥ T(5) ≥ T(10) ≥ … <strong>We must not hard-code that.</strong></p>
+<p>The Bay of Bengal can exhibit <strong>temperature inversions</strong> in which temperature temporarily <em>increases</em> with depth within a stratified upper layer. In winter (roughly Dec–Feb) in the northern BoB, the surface loses heat to the atmosphere but the fresh cap prevents convective overturning — inversions of ~0.5–2 °C are routine.</p>
+<p>Imposing temperature monotonicity would <strong>delete the exact phenomenon</strong> that makes the Bay of Bengal scientifically interesting.</p>
+<p>Therefore:
+- ✅ <strong>Smoothness</strong> = yes
+- ❌ <strong>Blind temperature monotonicity</strong> = no</p>
+<h5 id="35-density-stability-loss"><strong>3.5 Density stability loss</strong></h5>
+<p>This is the strongest physics constraint. For predicted temperature and salinity:</p>
+<div class="codehilite"><pre><span></span><code>ρ̂(z) = ρ(T̂(z), Ŝ(z), p(z))
+</code></pre></div>
+
+<p>Under normal stable stratification, density should generally increase with depth. For adjacent levels:</p>
+<div class="codehilite"><pre><span></span><code>L_density = Σ_d  ReLU(ρ̂_d − ρ̂_{d+1})
+</code></pre></div>
+
+<p>If ρ(100m) &gt; ρ(125m) → penalised (unstable profile)
+If ρ(100m) &lt; ρ(125m) → no penalty (physically stable)</p>
+<p><strong>Implementation:</strong>
+- <strong>Version 1:</strong> Use <code>gsw</code> (NumPy, not differentiable) for diagnostics and validation
+- <strong>Version 2:</strong> Precompute TEOS-10 coefficients / α(T,S,p) and β(T,S,p) on a coarse lookup grid with <code>gsw</code> once, then interpolate that table differentiably inside PyTorch</p>
+<p>This is an excellent hackathon compromise — honest, cheap, and defensible.</p>
+<hr />
+<p>OceanEmbed-PG · SIH26066</p>
+<p>PART 3 — PHYSICS-GUIDED LOSS</p>
+<h5 id="36-d26-auxiliary-objective"><strong>3.6 D26 auxiliary objective</strong></h5>
+<p>D26 is the depth where T(z) = 26 °C. Instead of treating this only as a final graph, we can make it one of our operational objectives.</p>
+<p>From the true temperature profile, interpolate the depth where T = 26 °C to create a D26 target. The bottleneck has an auxiliary small head:</p>
+<div class="codehilite"><pre><span></span><code>embedding → D26 prediction
+</code></pre></div>
+
+<p>And we add:</p>
+<div class="codehilite"><pre><span></span><code>L_D26 = Huber(D26_predicted, D26_target)
+</code></pre></div>
+
+<p>This forces the embedding to preserve information relevant to cyclone heat content. This is not required by the PS, so it should be described as our proposed operational extension.</p>
+<h5 id="37-final-composite-loss"><strong>3.7 Final composite loss</strong></h5>
+<p>The complete practical loss:</p>
+<p>$$L_{total} = L_{Huber-T} + 0.05 \cdot L_{smooth} + 0.05 \cdot L_{density} + 0.10 \cdot L_{D26} + 0.10 \cdot L_{Huber-S}$$</p>
+<p>The exact coefficients should be tuned experimentally; these are initial engineering values, not scientifically established constants. The important concept is the <strong>structure</strong>:</p>
+<div class="codehilite"><pre><span></span><code>Temperature accuracy
+       +
+Profile smoothness
+       +
+Density stability
+       +
+Salinity consistency
+       +
+Cyclone-relevant D26 accuracy
+</code></pre></div>
+
+<hr />
+<p>OceanEmbed-PG · SIH26066</p>
+<p>PART 4 — UNCERTAINTY</p>
+<h3 id="part-4-uncertainty"><strong>PART 4 — UNCERTAINTY</strong></h3>
+<p>The final model should optionally estimate T̂(z) ± σ(z), but we don't make complicated probabilistic modelling a prerequisite.</p>
+<h5 id="mc-dropout-the-practical-approach"><strong>MC Dropout — the practical approach</strong></h5>
+<p>Keep dropout active at inference. Run N forward passes:</p>
+<div class="codehilite"><pre><span></span><code>prediction_1, prediction_2, ..., prediction_N
+</code></pre></div>
+
+<p>And calculate:</p>
+<div class="codehilite"><pre><span></span><code>σ(z) = Std(T̂_1, T̂_2, …, T̂_N)
+</code></pre></div>
+
+<p>This costs little because the architecture doesn't need to change.</p>
+<h5 id="observation-aware-uncertainty"><strong>Observation-aware uncertainty</strong></h5>
+<p>An especially useful addition: uncertainty should be higher where input quality is lower.</p>
+<div class="codehilite"><pre><span></span><code>missing / interpolated SSS → validity mask → model knows confidence is lower → higher uncertainty
+</code></pre></div>
+
+<p>This is particularly relevant around the Bay of Bengal river-plume / coastal regions where satellite salinity is noisy.</p>
+<h5 id="degraded-sss-augmentation"><strong>Degraded-SSS augmentation</strong></h5>
+<p>During training, randomly corrupt SSS to simulate real satellite uncertainty:</p>
+<div class="codehilite"><pre><span></span><code><span class="nv">true</span><span class="w"> </span><span class="nv">SSS</span><span class="w"> </span>→<span class="w"> </span><span class="nv">noise</span><span class="w"> </span>→<span class="w"> </span><span class="nv">smoothing</span><span class="w"> </span>→<span class="w"> </span><span class="k">random</span><span class="w"> </span><span class="nv">missing</span><span class="w"> </span><span class="nv">pixels</span><span class="w"> </span>→<span class="w"> </span><span class="nv">model</span><span class="w"> </span><span class="nv">input</span>
+</code></pre></div>
+
+<p>This prevents the most common failure mode: <strong>train/serve skew</strong> on SSS. Training on GLORYS SSS and deploying on SMAP SSS creates a mismatch that will cause the model to fail in the demo.</p>
+<hr />
+<p>OceanEmbed-PG · SIH26066</p>
+<p>PART 5 — DATA PIPELINE</p>
+<h3 id="part-5-data-pipeline"><strong>PART 5 — DATA PIPELINE</strong></h3>
+<p>Everything below is open and free. CMEMS needs a free account.</p>
+<table>
+<thead>
+<tr>
+<th><strong>What</strong></th>
+<th><strong>Product</strong></th>
+<th><strong>Res</strong></th>
+<th><strong>Access</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Label: T, S</td>
+<td>GLORYS12V1 — <code>GLOBAL_MULTIYEAR_PHY_001_030</code></td>
+<td>1/12°, 50 lev, daily</td>
+<td><code>copernicusmarine</code></td>
+</tr>
+<tr>
+<td>SST</td>
+<td>NOAA OISST v2.1</td>
+<td>0.25°, daily</td>
+<td>NOAA THREDDS, no auth</td>
+</tr>
+<tr>
+<td>SLA + geostrophic U,V</td>
+<td><code>SEALEVEL_GLO_PHY_L4</code></td>
+<td>0.25°, daily</td>
+<td><code>copernicusmarine</code></td>
+</tr>
+<tr>
+<td>SSS</td>
+<td>SMAP L3 (RSS or JPL)</td>
+<td>0.25°, 8-day running</td>
+<td>PO.DAAC</td>
+</tr>
+<tr>
+<td>Winds U,V</td>
+<td>CCMP v3.0</td>
+<td>0.25°, 6-hourly</td>
+<td>RSS / PO.DAAC</td>
+</tr>
+<tr>
+<td>Currents (incl. Ekman)</td>
+<td>OSCAR v2</td>
+<td>0.25°, 5-day</td>
+<td>PO.DAAC</td>
+</tr>
+<tr>
+<td>Validation</td>
+<td>Argo GDAC profiles</td>
+<td>point</td>
+<td><code>argopy</code></td>
+</tr>
+<tr>
+<td>Climatology baseline</td>
+<td>WOA23, or build from GLORYS</td>
+<td>0.25°</td>
+<td>NOAA NCEI</td>
+</tr>
+<tr>
+<td>Land/depth mask</td>
+<td>GEBCO or ETOPO</td>
+<td>—</td>
+<td>one-time</td>
+</tr>
+</tbody>
+</table>
+<h5 id="notes-that-will-save-you-time"><strong>Notes that will save you time:</strong></h5>
+<ul>
+<li>
+<p><strong>OISST over OSTIA.</strong> OISST is already 0.25°, daily, and needs no authentication. Use it for the hackathon.</p>
+</li>
+<li>
+<p><strong>Drop altimetric geostrophic currents, or use OSCAR instead.</strong> Geostrophic U,V from the SLA product are <em>derived from</em> SLA — they are collinear with an input you already have and add almost no information. OSCAR includes the Ekman component, which is genuinely new information.</p>
+</li>
+<li>
+<p><strong>SSS is your weak link.</strong> SMAP is ~40 km footprint, noisy, degraded by land contamination and radio-frequency interference — worst exactly in the river-plume region that matters most. If you train on GLORYS SSS and deploy on SMAP SSS you have train/serve skew and the model will fail in the demo. Either train on SMAP directly, or train on GLORYS SSS with noise-and-smoothing augmentation that mimics SMAP's error characteristics.</p>
+</li>
+<li>
+<p><strong>Bathymetry mask.</strong> Do not let the model predict 1000 m temperature where the ocean is 200 m deep. Mask each depth level by bathymetry and exclude those cells from both loss and metrics. Easy to forget, embarrassing on a map.</p>
+</li>
+<li>
+<p><strong>Grid alignment.</strong> GLORYS at 1/12° coarsened by a factor of 3 gives exactly 0.25°, and the cell centres land on the same 0.125°-offset grid as OISST and the CMEMS L4 altimetry products. Verify this once.</p>
+</li>
+</ul>
+<hr />
+<p>OceanEmbed-PG · SIH26066</p>
+<p>PART 5 — DATA PIPELINE</p>
+<h5 id="data-volume-do-the-arithmetic-before-you-start-downloading"><strong>Data volume — do the arithmetic before you start downloading</strong></h5>
+<p>Region 5–30 °N, 45–105 °E is 300 × 720 cells at 1/12°, or 100 × 240 at 0.25°.</p>
+<p>Naively downloading GLORYS daily for 10 years at native resolution with all depth levels is several hundred GB. You cannot do that in a hackathon.</p>
+<p><strong>The fix: subsample in time.</strong> Subsurface ocean state decorrelates over roughly 10–30 days at mesoscale. Consecutive daily fields are nearly redundant. Take <strong>every 5th day</strong>.</p>
+<div class="codehilite"><pre><span></span><code><span class="mf">2010</span><span class="err">–</span><span class="mf">2019</span><span class="p">,</span><span class="w"> </span><span class="n">every</span><span class="w"> </span><span class="mf">5</span><span class="n">th</span><span class="w"> </span><span class="n">day</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">~</span><span class="mf">730</span><span class="w"> </span><span class="n">fields</span>
+<span class="n">Requesting</span><span class="w"> </span><span class="kr">on</span><span class="n">ly</span><span class="w"> </span><span class="err">~</span><span class="mf">15</span><span class="w"> </span><span class="n">depth</span><span class="w"> </span><span class="n">levels</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">S</span><span class="p">:</span>
+<span class="mf">730</span><span class="w"> </span><span class="err">×</span><span class="w"> </span><span class="mf">300</span><span class="w"> </span><span class="err">×</span><span class="w"> </span><span class="mf">720</span><span class="w"> </span><span class="err">×</span><span class="w"> </span><span class="mf">15</span><span class="w"> </span><span class="err">×</span><span class="w"> </span><span class="mf">2</span><span class="w"> </span><span class="err">×</span><span class="w"> </span><span class="mf">4</span><span class="w"> </span><span class="n">bytes</span><span class="w"> </span><span class="err">≈</span><span class="w"> </span><span class="mf">19</span><span class="w"> </span><span class="n">GB</span><span class="w"> </span><span class="n">transferred</span>
+<span class="err">→</span><span class="w"> </span><span class="err">~</span><span class="mf">2</span><span class="w"> </span><span class="n">GB</span><span class="w"> </span><span class="n">as</span><span class="w"> </span><span class="n">float32</span><span class="w"> </span><span class="n">zarr</span><span class="w"> </span><span class="n">after</span><span class="w"> </span><span class="n">coarsening</span><span class="w"> </span><span class="kr">to</span><span class="w"> </span><span class="mf">0.25</span><span class="err">°</span>
+</code></pre></div>
+
+<p>That is tractable. Use <code>copernicusmarine.open_dataset()</code>, which returns a lazy xarray object backed by cloud zarr — subset, coarsen, and compute so only the needed chunks ever cross the network.</p>
+<h5 id="target-generation"><strong>Target generation</strong></h5>
+<div class="codehilite"><pre><span></span><code><span class="n">GLORYS</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">North</span><span class="w"> </span><span class="n">Indian</span><span class="w"> </span><span class="n">Ocean</span><span class="w"> </span><span class="n">crop</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="mf">0.25</span><span class="err">°</span><span class="w"> </span><span class="n">regridding</span><span class="o">/</span><span class="n">coarsening</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="mh">15</span><span class="w"> </span><span class="n">target</span><span class="w"> </span><span class="n">depths</span>
+<span class="err">→</span><span class="w"> </span><span class="n">day</span><span class="o">-</span><span class="n">of</span><span class="o">-</span><span class="n">year</span><span class="w"> </span><span class="n">climatology</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">anomaly</span>
+</code></pre></div>
+
+<p>GLORYS at 1/12° can be coarsened by a factor of three to 0.25°. Process incrementally rather than downloading everything at native resolution.</p>
+<h5 id="the-complete-pipeline"><strong>The complete pipeline</strong></h5>
+<div class="codehilite"><pre><span></span><code>RAW PRODUCTS
+     │
+     ├── SST ────┐
+     ├── SSS ────┤
+     ├── SLA ────┤
+     ├── currents─┤      HARMONISATION
+     ├── winds ──┤      ──────────────
+     └───────────┘           │
+                       COMMON 0.25° GRID
+                             │
+                        DAILY GRID
+                             │
+                      UNIT CONVERSION
+                             │
+                     LAND / OCEAN MASK
+                             │
+                      VALIDITY MASKS
+                             │
+                        CLIMATOLOGY
+                             │
+                         ANOMALIES
+                             │
+                      STANDARDISATION
+                             │
+                    MODEL INPUT TENSOR
+</code></pre></div>
+
+<p>xarray / Zarr / Dask are appropriate for the multidimensional scientific data pipeline, while PyTorch is used for the model.</p>
+<hr />
+<p>OceanEmbed-PG · SIH26066</p>
+<p>PART 6 — VALIDATION</p>
+<h3 id="part-6-validation"><strong>PART 6 — VALIDATION</strong></h3>
+<h5 id="training-split-never-randomly-shuffle"><strong>Training split — never randomly shuffle</strong></h5>
+<p>Adjacent days of ocean state are nearly identical. A random split lets the model effectively see the same phenomenon in training and testing. <strong>Random splits are severe leakage.</strong></p>
+<p>The recommended strategy:</p>
+<table>
+<thead>
+<tr>
+<th>Split</th>
+<th>Period</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TRAIN</strong></td>
+<td>Earlier years (e.g. 2010–2018)</td>
+</tr>
+<tr>
+<td><strong>VALIDATION</strong></td>
+<td>Later year (e.g. 2019)</td>
+</tr>
+<tr>
+<td><strong>TEST</strong></td>
+<td>Latest 1–2 years (e.g. 2020–2021)</td>
+</tr>
+</tbody>
+</table>
+<p>Within training, use <strong>blocked spatial validation</strong> rather than random pixels.</p>
+<h5 id="the-evaluation-pipeline"><strong>The evaluation pipeline</strong></h5>
+<div class="codehilite"><pre><span></span><code>MODEL → predicted profile → match with independent ARGO →
+    RMSE, MAE, Bias, Correlation, R²
+</code></pre></div>
+
+<p>Separately by:
+- <strong>Region:</strong> Bay of Bengal vs Arabian Sea
+- <strong>Season:</strong> Summer, monsoon, winter, etc.
+- <strong>Depth:</strong> per-level reporting</p>
+<h5 id="the-most-important-scientific-validation-three-way-comparison"><strong>The most important scientific validation — three-way comparison</strong></h5>
+<div class="codehilite"><pre><span></span><code>                    WITHHELD ARGO
+                         │
+              ┌──────────┼──────────┐
+              ↓          ↓          ↓
+          OceanEmbed   GLORYS   Climatology
+              ↓          ↓          ↓
+            RMSE        RMSE       RMSE
+</code></pre></div>
+
+<p>This prevents the weak claim <em>"Our model matches GLORYS."</em> GLORYS supplied the training targets, so that comparison alone is insufficient.</p>
+<p>Instead, we ask: <strong>How well does our predicted field reproduce an independently observed ARGO profile?</strong></p>
+<p>The three-way comparison is one of the most important validation figures.</p>
+<h5 id="glorys-is-not-ground-truth"><strong>GLORYS is not ground truth</strong></h5>
+<p>This needs to be explicitly stated in the pitch.</p>
+<div class="codehilite"><pre><span></span><code>GLORYS = ocean model + data assimilation + observations
+</code></pre></div>
+
+<p>Therefore: <strong>training target ≠ perfect truth.</strong> ARGO is used as the independent physical observation check.</p>
+<p><strong>The framing to give the jury.</strong> Not <em>"we beat GLORYS"</em>. Instead:</p>
+<blockquote>
+<p><em>"GLORYS needs weeks of latency and in-situ assimilation to produce this field. OceanEmbed-PG produces a comparable field from same-day satellite data alone, with calibrated uncertainty, and here is exactly how much skill we give up for it."</em></p>
+</blockquote>
+<p>That survives cross-examination. The other framing does not.</p>
+<h5 id="ablation-study"><strong>Ablation study</strong></h5>
+<p>Run progressively:</p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Inputs</th>
+<th>RMSE at 100m</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>SST only</td>
+<td>████████████ highest</td>
+</tr>
+<tr>
+<td>B</td>
+<td>SST + SLA</td>
+<td>██████████</td>
+</tr>
+<tr>
+<td>C</td>
+<td>SST + SLA + SSS</td>
+<td>████████</td>
+</tr>
+<tr>
+<td>D</td>
+<td>SST + SLA + SSS + winds</td>
+<td>██████</td>
+</tr>
+<tr>
+<td>E</td>
+<td>All variables</td>
+<td>█████</td>
+</tr>
+<tr>
+<td>F</td>
+<td>All + physics branch</td>
+<td>███ lowest</td>
+</tr>
+</tbody>
+</table>
+<p>The actual values must come from experiments. The visual is powerful because it answers <em>"Why do you need all these variables?"</em> with experimental evidence.</p>
+<hr />
+<p>OceanEmbed-PG · SIH26066</p>
+<p>PART 7 — OPERATIONAL PRODUCTS</p>
+<h3 id="part-7-operational-products"><strong>PART 7 — OPERATIONAL PRODUCTS</strong></h3>
+<p>The model does not stop at temperature. From the predicted profile we calculate:</p>
+<h5 id="d26-depth-of-the-26-c-isotherm"><strong>D26 — Depth of the 26 °C isotherm</strong></h5>
+<div class="codehilite"><pre><span></span><code>T(D26) = 26 °C
+</code></pre></div>
+
+<p>Below 26 °C the ocean cannot sustain a tropical cyclone.</p>
+<h5 id="tchp-tropical-cyclone-heat-potential"><strong>TCHP — Tropical Cyclone Heat Potential</strong></h5>
+<div class="codehilite"><pre><span></span><code>TCHP = ρ · c_p · ∫₀^D26 (T(z) − 26) dz
+</code></pre></div>
+
+<p>with ρ ≈ 1026 kg/m³, c_p ≈ 3993 J/(kg·K). Reported in kJ/cm².</p>
+<p>Rough operational thresholds: ~50 kJ/cm² supports intensification, ~90+ is associated with rapid intensification. <strong>Rapid intensification</strong> is ≥30 kt increase in maximum sustained wind in 24 h.</p>
+<h5 id="why-this-is-more-useful-than-an-sst-only-system"><strong>Why this is more useful than an SST-only system</strong></h5>
+<p>Consider:</p>
+<table>
+<thead>
+<tr>
+<th>Location</th>
+<th>SST</th>
+<th>D26</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A</strong></td>
+<td>30 °C</td>
+<td>45 m</td>
+<td>Shallow warm layer — storm may self-limit</td>
+</tr>
+<tr>
+<td><strong>B</strong></td>
+<td>30 °C</td>
+<td>120 m</td>
+<td>Deep warm reservoir — rapid intensification risk</td>
+</tr>
+</tbody>
+</table>
+<p>From the satellite's SST map: <strong>A ≈ B</strong>. Both look like 30 °C from space.</p>
+<p>But our model reveals:
+- <strong>A</strong> → shallow warm layer, cyclone mixing brings up cold water, storm weakens
+- <strong>B</strong> → deep warm reservoir, mixing entrains warm water, storm intensifies explosively</p>
+<p><strong>SST alone cannot distinguish these two cases.</strong> That single sentence is the entire problem statement.</p>
+<hr />
+<p>OceanEmbed-PG · SIH26066</p>
+<p>PART 8 — SYSTEM ARCHITECTURE AND DEMO</p>
+<h3 id="part-8-system-architecture-and-demo"><strong>PART 8 — SYSTEM ARCHITECTURE AND DEMO</strong></h3>
+<h5 id="full-system-stack"><strong>Full system stack</strong></h5>
+<p><img alt="System architecture — Frontend, Backend API, ML &amp; Data layers with Demo Mode" src="/Users/sankalp/Documents/sih/images/system_architecture.jpg" /></p>
+<h5 id="repository-structure"><strong>Repository structure</strong></h5>
+<div class="codehilite"><pre><span></span><code><span class="n">oceanembed</span><span class="o">-</span><span class="n">pg</span><span class="o">/</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">configs</span><span class="o">/</span><span class="k">default</span><span class="p">.</span><span class="n">yaml</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">data</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">raw</span><span class="o">/</span><span class="w">                    </span><span class="p">#</span><span class="w"> </span><span class="n">gitignored</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">processed</span><span class="o">/</span><span class="w">              </span><span class="p">#</span><span class="w"> </span><span class="n">zarr</span><span class="w"> </span><span class="n">stores</span><span class="p">,</span><span class="w"> </span><span class="n">gitignored</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">src</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">data</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">fetch_glorys</span><span class="p">.</span><span class="n">py</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">fetch_surface</span><span class="p">.</span><span class="n">py</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">fetch_argo</span><span class="p">.</span><span class="n">py</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">regrid</span><span class="p">.</span><span class="n">py</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">build_climatology</span><span class="p">.</span><span class="n">py</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">datasets</span><span class="o">/</span><span class="n">grid_dataset</span><span class="p">.</span><span class="n">py</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">models</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">encoder</span><span class="p">.</span><span class="n">py</span><span class="w">           </span><span class="p">#</span><span class="w"> </span><span class="n">surface</span><span class="w"> </span><span class="n">embedding</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">unet</span><span class="p">.</span><span class="n">py</span><span class="w">              </span><span class="p">#</span><span class="w"> </span><span class="n">U</span><span class="o">-</span><span class="n">Net</span><span class="w"> </span><span class="n">backbone</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">attention</span><span class="p">.</span><span class="n">py</span><span class="w">         </span><span class="p">#</span><span class="w"> </span><span class="n">bottleneck</span><span class="w"> </span><span class="n">attention</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">oceanembed</span><span class="p">.</span><span class="n">py</span><span class="w">        </span><span class="p">#</span><span class="w"> </span><span class="n">full</span><span class="w"> </span><span class="n">model</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">losses</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">huber_weighted</span><span class="p">.</span><span class="n">py</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">physics</span><span class="p">.</span><span class="n">py</span><span class="w">           </span><span class="p">#</span><span class="w"> </span><span class="n">smoothness</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">density</span><span class="w"> </span><span class="n">inversion</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">D26</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">eval</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">argo_match</span><span class="p">.</span><span class="n">py</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">metrics</span><span class="p">.</span><span class="n">py</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">diagnostics</span><span class="p">.</span><span class="n">py</span><span class="w">       </span><span class="p">#</span><span class="w"> </span><span class="n">D26</span><span class="p">,</span><span class="w"> </span><span class="n">TCHP</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">baselines</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">train</span><span class="p">.</span><span class="n">py</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">app</span><span class="o">/</span><span class="n">dashboard</span><span class="p">.</span><span class="n">py</span>
+<span class="err">└──</span><span class="w"> </span><span class="n">reports</span><span class="o">/</span>
+</code></pre></div>
+
+<h5 id="environment-condamamba-python-311"><strong>Environment (conda/mamba, Python 3.11):</strong></h5>
+<div class="codehilite"><pre><span></span><code>mamba<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>oceanembed<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11
+mamba<span class="w"> </span>activate<span class="w"> </span>oceanembed
+mamba<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>xarray<span class="w"> </span>dask<span class="w"> </span>zarr<span class="w"> </span>netcdf4<span class="w"> </span>numpy<span class="w"> </span>scipy<span class="w"> </span>pandas<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>matplotlib<span class="w"> </span>cartopy<span class="w"> </span>gsw<span class="w"> </span>scikit-learn
+pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cu121
+pip<span class="w"> </span>install<span class="w"> </span>copernicusmarine<span class="w"> </span>argopy<span class="w"> </span>streamlit<span class="w"> </span>plotly<span class="w"> </span>xgboost<span class="w"> </span>fastapi<span class="w"> </span>uvicorn
+copernicusmarine<span class="w"> </span>login
+</code></pre></div>
+
+<p>Pin versions in <code>environment.yml</code> on day one and make all six people install from it. Version drift across six laptops the night before a demo is a real and stupid way to lose.</p>
+<hr />
+<p>OceanEmbed-PG · SIH26066</p>
+<p>PART 8 — SYSTEM ARCHITECTURE AND DEMO</p>
+<h5 id="hardcoded-prototype-mode-critical-for-sih"><strong>Hardcoded prototype mode — critical for SIH</strong></h5>
+<p>You do not need live satellite downloads during the final presentation. Build the application in two modes:</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TRAINING / RESEARCH</strong></td>
+<td>Real datasets → preprocessing → model training</td>
+</tr>
+<tr>
+<td><strong>DEMO</strong></td>
+<td>Cached test day → saved input tensor → saved checkpoint → instant inference → dashboard</td>
+</tr>
+</tbody>
+</table>
+<p>The final application can run <strong>completely offline</strong>. The inputs, model weights and validation cases are cached locally; inference is real, but the network does not depend on live external services. That is legitimate and much better than hardcoding fake outputs.</p>
+<h5 id="demo-data-pre-package-three-cases"><strong>Demo data — pre-package three cases</strong></h5>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th>Description</th>
+<th>Demonstrates</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Case 1</strong></td>
+<td>Normal Bay of Bengal</td>
+<td>Salinity stratification, barrier layer</td>
+</tr>
+<tr>
+<td><strong>Case 2</strong></td>
+<td>High-salinity Arabian Sea / monsoon</td>
+<td>Upwelling regime, deep mixed layer</td>
+</tr>
+<tr>
+<td><strong>Case 3</strong></td>
+<td>Cyclone-related case (Amphan, May 2020)</td>
+<td>D26/TCHP, cyclone heat content</td>
+</tr>
+</tbody>
+</table>
+<p>For each, store:</p>
+<div class="codehilite"><pre><span></span><code>surface_inputs.npy
+prediction.npy
+uncertainty.npy
+argo_profile.csv
+d26_map.npy
+tchp_map.npy
+</code></pre></div>
+
+<p>The front end loads everything locally.</p>
+<h5 id="dashboard-five-panels"><strong>Dashboard — five panels</strong></h5>
+<table>
+<thead>
+<tr>
+<th>Panel</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1 — Surface state</strong></td>
+<td>SST, SSS, SLA maps + wind/current vectors</td>
+</tr>
+<tr>
+<td><strong>2 — Embedding</strong></td>
+<td>Bottleneck channels visualised — "Satellite Ocean Embedding: learned representation of the surface state"</td>
+</tr>
+<tr>
+<td><strong>3 — Subsurface reconstruction</strong></td>
+<td>Depth selector → predicted T map; vertical cross-section viewer</td>
+</tr>
+<tr>
+<td><strong>4 — Point profile</strong></td>
+<td>Click anywhere → predicted profile + ARGO overlay + uncertainty band</td>
+</tr>
+<tr>
+<td><strong>5 — Cyclone intelligence</strong></td>
+<td>D26 map + TCHP map + uncertainty + cyclone track overlay</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Panel 4 is one of the strongest pieces of judge-facing evidence.</strong> Panel 2 directly satisfies the PS requirement for a satellite embedding engine.</p>
+<hr />
+<p>OceanEmbed-PG · SIH26066</p>
+<p>PART 9 — MVP vs ADVANCED TIERS</p>
+<h3 id="part-9-mvp-vs-advanced-tiers"><strong>PART 9 — MVP vs ADVANCED TIERS</strong></h3>
+<h5 id="mvp-must-finish"><strong>MVP — must finish</strong></h5>
+<ul>
+<li>☐ 7 official input variables</li>
+<li>☐ 0.25° daily grid</li>
+<li>☐ GLORYS targets</li>
+<li>☐ U-Net backbone</li>
+<li>☐ Explicit embedding bottleneck</li>
+<li>☐ 15-depth temperature output</li>
+<li>☐ Anomaly learning</li>
+<li>☐ Bathymetry mask</li>
+<li>☐ Huber / depth-weighted loss</li>
+<li>☐ Smoothness loss</li>
+<li>☐ Depth-wise evaluation</li>
+<li>☐ ARGO validation</li>
+<li>☐ D26 calculation</li>
+<li>☐ Basic dashboard</li>
+</ul>
+<h5 id="strong-prototype"><strong>Strong prototype</strong></h5>
+<ul>
+<li>☐ Physics feature branch (wind stress curl, SLA gradients, etc.)</li>
+<li>☐ Auxiliary salinity decoder</li>
+<li>☐ Density stability penalty</li>
+<li>☐ Regional ablation (BoB vs Arabian Sea)</li>
+<li>☐ MC-Dropout uncertainty</li>
+<li>☐ Interactive profile viewer with ARGO overlay</li>
+</ul>
+<h5 id="advanced"><strong>Advanced</strong></h5>
+<ul>
+<li>☐ Bottleneck attention</li>
+<li>☐ D26 auxiliary loss</li>
+<li>☐ Spatio-temporal input window / ConvLSTM</li>
+<li>☐ Continuous-depth decoder (neural field)</li>
+<li>☐ Three-way skill table (OceanEmbed vs GLORYS vs climatology vs ARGO)</li>
+<li>☐ Cyclone case study (Amphan)</li>
+</ul>
+<h5 id="what-not-to-build"><strong>What NOT to build</strong></h5>
+<p>Do not attempt <em>all at once</em>:</p>
+<ul>
+<li>Full differentiable ocean simulator</li>
+<li>GNN over every ocean cell</li>
+<li>Full ViT</li>
+<li>ConvLSTM + neural field + CRPS + Kubernetes + mobile application</li>
+</ul>
+<p>That is how a technically impressive idea becomes an unfinished hackathon submission.</p>
+<hr />
+<p>OceanEmbed-PG · SIH26066</p>
+<p>PART 10 — THINGS THAT WILL GO WRONG</p>
+<h3 id="part-10-things-that-will-go-wrong"><strong>PART 10 — THINGS THAT WILL GO WRONG</strong></h3>
+<ul>
+<li>
+<p><strong>Random train/test split.</strong> Adjacent days are near-identical. You will get an RMSE of 0.1 °C and it will be fiction. Split by time and by region only.</p>
+</li>
+<li>
+<p><strong>Climatology computed over all years.</strong> Leakage. Compute it from the training years alone.</p>
+</li>
+<li>
+<p><strong>Monotonicity constraint.</strong> Deletes the BoB winter inversion, which is the phenomenon you are selling.</p>
+</li>
+<li>
+<p><strong>Density penalty without salinity.</strong> Physically impossible. Co-predict S.</p>
+</li>
+<li>
+<p><strong>Land and shallow water.</strong> Mask by bathymetry per level or your maps will show 1000 m temperatures in the Sundarbans.</p>
+</li>
+<li>
+<p><strong>Gridded Argo from the LAS as your validation set.</strong> It is an objective analysis — smoothed, and derived from the same floats. Use raw delayed-mode profiles for the honest test; use the gridded product for maps only.</p>
+</li>
+<li>
+<p><strong>Train/serve skew on SSS.</strong> Training on reanalysis salinity and deploying on satellite salinity is the most likely cause of a demo that looks great in validation and terrible live.</p>
+</li>
+<li>
+<p><strong>Six people, one branch.</strong> Predictable. One branch per person, PRs into <code>main</code>, no direct pushes.</p>
+</li>
+<li>
+<p><strong>Live demo over conference wifi.</strong> Have the offline version and the video.</p>
+</li>
+<li>
+<p><strong>GLORYS called "ground truth."</strong> It is not. It is a reanalysis. The jury from INCOIS will know this. Frame carefully.</p>
+</li>
+</ul>
+<hr />
+<p>OceanEmbed-PG · SIH26066</p>
+<p>PART 11 — THE FIVE QUESTIONS THE JURY WILL ASK</p>
+<h3 id="part-11-the-five-questions-the-jury-will-ask"><strong>PART 11 — THE FIVE QUESTIONS THE JURY WILL ASK</strong></h3>
+<p>Rehearse these until the answers are automatic. One person answers, the rest stay silent.</p>
+<p><strong>1. "Aren't you just emulating GLORYS?"</strong></p>
+<p>Partly, yes, by construction, and here is the three-way table quantifying it. The contribution is producing a comparable field from same-day satellite data with no in-situ assimilation and weeks less latency, with calibrated uncertainty. Then show the NRT result.</p>
+<p><strong>2. "How is this different from Argo interpolation?"</strong></p>
+<p>Argo gives roughly one profile per 3° every 10 days. Most of the basin is unobserved at any moment. We produce a daily 0.25° field with uncertainty that widens where the surface constraint is weak.</p>
+<p><strong>3. "Your 1000 m numbers look like climatology."</strong></p>
+<p>They are, and that is physics: surface fields carry almost no information below the main thermocline. That is why we report a per-depth skill score, and why our uncertainty widens correctly with depth. Then show the spread–skill plot.</p>
+<p><strong>4. "Why not just use SST?"</strong></p>
+<p>Show the Amphan case. Two locations, same SST, different D26, different storm outcome. SST alone cannot distinguish a shallow warm layer from a deep warm reservoir.</p>
+<p><strong>5. "What happens when SMAP salinity is bad near the coast?"</strong></p>
+<p>Uncertainty widens there because we trained with degraded-SSS augmentation. Show the σ map with the river plume visible in it. If your model does this, it is your best single slide.</p>
+<hr />
+<p>OceanEmbed-PG · SIH26066</p>
+<h5 id="the-novelty-claim"><strong>The novelty claim</strong></h5>
+<p>Don't claim <em>"We invented a new U-Net."</em> Instead:</p>
+<blockquote>
+<p><strong>"We introduce a physics-guided satellite embedding pipeline tailored to the North Indian Ocean that explicitly separates the physical pathways controlling subsurface structure — thermocline displacement from SLA, mixing from winds, advection from currents, and salinity-driven stratification from SSS — and validates their contribution through regional ablation against independent ARGO observations."</strong></p>
+</blockquote>
+<p>That is a credible innovation statement. It is system-level scientific innovation + regional empirical evidence — the defensible novelty territory.</p>
+<hr />
+<p>21 / 21</p>
+</body>
+</html>
