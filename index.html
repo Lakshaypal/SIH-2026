@@ -10,7 +10,7 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
@@ -112,55 +112,104 @@
     <!-- ============================================ -->
     <!--  SECTION 1: CINEMATIC HERO                   -->
     <!-- ============================================ -->
-    <section id="hero" class="section hero-section">
-      <div class="hero-content">
-        <div class="hero-kicker">
-          <span class="kicker-badge">SIH26066</span>
-          <span class="kicker-org">INCOIS · Ministry of Earth Sciences · Government of India</span>
-        </div>
-        <h1 class="hero-title">
-          The ocean is not<br>
-          <em>surface-deep.</em>
-        </h1>
-        <p class="hero-subtitle">
-          Seven satellite signals become a physics-guided 3D thermal reconstruction of the North Indian Ocean — 
-          revealing the hidden warm reservoir that fuels cyclone rapid intensification, guides naval anti-submarine sonar, and locates pelagic fisheries.
+    <section id="hero" class="section hero-asymmetric">
+      <div class="hero-col-left">
+        <div class="hero-eyebrow">Built for INCOIS · SIH26066</div>
+        <h1 class="hero-title-new">Reconstructing the hidden ocean depth from surface satellite signals.</h1>
+        <p class="hero-subtitle-new">
+          OceanEmbed-PG inverts seven disparate surface satellite channels into a continuous 3D subsurface temperature cube down to 1000 meters, in real time.
         </p>
-
-        <!-- Official Problem Statement Box matching PDF -->
-        <div class="problem-meta-card">
-          <strong>Problem Statement SIH26066:</strong> Satellite Embedding-Based Deep Learning Framework for Reconstruction of Subsurface Ocean Temperature from Surface Satellite Observations · <strong>Ministry:</strong> Ministry of Earth Sciences (MoES) · <strong>Department:</strong> INCOIS, Ocean Valley · <strong>Theme:</strong> Disaster Management · <strong>Domain:</strong> North Indian Ocean (5°N–30°N, 45°E–105°E) · <strong>Resolution:</strong> 0.25° Daily Grid · <strong>Target:</strong> 15 Standard Depths (0–1000m)
+        
+        <div class="hero-capabilities">
+          <div class="cap-item"><span class="cap-num">01</span> PHYSICS-GUIDED RECONSTRUCTION</div>
+          <div class="cap-item"><span class="cap-num">02</span> 3D SUBSURFACE CUBE</div>
+          <div class="cap-item"><span class="cap-num">03</span> SATELLITE FAULT TOLERANCE</div>
+          <div class="cap-item"><span class="cap-num">04</span> OPERATIONAL DECISION SUPPORT</div>
         </div>
 
-        <div class="hero-stats">
-          <div class="stat-card">
-            <div class="stat-value" id="heroDepthCounter">15</div>
-            <div class="stat-label">Depth Levels</div>
-            <div class="stat-detail">0 – 1000m standard</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value">0.25°</div>
-            <div class="stat-label">Daily Grid</div>
-            <div class="stat-detail">~28 km resolution</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value">7</div>
-            <div class="stat-label">Surface Inputs</div>
-            <div class="stat-detail">SST · SSS · SLA · U/V · Wx/Wy</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value">1,284</div>
-            <div class="stat-label">ARGO Floats</div>
-            <div class="stat-detail">Held-out independent truth</div>
+        <div class="hero-actions">
+          <a href="#explorer" class="btn-primary-pill">Open the live model <span class="arrow-glyph">→</span></a>
+          <a href="OceanEmbed_PG_SIH2026_Engineering_and_Data_Specification.pdf" download class="btn-ghost-pill">Read the technical brief</a>
+        </div>
+      </div>
+      
+      <div class="hero-col-right">
+        <div class="stylized-ocean-mesh"></div>
+        <div class="floating-readout-panel">
+          <div class="readout-header">Live Telemetry &middot; Northern Bay of Bengal</div>
+          <div class="readout-grid">
+            <div class="r-label">LAT / LON</div><div class="r-val">17.80°N, 89.40°E</div>
+            <div class="r-label">DEPTH PROBE</div><div class="r-val">0m &rarr; 1000m Active</div>
+            <div class="r-label">INFERENCE</div><div class="r-val highlight">74ms (ONNX CPU)</div>
+            <div class="r-label">THERMAL FUEL</div><div class="r-val danger">TCHP: 78.4 kJ/cm²</div>
           </div>
         </div>
       </div>
     </section>
 
+    <!-- Trust / Validation Strip -->
+    <div class="trust-strip">
+      <div class="trust-label">TRAINED & VALIDATED AGAINST:</div>
+      <div class="marquee-container">
+        <div class="marquee-content">
+          <span>ARGO Float Network</span> &bull; 
+          <span>RAMA Buoy Array</span> &bull; 
+          <span>WOA18 Climatology</span> &bull; 
+          <span>INCOIS</span> &bull; 
+          <span>ECMWF / CDS</span> &bull; 
+          <span>Copernicus Marine</span> &bull;
+          <span>ARGO Float Network</span> &bull; 
+          <span>RAMA Buoy Array</span> &bull; 
+          <span>WOA18 Climatology</span> &bull; 
+          <span>INCOIS</span> &bull; 
+          <span>ECMWF / CDS</span> &bull; 
+          <span>Copernicus Marine</span>
+        </div>
+      </div>
+    </div>
+
     <!-- ============================================ -->
-    <!--  SECTION 2: INTERACTIVE OCEAN EXPLORER       -->
+    <!--  THE PROBLEM & VALUE                         -->
     <!-- ============================================ -->
-    <section id="explorer" class="section explorer-section">
+    <section id="about" class="section about-two-col">
+      <div class="about-left">
+        <span class="section-kicker">THE CHALLENGE</span>
+        <h2 class="section-title">Surface sensors cannot see the deep ocean.</h2>
+      </div>
+      <div class="about-right">
+        <p class="about-desc">
+          Current operational models rely on sparse ARGO floats or computationally heavy, delayed physics simulations. OceanEmbed-PG replaces hours of supercomputer simulation with a lightweight ONNX neural network that instantly maps surface anomalies to deep 3D thermal structures.
+        </p>
+        <div class="inline-stat-row">
+          <div class="i-stat"><span class="i-val">74ms</span><span class="i-lab">Inference</span></div>
+          <div class="i-stat"><span class="i-val">427k</span><span class="i-lab">Parameters</span></div>
+          <div class="i-stat"><span class="i-val">24,341</span><span class="i-lab">Cells / Grid</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!--  LIVE PLATFORM PREVIEW (STAGE 03)            -->
+    <!-- ============================================ -->
+    <section id="platform-preview" class="section platform-section">
+      <div class="section-header">
+        <span class="section-kicker">LIVE PROTOTYPE</span>
+        <h2 class="section-title">Stage 03: Operational Dashboard</h2>
+        <p class="section-desc">Interact with the real-time reconstruction. Drag to rotate 3D volumes, or slice a 2D transect across the basin.</p>
+      </div>
+
+      <div class="browser-frame-mockup">
+        <div class="browser-header">
+          <div class="browser-dots">
+            <span class="dot close"></span>
+            <span class="dot min"></span>
+            <span class="dot max"></span>
+          </div>
+          <div class="browser-url">oceanembed.incois.gov.in/app</div>
+        </div>
+        <div class="browser-viewport">
+          <!-- original explorer section starts here -->
+          <section id="explorer" class="section explorer-section">
       <div class="section-header">
         <span class="section-kicker">WATER COLUMN · 0 TO 1000 METRES</span>
         <h2 class="section-title">Interactive Ocean Explorer</h2>
@@ -1271,264 +1320,312 @@
       </div>
     </section>
 
+        </div> <!-- close browser-viewport -->
+      </div> <!-- close browser-frame-mockup -->
+    </section> <!-- close platform-section -->
+
     <!-- ============================================ -->
     <!--  SECTION 6: ARCHITECTURE FLOW                -->
     <!-- ============================================ -->
-    <section id="architecture" class="section arch-section">
-      <div class="section-header">
-        <span class="section-kicker">DEEP LEARNING PIPELINE</span>
-        <h2 class="section-title">Seven signals. <em>One latent ocean.</em></h2>
-        <p class="section-desc">Reconstructing unobserved subsurface profiles via a physics-constrained satellite embedding network.</p>
-      </div>
-
-      <div class="pipeline-flow">
-        <div class="pipeline-step" data-step="1">
-          <div class="step-number">01</div>
-          <div class="step-content">
-            <h3>Surface Observation</h3>
-            <p>SST, SSS, SLA, surface currents (U,V), and wind stress (Wx,Wy) regridded to 0.25° daily tensor.</p>
-            <div class="step-detail">
-              <span class="mono">Tensor: 7 × H × W</span>
-              <span class="mono">CMEMS · SMAP · ERA5</span>
-            </div>
-          </div>
-        </div>
-        <div class="pipeline-connector"><svg viewBox="0 0 40 40"><path d="M10 20h20M25 15l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2.5"/></svg></div>
-        <div class="pipeline-step" data-step="2">
-          <div class="step-number">02</div>
-          <div class="step-content">
-            <h3>Satellite Embedding</h3>
-            <p>U-Net encoder compresses spatial signatures into multiscale latent feature maps capturing baroclinic modes.</p>
-            <div class="step-detail">
-              <span class="mono">Feature Extractor</span>
-              <span class="mono">Cross-channel Attention</span>
-            </div>
-          </div>
-        </div>
-        <div class="pipeline-connector"><svg viewBox="0 0 40 40"><path d="M10 20h20M25 15l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2.5"/></svg></div>
-        <div class="pipeline-step" data-step="3">
-          <div class="step-number">03</div>
-          <div class="step-content">
-            <h3>Depth Head</h3>
-            <p>Decodes temperature anomalies across 15 standard depths, predicting differences from seasonal climatology.</p>
-            <div class="step-detail">
-              <span class="mono">15 Standard Depths</span>
-              <span class="mono">WOA18 Residual Model</span>
-            </div>
-          </div>
-        </div>
-        <div class="pipeline-connector"><svg viewBox="0 0 40 40"><path d="M10 20h20M25 15l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2.5"/></svg></div>
-        <div class="pipeline-step" data-step="4">
-          <div class="step-number">04</div>
-          <div class="step-content">
-            <h3>Physics Guidance</h3>
-            <p>Composite loss function enforces vertical smoothness and hydrostatic stability without suppressing inversions.</p>
-            <div class="step-detail">
-              <span class="mono">ℒ_data + λ₁·ℒ_grad + λ₂·ℒ_stab</span>
-              <span class="mono">Calibrated Uncertainty</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Physics Loss Card -->
-      <div class="physics-loss">
-        <h3>Composite Physics-Guided Loss Formulation</h3>
-        <div class="loss-equation">
-          <span class="loss-term">ℒ<sub>total</sub></span> =
-          <span class="loss-term highlight-data">ℒ<sub>data</sub></span> +
-          <span class="loss-lambda">λ₁</span> ·
-          <span class="loss-term highlight-grad">ℒ<sub>gradient</sub></span> +
-          <span class="loss-lambda">λ₂</span> ·
-          <span class="loss-term highlight-stab">ℒ<sub>stability</sub></span>
-        </div>
-        <div class="loss-details">
-          <div class="loss-item">
-            <span class="loss-color data-color"></span>
-            <div>
-              <strong>ℒ<sub>data</sub> (Empirical Loss)</strong>
-              <p>Mean squared error against GLORYS reanalysis target and in-situ ARGO profiles.</p>
-            </div>
-          </div>
-          <div class="loss-item">
-            <span class="loss-color grad-color"></span>
-            <div>
-              <strong>ℒ<sub>gradient</sub> (Smoothness Loss)</strong>
-              <p>Penalizes unrealistic discontinuities in the vertical temperature derivative (∂T/∂z).</p>
-            </div>
-          </div>
-          <div class="loss-item">
-            <span class="loss-color stab-color"></span>
-            <div>
-              <strong>ℒ<sub>stability</sub> (Conditional Buoyancy)</strong>
-              <p>Encourages gravitationally stable stratification while permitting real salinity-driven thermal inversions.</p>
-            </div>
-          </div>
-        </div>
-        <div class="loss-note">
-          <strong>Key Scientific Insight:</strong> Standard naive models force monotonic temperature decrease with depth (T(z₁) ≥ T(z₂)). This fails in the Bay of Bengal, where freshwater runoff caps warmer subsurface waters during winter. OceanEmbed-PG preserves these real inversion phenomena.
-        </div>
-      </div>
-    </section>
-
     <!-- ============================================ -->
-    <!--  SECTION 7: DATA SOURCES & OPERATIONAL FLOW  -->
+    <!--  PIPELINE & ARCHITECTURE BENTO               -->
     <!-- ============================================ -->
-    <section id="data-sources" class="section datasource-section">
-      <div class="section-header">
-        <span class="section-kicker">DATA PIPELINE &amp; INGESTION</span>
-        <h2 class="section-title">Satellite Inputs &amp; Operational Targets</h2>
-        <p class="section-desc">Seamless integration of European Copernicus (CMEMS), NASA/JPL (SMAP), ECMWF (ERA5), and MoES/INCOIS in-situ observational networks.</p>
+    <section id="architecture" class="section arch-bento-section">
+      
+      <!-- Pipeline Diagram Strip -->
+      <div class="pipeline-strip">
+        <div class="section-header center">
+          <span class="section-kicker">DATA PIPELINE</span>
+          <h2 class="section-title">How Data Moves</h2>
+        </div>
+        
+        <div class="pipeline-flow-diagram">
+          <div class="p-node">
+            <span class="p-icon">🛰️</span>
+            <strong>Satellite Feeds</strong>
+            <span>CMEMS · SMAP · ERA5</span>
+          </div>
+          <div class="p-arrow">→</div>
+          <div class="p-node">
+            <span class="p-icon">⚙️</span>
+            <strong>Pre-processing</strong>
+            <span>0.25° Regridding</span>
+          </div>
+          <div class="p-arrow">→</div>
+          <div class="p-node highlight">
+            <span class="p-icon">🧠</span>
+            <strong>OceanEmbed-PG</strong>
+            <span>ONNX Inference</span>
+          </div>
+          <div class="p-arrow">→</div>
+          <div class="p-node">
+            <span class="p-icon">📊</span>
+            <strong>3D Output</strong>
+            <span>15 Standard Depths</span>
+          </div>
+        </div>
       </div>
 
-      <div class="datasource-grid">
-        <div class="pipeline-visual">
-          <h3>Operational Data Pipeline Architecture</h3>
-          <div class="data-flow">
-            <div class="flow-node">
-              <span class="flow-icon">🛰️</span>
-              <strong>Satellite Feeds</strong>
-              <span>CMEMS · SMOS · SMAP · Altimetry</span>
-            </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-node">
-              <span class="flow-icon">⚙️</span>
-              <strong>Pre-processing</strong>
-              <span>0.25° Regridding · QC Filtering</span>
-            </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-node">
-              <span class="flow-icon">🧠</span>
-              <strong>OceanEmbed-PG</strong>
-              <span>Subsurface Neural Inference</span>
-            </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-node">
-              <span class="flow-icon">📊</span>
-              <strong>Ocean Products</strong>
-              <span>T(z) · D26 · TCHP · MLD · BLT</span>
-            </div>
+      <!-- Bento Grid -->
+      <div class="bento-container">
+        <div class="section-header">
+          <span class="section-kicker">THE MODEL</span>
+          <h2 class="section-title">Neural Architecture</h2>
+        </div>
+        
+        <div class="bento-grid">
+          <div class="bento-card b-large">
+            <span class="panel-kicker">TENSOR FLOW</span>
+            <h3>Spatial Feature Extraction</h3>
+            <p>A U-Net style convolutional encoder compresses 7 input channels into multiscale latent features, capturing baroclinic modes before decoding into 15 depth layers.</p>
+            <div class="bento-code">[7, 101, 241] &rarr; Conv2D &rarr; [64, 50, 120] &rarr; Latent &rarr; [15, 101, 241]</div>
           </div>
-          <div class="data-flow">
-            <div class="flow-node">
-              <span class="flow-icon">🎯</span>
-              <strong>Validation Ground Truth</strong>
-              <span>INCOIS ARGO · Moored OMNI Buoys</span>
-            </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-node">
-              <span class="flow-icon">📈</span>
-              <strong>Benchmarks</strong>
-              <span>GLORYS12V1 Reanalysis · WOA18</span>
-            </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-node">
-              <span class="flow-icon">🌀</span>
-              <strong>Disaster Forecasting</strong>
-              <span>IMD Cyclone Track &amp; Intensity Models</span>
-            </div>
-            <div class="flow-arrow">→</div>
-            <div class="flow-node">
-              <span class="flow-icon">🏢</span>
-              <strong>INCOIS Portal</strong>
-              <span>Public &amp; Naval Advisory Products</span>
+          
+          <div class="bento-card b-small">
+            <span class="panel-kicker">PERFORMANCE</span>
+            <strong class="big-num">74ms</strong>
+            <p>End-to-end CPU Inference</p>
+          </div>
+          
+          <div class="bento-card b-small">
+            <span class="panel-kicker">MODEL SIZE</span>
+            <strong class="big-num">427k</strong>
+            <p>Parameters (Highly Optimized)</p>
+          </div>
+          
+          <div class="bento-card b-wide">
+            <span class="panel-kicker">UNCERTAINTY QUANTIFICATION</span>
+            <h3>Monte Carlo Dropout</h3>
+            <p>At inference time, active dropout layers provide a stochastic distribution of predictions, yielding a robust 95% confidence interval for every reconstructed voxel.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Physics Constraints (Split-Equation Zig-Zag) -->
+      <div class="physics-zigzag">
+        <div class="pz-row">
+          <div class="pz-text">
+            <span class="section-kicker">PHYSICS GUIDANCE</span>
+            <h2>Composite Loss Formulation</h2>
+            <p>OceanEmbed-PG doesn't just learn from data; it respects the laws of fluid dynamics. By embedding physics constraints directly into the loss function, the model ensures vertical smoothness and hydrostatic stability.</p>
+          </div>
+          <div class="pz-code-card">
+            <pre><code>ℒ_total = ℒ_MSE(Y, Ŷ) 
+        + λ₁ &middot; || &part;Ŷ/&part;z || 
+        + λ₂ &middot; ReLU(-&part;ρ/&part;z)</code></pre>
+            <div class="pz-legend">
+              <span class="c-data">ℒ_MSE</span> Data fidelity (ARGO/GLORYS)<br>
+              <span class="c-grad">ℒ_grad</span> Vertical smoothness<br>
+              <span class="c-stab">ℒ_stab</span> Hydrostatic stability
             </div>
           </div>
         </div>
-
-        <div class="source-cards">
-          <div class="source-card">
-            <div class="source-icon">🛰️</div>
-            <h4>Copernicus Marine (CMEMS)</h4>
-            <p>Daily 0.25° gridded Level-4 SST, Sea Level Anomaly (SLA), and surface geostrophic current vectors.</p>
-            <a href="https://marine.copernicus.eu" class="source-link" target="_blank" rel="noopener noreferrer">marine.copernicus.eu ↗</a>
+        <div class="pz-row reverse">
+          <div class="pz-text">
+            <h2>The Halocline Exception</h2>
+            <p>Standard naive models force monotonic temperature decrease with depth. This fails in the Bay of Bengal, where massive freshwater runoff caps warmer subsurface waters during winter. Our conditional stability term preserves these real inversion phenomena.</p>
           </div>
-          <div class="source-card">
-            <div class="source-icon">🎯</div>
-            <h4>International ARGO Project</h4>
-            <p>Autonomous profiling floats measuring temperature and salinity down to 2,000 m every 10 days.</p>
-            <a href="https://argo.ucsd.edu" class="source-link" target="_blank" rel="noopener noreferrer">argo.ucsd.edu ↗</a>
-          </div>
-          <div class="source-card">
-            <div class="source-icon">🏢</div>
-            <h4>INCOIS (MoES India)</h4>
-            <p>Indian National Centre for Ocean Information Services — moored OMNI buoy network and LAS server.</p>
-            <a href="https://incois.gov.in" class="source-link" target="_blank" rel="noopener noreferrer">incois.gov.in ↗</a>
-          </div>
-          <div class="source-card">
-            <div class="source-icon">🌊</div>
-            <h4>Mercator GLORYS12V1</h4>
-            <p>Global 1/12° eddy-resolving ocean physics reanalysis used as the training target across 1993–2020.</p>
-            <a href="https://www.mercator-ocean.eu" class="source-link" target="_blank" rel="noopener noreferrer">mercator-ocean.eu ↗</a>
+          <div class="pz-code-card danger">
+            <pre><code>if (basin == 'BoB' && season == 'Winter') {
+  allow_thermal_inversion = true;
+  // Salinity dictates density, 
+  // overriding thermal stability
+}</code></pre>
           </div>
         </div>
       </div>
     </section>
 
     <!-- ============================================ -->
-    <!--  SECTION 8: OPERATIONAL MISSION INTELLIGENCE -->
     <!-- ============================================ -->
-    <section id="operations" class="section mission-section">
+    <!--  APPLICATIONS ZIG-ZAG                        -->
+    <!-- ============================================ -->
+    <section id="applications" class="section apps-section">
       <div class="section-header">
-        <span class="section-kicker">MISSION APPLICATIONS · DEFENSE, FISHERIES &amp; ASV</span>
-        <h2 class="section-title">Operational Mission Intelligence</h2>
-        <p class="section-desc">Extending 3D subsurface temperature reconstruction into decisive operational capabilities for naval defense, commercial fisheries advisory, and autonomous fleet routing.</p>
+        <span class="section-kicker">MISSION INTELLIGENCE</span>
+        <h2 class="section-title">Operational Deployment</h2>
       </div>
 
-      <div class="mission-grid">
-        <!-- Card 1: Naval Sonar & Submarine Stealth -->
-        <div class="mission-card">
-          <div>
-            <span class="mission-badge badge-navy">NAVAL DEFENSE &amp; ASW</span>
-            <h3 class="mission-title">Submarine Acoustic Shadow Zone Calculator</h3>
-            <p class="mission-desc">Underwater sound bends according to the Sound Velocity Profile (Mackenzie equation). Beneath the Sonic Layer Depth (SLD), downward refraction creates an acoustic shadow zone where submarines evade surface active sonar.</p>
-          </div>
-          <div class="mission-stats">
-            <div>Mackenzie Equation: <strong>C(T, S, z) = 1448.96 + 4.59T - 0.053T² + 1.34(S-35) + 0.0163z</strong></div>
-            <div>Sonic Layer Depth (SLD): <strong>48 metres</strong></div>
-            <div>Acoustic Shadow Window: <strong>50 m – 180 m (Submarine Cloaking Band)</strong></div>
+      <!-- App 1: Naval Defense -->
+      <div class="app-row">
+        <div class="app-image ai-navy">
+          <div class="overlay-text">ASW CLOAKING BAND: 50m - 180m</div>
+        </div>
+        <div class="app-text">
+          <span class="mission-badge badge-navy">NAVAL DEFENSE & ASW</span>
+          <h3>Submarine Acoustic Shadow Zone Calculator</h3>
+          <p>Underwater sound bends according to the Sound Velocity Profile (Mackenzie equation). Beneath the Sonic Layer Depth (SLD), downward refraction creates an acoustic shadow zone where submarines evade surface active sonar.</p>
+          <div class="app-stats">
+            <div>Mackenzie Equation: <span class="mono">C(T,S,z) = 1448.96 + 4.59T - ...</span></div>
+            <div>Sonic Layer Depth: <strong>48 metres</strong></div>
           </div>
         </div>
+      </div>
 
-        <!-- Card 2: Fisheries Advisory -->
-        <div class="mission-card">
-          <div>
-            <span class="mission-badge badge-fisheries">COMMERCIAL FISHERIES</span>
-            <h3 class="mission-title">Potential Fishing Zone (PFZ) &amp; Thermocline Targeting</h3>
-            <p class="mission-desc">Pelagic fish schools congregate along the thermocline where nutrient-rich upwelling meets warm surface waters. Real-time thermocline depth forecasting guides commercial fleets to optimal net depths, slashing searching fuel costs by ~30%.</p>
-          </div>
-          <div class="mission-stats">
-            <div>Optimal Trawl Depth: <strong>60 m – 75 m</strong></div>
-            <div>Thermocline Sharpness: <strong>max |dT/dz| = 0.34 °C/m</strong></div>
-            <div>Fuel Saving Advisory: <strong>INCOIS PFZ Multilingual Coastal Advisory Ready</strong></div>
+      <!-- App 2: Fisheries (Reverse) -->
+      <div class="app-row reverse">
+        <div class="app-image ai-fish">
+          <div class="overlay-text">max |dT/dz| = 0.34 °C/m</div>
+        </div>
+        <div class="app-text">
+          <span class="mission-badge badge-fisheries">COMMERCIAL FISHERIES</span>
+          <h3>Potential Fishing Zone (PFZ) Targeting</h3>
+          <p>Pelagic fish schools congregate along the thermocline where nutrient-rich upwelling meets warm surface waters. Real-time thermocline depth forecasting guides commercial fleets to optimal net depths, slashing searching fuel costs by ~30%.</p>
+          <div class="app-stats">
+            <div>Optimal Trawl Depth: <strong>60 m &ndash; 75 m</strong></div>
+            <div>Fuel Saving Advisory: <strong>INCOIS PFZ Coastal Ready</strong></div>
           </div>
         </div>
+      </div>
 
-        <!-- Card 3: ASV / Autonomous Routing -->
-        <div class="mission-card">
-          <div>
-            <span class="mission-badge badge-asv">AUTONOMOUS MARINE VEHICLES</span>
-            <h3 class="mission-title">ASV &amp; Commercial Navigation Hazard Advisory</h3>
-            <p class="mission-desc">Combines real-time AIS traffic with subsurface heat anomalies (TCHP > 80 kJ/cm²) to detect rapid cyclone intensification pathways, allowing autonomous surface vehicles and merchant vessels to alter course proactively.</p>
-          </div>
-          <div class="mission-stats">
-            <div>High-Risk TCHP Threshold: <strong>> 75 kJ/cm² (Explosive Intensification)</strong></div>
-            <div>AIS Integration: <strong>Real-Time WebSocket WSS v0 (No API Keys Exposed)</strong></div>
-            <div>Routing Safety Margin: <strong>+180 Nautical Miles from Warm Core</strong></div>
+      <!-- App 3: Disaster -->
+      <div class="app-row">
+        <div class="app-image ai-storm">
+          <div class="overlay-text">TCHP > 75 kJ/cm² (Explosive Risk)</div>
+        </div>
+        <div class="app-text">
+          <span class="mission-badge badge-asv">DISASTER & AUTONOMOUS ROUTING</span>
+          <h3>Cyclone Heat Potential & Hazard Advisory</h3>
+          <p>Combines real-time AIS traffic with subsurface heat anomalies to detect rapid cyclone intensification pathways. Autonomous surface vehicles and merchant vessels can alter course proactively before the storm explodes in intensity.</p>
+          <div class="app-stats">
+            <div>AIS Integration: <strong>Real-Time WebSocket WSS v0</strong></div>
+            <div>Routing Safety Margin: <strong>+180 NM from Warm Core</strong></div>
           </div>
         </div>
+      </div>
+    </section>
 
-        <!-- Card 4: Edge-AI Inference Engine -->
-        <div class="mission-card">
-          <div>
-            <span class="mission-badge badge-ai">EDGE-AI BENCHMARK</span>
-            <h3 class="mission-title">Sub-100ms Inference Engine (Zero GPU Dependency)</h3>
-            <p class="mission-desc">Trained on Copernicus Marine and ERA5 reanalysis, the compact 427,000-parameter neural surrogate runs entirely on commodity CPU hardware with sub-100ms response time per 0.25° grid slice.</p>
+    <!-- ============================================ -->
+    <!--  SECTION 8: VIDEO BRIEFINGS & DEMOS          -->
+    <!-- ============================================ -->
+    <section id="videos" class="section video-section">
+      <div class="section-header center">
+        <span class="section-kicker">VIDEO BRIEFINGS</span>
+        <h2 class="section-title">Project Presentations &amp; Demos</h2>
+        <p class="section-desc">Watch our system architecture breakdowns, prototype walkthroughs, and case analyses.</p>
+      </div>
+
+      <div class="video-grid">
+        <div class="video-card">
+          <div class="video-wrapper">
+            <iframe src="https://www.youtube.com/embed/ltiH_uuZLLE" title="SubOceanNet Theory & 7 Satellite Inputs" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
           </div>
-          <div class="mission-stats">
-            <div>Prediction Latency: <strong>74 ms / slice (CPU-Only PyTorch / ONNX)</strong></div>
-            <div>Model Compactness: <strong>427,000 Parameters (~1.7 MB weight file)</strong></div>
-            <div>Validation Fit: <strong>R² = 0.961 · RMSE = 0.68°C against ARGO</strong></div>
+          <h4>SubOceanNet Theory &amp; 7 Satellite Inputs</h4>
+        </div>
+        
+        <div class="video-card">
+          <div class="video-wrapper">
+            <iframe src="https://www.youtube.com/embed/oU9HUzUS8CE" title="SIH26066 Working Prototype Walkthrough" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+          <h4>SIH26066 Working Prototype Walkthrough</h4>
+        </div>
+
+        <div class="video-card">
+          <div class="video-wrapper">
+            <iframe src="https://www.youtube.com/embed/qfhngxMtEqU" title="Team TempDetectors Architecture & Physics Constraints" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+          <h4>Architecture &amp; Physics Constraints</h4>
+        </div>
+
+        <div class="video-card">
+          <div class="video-wrapper">
+            <iframe src="https://www.youtube.com/embed/9HyG9cUYUxQ" title="OceanEmbed AI Real-Time Latency & AIS Prototype" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+          <h4>Real-Time Latency &amp; AIS Prototype</h4>
+        </div>
+
+        <div class="video-card">
+          <div class="video-wrapper">
+            <iframe src="https://www.youtube.com/embed/zDVKEQz9Cug" title="Space to Subsurface: Cyclone Amphan Case Analysis" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+          <h4>Space to Subsurface: Cyclone Amphan</h4>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!--  COMPETITIVE MATRIX                          -->
+    <!-- ============================================ -->
+    <section id="matrix" class="section matrix-section">
+      <div class="section-header center">
+        <span class="section-kicker">WHAT IS UNIQUE WE ARE DOING</span>
+        <h2 class="section-title">Competitive Advantage</h2>
+      </div>
+      
+      <div class="matrix-container">
+        <table class="competitive-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>OceanEmbed-PG (Ours)</th>
+              <th>Traditional Numerical Models (e.g. GLORYS)</th>
+              <th>Standard Black-Box AI</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Latency</strong></td>
+              <td class="highlight-cell">~74ms (Real-Time)</td>
+              <td>Hours to Days</td>
+              <td>Seconds to Minutes</td>
+            </tr>
+            <tr>
+              <td><strong>Physics Constraints</strong></td>
+              <td class="highlight-cell">Thermodynamically Stable Loss</td>
+              <td>Strict Physics Solvers</td>
+              <td>None (Prone to impossible outputs)</td>
+            </tr>
+            <tr>
+              <td><strong>Halocline Modeling</strong></td>
+              <td class="highlight-cell">Learns Salinity-Driven Inversions</td>
+              <td>Accurate but computationally heavy</td>
+              <td>Fails (Forces monotonic temperature drop)</td>
+            </tr>
+            <tr>
+              <td><strong>Hardware Requirements</strong></td>
+              <td class="highlight-cell">Edge-capable (CPU inference)</td>
+              <td>HPC Clusters / Supercomputers</td>
+              <td>High-end GPUs</td>
+            </tr>
+            <tr>
+              <td><strong>Input Reliance</strong></td>
+              <td class="highlight-cell">7 Surface Satellite Channels</td>
+              <td>Massive historical boundary conditions</td>
+              <td>Requires dense volumetric data</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!--  API / DEVELOPER ACCESS PANEL                -->
+    <!-- ============================================ -->
+    <section id="developer" class="section dev-section">
+      <div class="dev-container">
+        <div class="dev-text">
+          <span class="section-kicker">DEVELOPER ACCESS</span>
+          <h2>Integrate via REST & WSS</h2>
+          <p>OceanEmbed-PG exposes low-latency endpoints for direct integration into INCOIS portals, naval routing software, or dashboard overlays.</p>
+        </div>
+        <div class="dev-code-panel">
+          <div class="dev-tabs">
+            <div class="dev-tab active">cURL</div>
+            <div class="dev-tab">Python</div>
+            <div class="dev-tab">WSS Stream</div>
+          </div>
+          <div class="dev-code-content">
+<pre><code><span class="c-dim"># Fetch 3D Profile for specific Lat/Lon</span>
+curl -X POST https://api.oceanembed.incois.gov.in/v1/profile \
+  -H "Authorization: Bearer INCOIS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "lat": 17.8,
+    "lon": 89.4,
+    "depths": [0, 10, 20, 30, 50, 75, 100, 150, 200, 300, 500, 1000]
+  }'
+
+<span class="c-comment">{"status":"success", "latency_ms": 74, "data": [...]}</span></code></pre>
           </div>
         </div>
       </div>
