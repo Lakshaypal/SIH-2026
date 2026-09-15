@@ -138,6 +138,128 @@
     $$('.reveal').forEach(el => observer.observe(el));
   }
 
+  // ─── Three.js 3D Variables ───────────────────────────────
+  let scene3D, camera3D, renderer3D, controls3D, planesGroup;
+  
+  function init3DReconstruction() {
+    const container = document.getElementById('three-container');
+    if (!container) return;
+
+    scene3D = new THREE.Scene();
+    camera3D = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera3D.position.set(20, 15, 30);
+
+    renderer3D = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer3D.setSize(container.clientWidth, container.clientHeight);
+    renderer3D.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer3D.domElement);
+
+    controls3D = new THREE.OrbitControls(camera3D, renderer3D.domElement);
+    controls3D.enableDamping = true;
+    controls3D.dampingFactor = 0.05;
+    controls3D.autoRotate = true;
+    controls3D.autoRotateSpeed = 1.0;
+
+    // Lighting
+    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+    scene3D.add(ambient);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(10, 20, 10);
+    scene3D.add(dirLight);
+
+    // Bounding Box Grid (Ocean Column)
+    const boxGeo = new THREE.BoxGeometry(10, 20, 10);
+    const boxEdges = new THREE.EdgesGeometry(boxGeo);
+    const boxLine = new THREE.LineSegments(boxEdges, new THREE.LineBasicMaterial({ color: 0x0ea5e9, transparent: true, opacity: 0.2 }));
+    boxLine.position.y = -10; // Center box so top is at 0
+    scene3D.add(boxLine);
+
+    // Group for the temperature planes
+    planesGroup = new THREE.Group();
+    scene3D.add(planesGroup);
+
+    // Render loop
+    function animate() {
+      requestAnimationFrame(animate);
+      if(controls3D) controls3D.update();
+      if(renderer3D && scene3D && camera3D) renderer3D.render(scene3D, camera3D);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      if(!container || !camera3D || !renderer3D) return;
+      camera3D.aspect = container.clientWidth / container.clientHeight;
+      camera3D.updateProjectionMatrix();
+      renderer3D.setSize(container.clientWidth, container.clientHeight);
+    });
+  }
+
+  function update3DReconstruction(dp) {
+    if (!planesGroup) return;
+    
+    // Clear old planes
+    while(planesGroup.children.length > 0){ 
+      planesGroup.remove(planesGroup.children[0]); 
+    }
+
+    const maxDepth = 1000;
+    const maxTemp = 32.0;
+    const minTemp = 4.0;
+
+    // Helper to get color based on temperature (blue for cold, red for warm)
+    function getTempColor(t) {
+      const ratio = Math.max(0, Math.min(1, (t - minTemp) / (maxTemp - minTemp)));
+      const color = new THREE.Color();
+      // Interpolate from deep blue (0x020617) to cyan to orange to red
+      if (ratio < 0.3) color.lerpColors(new THREE.Color(0x020617), new THREE.Color(0x0ea5e9), ratio / 0.3);
+      else if (ratio < 0.7) color.lerpColors(new THREE.Color(0x0ea5e9), new THREE.Color(0xf59e0b), (ratio - 0.3) / 0.4);
+      else color.lerpColors(new THREE.Color(0xf59e0b), new THREE.Color(0xef4444), (ratio - 0.7) / 0.3);
+      return color;
+    }
+
+    dp.predicted.forEach((temp, i) => {
+      const depth = DEPTHS[i];
+      // Map depth (0 to 1000) to Y (-0 to -20)
+      const yPos = -(depth / maxDepth) * 20;
+
+      const planeGeo = new THREE.PlaneGeometry(9.8, 9.8);
+      const planeMat = new THREE.MeshBasicMaterial({ 
+        color: getTempColor(temp), 
+        transparent: true, 
+        opacity: 0.8,
+        side: THREE.DoubleSide
+      });
+      const plane = new THREE.Mesh(planeGeo, planeMat);
+      
+      plane.rotation.x = -Math.PI / 2;
+      plane.position.y = 0; // Start at surface for animation
+      
+      // Animate planes sinking to their correct depths
+      const targetY = yPos;
+      const dropSpeed = 0.05 + (i * 0.01);
+      
+      const animatePlane = () => {
+        if (plane.position.y > targetY) {
+          plane.position.y -= dropSpeed;
+          requestAnimationFrame(animatePlane);
+        } else {
+          plane.position.y = targetY;
+        }
+      };
+      animatePlane();
+
+      planesGroup.add(plane);
+      
+      // Highlight D26 isotherm
+      if (Math.abs(temp - 26.0) < 1.0) {
+        const edgeGeo = new THREE.EdgesGeometry(planeGeo);
+        const edgeLine = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 }));
+        edgeLine.rotation.x = -Math.PI / 2;
+        plane.add(edgeLine);
+      }
+    });
+  }
+
   // ─── Populate Datapoints Table ─────────────────────────
   function renderDatapointsTable() {
     const tbody = $('#dpTableBody');
@@ -235,8 +357,18 @@
     setTimeout(() => {
       $('#processingState').classList.add('hidden');
       $('#resultState').classList.remove('hidden');
+      
+      // Resize 3D canvas now that container is visible
+      const container = document.getElementById('three-container');
+      if (container && camera3D && renderer3D) {
+        camera3D.aspect = container.clientWidth / container.clientHeight;
+        camera3D.updateProjectionMatrix();
+        renderer3D.setSize(container.clientWidth, container.clientHeight);
+      }
+
       updateOutputMetrics();
       updateProfileChart();
+      update3DReconstruction(dp); // Trigger 3D visualization
       btn.innerHTML = `<span class="btn-text">Run Another Inference</span>`;
       btn.disabled = false;
     }, 2500);
@@ -416,6 +548,7 @@
     renderScenarioDropdown();
     computeAggregates();
     initPipelineAnimation();
+    init3DReconstruction();
   }
 
   if (document.readyState === 'loading') {

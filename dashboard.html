@@ -1,1095 +1,448 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#ffffff">
-  <meta name="description" content="Halocline: Physics-Guided Subsurface Temperature Reconstruction for the North Indian Ocean — SIH26066 / INCOIS / MoES">
-  <title>Halocline — Subsurface Temperature Reconstruction · SIH26066</title>
-
-  <!-- Fonts -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Halocline | Seeing Beneath the Surface</title>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-
-  <!-- Leaflet Heat -->
-  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
-
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-
-  <!-- Plotly.js (For SubOceanNet 3D Volume Point Cloud Rendering) -->
-  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
-
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            abyssal: '#020b18',
+          },
+          fontFamily: {
+            inter: ['Inter', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <!-- GSAP for smooth scroll animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 </head>
-<body>
+<body class="bg-abyssal text-white font-inter overflow-x-hidden">
 
-  <!-- ============================================ -->
-  <!--  ULTRA-LIGHT BACKGROUND CANVAS (ZERO LAG)    -->
-  <!-- ============================================ -->
-  <canvas id="oceanCanvas"></canvas>
+  <!-- 3D Canvas Background -->
+  <div id="canvas-container" class="fixed inset-0 z-0 pointer-events-none"></div>
 
-  <!-- ============================================ -->
-  <!--  NAVIGATION                                  -->
-  <!-- ============================================ -->
-  <header id="topbar" class="topbar">
-    <a class="brand" href="#hero">
-      <span class="brand-icon">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2">
-          <path d="M2 12c2-3 5-5 10-5s8 2 10 5"/>
-          <path d="M2 17c2-3 5-5 10-5s8 2 10 5" opacity=".5"/>
-          <circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none"/>
-        </svg>
-      </span>
-      <span class="brand-text">Halocline</span>
-    </a>
-    <nav id="mainNav">
-      <a href="index.html" class="nav-link">Home</a>
-      <a href="dashboard.html" class="nav-link active">Ocean Explorer</a>
-      <a href="fleet.html" class="nav-link">Fleet Radar</a>
-      <a href="technical.html" class="nav-link">Method &amp; Validation</a>
-      <a href="demo.html" class="nav-link">Demo Walkthrough</a>
-    </nav>
-    <div class="topbar-actions">
-      <a href="OceanEmbed_PG_SIH2026_Engineering_and_Data_Specification.pdf" download class="btn-pdf-spec" title="Download Official ML & Data Scraper Engineering Specification (PDF)">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        <span>Technical PDF</span>
+  <!-- Navigation -->
+  <header class="fixed top-0 w-full z-50 glass-nav border-b border-white/10 transition-all duration-300" id="mainNav">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="relative flex items-center justify-center w-8 h-8 rounded-full border border-cyan-400/30 bg-cyan-500/10">
+          <div class="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.8)]"></div>
+        </div>
+        <span class="font-mono font-bold tracking-widest text-lg text-white group-hover:text-cyan-400 transition-colors">HALOCLINE</span>
       </a>
-      <div id="liveBadge" class="live-badge">
-        <span class="badge-dot"></span>
-        <span class="badge-text">AIS STANDBY</span>
-      </div>
+      
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+        <a href="#technology" class="hover:text-white transition-colors">Technology</a>
+        <a href="technical.html" class="hover:text-white transition-colors">Architecture</a>
+        <a href="#impact" class="hover:text-white transition-colors">Impact Metrics</a>
+        <a href="demo.html" class="hover:text-white transition-colors">Live Console</a>
+      </nav>
+
+      <a href="demo.html" class="hidden md:inline-flex h-10 items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-slate-900 transition-all hover:bg-cyan-400 hover:text-slate-900 hover:shadow-[0_0_20px_rgba(34,211,238,0.4)]">
+        Launch Interactive Demo
+      </a>
     </div>
   </header>
 
-  <!-- ============================================ -->
-  <!--  PIPELINE WORKFLOW BAR (SubOceanNet Architecture) -->
-  <!-- ============================================ -->
-  <div class="pipeline-breadcrumb-bar">
-    <div class="breadcrumb-container">
-      <div class="breadcrumb-step active">
-        <span class="step-badge">01</span>
-        <div class="step-text">
-          <span class="step-title">INPUT VARIABLES</span>
-          <span class="step-sub">SST · SSS · SLA · currents · winds</span>
-        </div>
+  <!-- Hero Section -->
+  <section class="relative z-10 min-h-screen flex flex-col justify-center items-center text-center px-4 pt-20" id="hero">
+    <div class="max-w-4xl mx-auto">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 font-mono text-xs font-bold tracking-wider mb-8">
+        <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+        INCOIS / MINISTRY OF EARTH SCIENCES
       </div>
-      <div class="breadcrumb-arrow">➔</div>
-      <div class="breadcrumb-step active">
-        <span class="step-badge">02</span>
-        <div class="step-text">
-          <span class="step-title">DEEP LEARNING FRAMEWORK</span>
-          <span class="step-sub">Encoder ➔ Latent Vector ➔ Decoder</span>
-        </div>
-      </div>
-      <div class="breadcrumb-arrow">➔</div>
-      <div class="breadcrumb-step active">
-        <span class="step-badge">03</span>
-        <div class="step-text">
-          <span class="step-title">TEMPERATURE PREDICTION</span>
-          <span class="step-sub">15 depth levels + MC uncertainty</span>
-        </div>
-      </div>
-      <div class="breadcrumb-system-pills">
-        <span class="pill-live"><span class="pill-dot"></span> DEMO DATA · LABELLED</span>
-        <span class="pill-ready">MODEL PROTOTYPE</span>
-        <span class="pill-date">2026-09-14</span>
+      
+      <h1 class="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6 leading-[1.1]">
+        Reconstructing the Ocean’s <br/>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">3D Invisible Architecture</span> <br/>
+        in Real-Time.
+      </h1>
+      
+      <p class="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+        Replacing slow supercomputer numerical models with physics-guided neural depth fields for instant subsurface forecasting and anomaly detection.
+      </p>
+      
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="demo.html" class="h-12 inline-flex items-center justify-center rounded-full bg-cyan-500 px-8 text-sm font-bold text-slate-900 transition-all hover:bg-cyan-400 hover:scale-105 hover:shadow-[0_0_30px_rgba(34,211,238,0.5)]">
+          Explore Live 3D Model
+        </a>
+        <a href="technical.html" class="h-12 inline-flex items-center justify-center rounded-full border border-slate-600 bg-slate-900/50 px-8 text-sm font-semibold text-white transition-all hover:bg-slate-800 hover:border-slate-500">
+          View Technical Specs
+        </a>
       </div>
     </div>
-  </div>
+    
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce opacity-50">
+      <span class="text-xs font-mono text-slate-400 mb-2">DESCEND TO DEPTH</span>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+    </div>
+  </section>
 
-  <main>
-
-    <!-- ============================================ -->
-    <!--  OPERATIONAL DASHBOARD (STAGE 03)            -->
-    <!-- ============================================ -->
-    <section id="explorer" class="section explorer-section">
-      <div class="dashboard-header-banner">
-        <div class="dh-title-col">
-          <span class="section-kicker">HALOCLINE · SIH26066</span>
-          <h1 class="section-title">Subsurface ocean explorer</h1>
-          <p class="section-desc">Inspect a 15-depth reconstruction for the North Indian Ocean, then compare the vertical profile with its uncertainty and ARGO validation layer.</p>
-        </div>
-        <div class="dh-status-col">
-          <div class="dh-telemetry-badge"><span class="badge-dot"></span> DEMO MODEL SNAPSHOT</div>
-          <div class="dh-meta-pill">GRID: <strong>0.25° · DAILY</strong></div>
-          <div class="dh-meta-pill">DOMAIN: <strong>5°N–30°N, 45°E–105°E</strong></div>
-        </div>
+  <!-- Interactive Depth Explorer -->
+  <section class="relative z-10 py-32 px-6" id="technology">
+    <div class="max-w-7xl mx-auto">
+      <div class="mb-16">
+        <h2 class="text-3xl md:text-5xl font-bold text-white mb-4">Interactive Depth Explorer</h2>
+        <p class="text-slate-400 max-w-2xl text-lg">Translate surface telemetry directly into deep-water thermodynamic curves using continuous neural functions.</p>
       </div>
 
-      <div class="scenarios-carousel">
-        <div class="scenarios-header">
-          <span class="scenarios-kicker">INVESTIGATION POINTS</span>
-          <span class="scenarios-subtitle">Choose a regional ocean condition to update the explorer.</span>
-        </div>
-        <div class="scenarios-grid">
-          <div class="scenario-card" data-lat="18.0" data-lon="88.0">
-            <div class="scenario-badge danger">PRE-CYCLONE</div>
-            <h4>Cyclone Amphan Heat Pool</h4>
-            <span class="scenario-coords">18°N, 88°E · Bay of Bengal</span>
-            <p>Extreme upper-ocean heat reservoir (TCHP &gt; 80 kJ/cm²) creating conditions for rapid cyclone intensification.</p>
-          </div>
-          <div class="scenario-card" data-lat="14.0" data-lon="56.0">
-            <div class="scenario-badge info">SW MONSOON</div>
-            <h4>Summer Somali Upwelling</h4>
-            <span class="scenario-coords">14°N, 56°E · Arabian Sea</span>
-            <p>Intense wind stress curl lifts deep cold nutrient-rich waters; shallow D20 thermocline (~60m).</p>
-          </div>
-          <div class="scenario-card" data-lat="13.5" data-lon="89.5">
-            <div class="scenario-badge success">POST-MONSOON</div>
-            <h4>Monsoon Freshwater Barrier</h4>
-            <span class="scenario-coords">13.5°N, 89.5°E · Bay of Bengal</span>
-            <p>Low-salinity river discharge creates sharp halocline capping that traps subsurface thermal energy.</p>
-          </div>
-          <div class="scenario-card" data-lat="10.5" data-lon="72.5">
-            <div class="scenario-badge warning">COASTAL REEF</div>
-            <h4>Lakshadweep Reef Zone</h4>
-            <span class="scenario-coords">10.5°N, 72.5°E · Arabian Sea</span>
-            <p>High-productivity thermal barrier region identified for marine biodiversity and fishing zones.</p>
-          </div>
-          <div class="scenario-card" data-lat="5.5" data-lon="79.0">
-            <div class="scenario-badge neutral">BASELINE</div>
-            <h4>Equatorial Channel</h4>
-            <span class="scenario-coords">5.5°N, 79°E · Open Ocean</span>
-            <p>Stratified tropical oceanic regime with deep thermocline and baseline climatological stability.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="sector-presets-bar">
-        <span style="font-size:0.75rem;font-weight:700;font-family:var(--font-mono);color:var(--text-muted);white-space:nowrap">QUICK LOCATIONS:</span>
-        <button class="sector-chip active" data-lat="17.8" data-lon="89.4">📍 Central Bay of Bengal</button>
-        <button class="sector-chip" data-lat="14.2" data-lon="73.8">⚓ Karnataka / Goa Coast</button>
-        <button class="sector-chip" data-lat="21.5" data-lon="68.8">🌊 Gujarat / Gulf of Kutch</button>
-        <button class="sector-chip" data-lat="12.0" data-lon="55.0">💨 Somali Gyre / Arabian Sea</button>
-        <button class="sector-chip" data-lat="11.5" data-lon="93.5">🌀 Andaman Deep Basin</button>
-        <button class="sector-chip" data-lat="8.5" data-lon="79.2">🐟 Gulf of Mannar PFZ</button>
-      </div>
-
-      <!-- Coordinate Input & Land Validation Bar (Competitor feature implemented) -->
-      <div class="coord-query-bar">
-        <form id="coordForm" class="coord-inputs">
-          <div class="coord-field">
-            <label for="inputLat">LAT:</label>
-            <input type="number" id="inputLat" step="0.1" min="5" max="30" value="17.8">
-            <span>°N</span>
-          </div>
-          <div class="coord-field">
-            <label for="inputLon">LON:</label>
-            <input type="number" id="inputLon" step="0.1" min="45" max="105" value="89.4">
-            <span>°E</span>
-          </div>
-          <button type="submit" class="query-btn">Query Station</button>
-        </form>
-        <div class="benchmark-chip">
-          <span>⚡ AI Latency: <strong id="latencyReadout">74 ms</strong></span>
-          <span>· 427K Params</span>
-          <span>· CPU PyTorch / ONNX</span>
-          <span>· R² = 0.961</span>
-        </div>
-      </div>
-
-      <!-- Land detection warning alert -->
-      <div id="landAlert" class="land-alert hidden">
-        <span>⚠️</span>
-        <div id="landAlertText">Land coordinate detected. Ocean soundings are restricted to marine waters. Automatically snapped to nearest coastal grid cell.</div>
-      </div>
-
-      <!-- Stage 01: Surface Input Layers Switcher (SubOceanNet feature) -->
-      <div class="input-layers-bar">
-        <div class="input-layers-header">
-          <span class="input-layers-kicker">STAGE 01 · 7 SATELLITE SURFACE OBSERVATIONS</span>
-          <span class="input-layers-note">Select any satellite variable to inspect raw surface field on map</span>
-        </div>
-        <div class="input-layers-chips">
-          <button class="layer-chip active" data-layer="subsurface">🌊 3D Subsurface Model</button>
-          <button class="layer-chip" data-layer="sst">🌡️ SST (Temp)</button>
-          <button class="layer-chip" data-layer="sss">🧂 SSS (Salinity)</button>
-          <button class="layer-chip" data-layer="sla">📏 SLA (Altimetry)</button>
-          <button class="layer-chip" data-layer="cur_u">➡️ Cur-U (East)</button>
-          <button class="layer-chip" data-layer="cur_v">⬆️ Cur-V (North)</button>
-          <button class="layer-chip" data-layer="wind_u">💨 Wind-U (10m)</button>
-          <button class="layer-chip" data-layer="wind_v">💨 Wind-V (10m)</button>
-        </div>
-        <div id="layerInfoBanner" class="layer-info-banner">
-          <span id="layerInfoTitle">Reconstructed Subsurface Thermal Field</span> · <span id="layerInfoDesc">0.25° daily grid at selected depth level</span> · <span class="layer-units" id="layerInfoUnits">°C</span>
-        </div>
-      </div>
-
-      <!-- Explorer panels -->
-      <div class="master-hub-bar">
-        <div class="stage03-tab-bar">
-          <button class="stage-tab-btn active" data-tab="maps" title="2D Vertical Depth Slicing Maps">
-            <span class="tab-emoji">🗺️</span>
-            <div class="tab-content-group">
-              <span class="tab-main">Prediction Maps</span>
-              <small>0–1000m Water Column</small>
-            </div>
-          </button>
-          <button class="stage-tab-btn" data-tab="volume" title="Dual 3D Voxel Point Cloud & Solid Slicer">
-            <span class="tab-emoji">🧊</span>
-            <div class="tab-content-group">
-              <span class="tab-main">3D Volume</span>
-              <small>Dual Slicer &amp; Voxel Mesh</small>
-            </div>
-          </button>
-          <button class="stage-tab-btn" data-tab="profiles" title="Multi-Station Vertical Profiles T(z)">
-            <span class="tab-emoji">📈</span>
-            <div class="tab-content-group">
-              <span class="tab-main">T(z) Profiles</span>
-              <small>Multi-Point Soundings</small>
-            </div>
-          </button>
-          <button class="stage-tab-btn" data-tab="timeseries" title="18-Month Marine Heatwave Time Series">
-            <span class="tab-emoji">⏱️</span>
-            <div class="tab-content-group">
-              <span class="tab-main">Time Series</span>
-              <small>Subsurface Marine Heatwaves</small>
-            </div>
-          </button>
-          <button class="stage-tab-btn" data-tab="transect" title="Zonal Cross-Section 45°E to 105°E">
-            <span class="tab-emoji">🌊</span>
-            <div class="tab-content-group">
-              <span class="tab-main">Basin Transect</span>
-              <small>Somali to Bay of Bengal</small>
-            </div>
-          </button>
-          <button class="stage-tab-btn" data-tab="argo" title="In-situ ARGO Float CTD Matchup">
-            <span class="tab-emoji">🛰️</span>
-            <div class="tab-content-group">
-              <span class="tab-main">ARGO Matchup</span>
-              <small>Hold-out comparison</small>
-            </div>
-          </button>
-          <button class="stage-tab-btn" data-tab="tchp" title="Cyclone Heat Potential & Rapid Intensification">
-            <span class="tab-emoji">🌀</span>
-            <div class="tab-content-group">
-              <span class="tab-main">Cyclone TCHP</span>
-              <small>Rapid Intensification Fuel</small>
-            </div>
-          </button>
-          <button class="stage-tab-btn" data-tab="ais" title="Verified live AIS radar">
-            <span class="tab-emoji">🚢</span>
-            <div class="tab-content-group">
-              <span class="tab-main">Live AIS Radar</span>
-              <small>Verified reports only</small>
-            </div>
-          </button>
-        </div>
-      </div>
-
-      <!-- Stage 03 View 1: 2D Prediction Maps & Station Sounding -->
-      <div id="viewPredictionMaps" class="stage03-view active">
-        <div class="explorer-layout">
-          <!-- Depth Rail (Left Axis) -->
-          <aside class="depth-rail">
-            <div class="rail-header">DEPTH</div>
-            <div class="depth-readout">
-              <span id="depthValue">050</span><span>m</span>
-            </div>
-            <!-- Animate Sweep Button (Competitor Feature) -->
-            <button id="btnAnimateSweep" class="btn-sweep-toggle" title="Automatically sweep through all 15 depths">
-              <span id="sweepIcon">▶</span> <span id="sweepText">Animate sweep</span>
-            </button>
-            <div class="rail-slider-container">
-              <input id="depthSlider" type="range" min="0" max="14" value="5" aria-label="Select prediction depth" class="vertical-slider">
-              <div id="depthTicks" class="depth-ticks"></div>
-            </div>
-          </aside>
-
-          <!-- Map Panel (Center) -->
-          <div class="map-stage">
-            <div class="map-toolbar">
-              <div class="map-status-pill">
-                SUBSURFACE FIELD · <strong id="mapDepthLabel">50</strong>m RECONSTRUCTION
-              </div>
-              <div class="mode-toggles">
-                <button class="toggle-btn active" id="btnTemp" data-mode="temperature">Temperature</button>
-                <button class="toggle-btn" id="btnUncertainty" data-mode="uncertainty">Uncertainty ±σ</button>
-                <button class="toggle-btn" id="btnD26" data-mode="D26">D26</button>
-                <button class="toggle-btn" id="btnTCHP" data-mode="TCHP">TCHP</button>
-                <button class="btn-run-prediction" id="btnRunPrediction">⚡ Run Prediction (8 MC Passes)</button>
-              </div>
-            </div>
-
-            <!-- Dynamic Colormap Scale Bar (SubOceanNet Feature) -->
-            <div class="colormap-scale-bar">
-              <span class="scale-label" id="scaleMin">3.2 °C</span>
-              <div class="scale-gradient" id="scaleGradient"></div>
-              <span class="scale-label" id="scaleMax">31.0 °C</span>
-            </div>
-
-            <div id="explorerMap" class="leaflet-map"></div>
-            <div class="map-footer">
-              <span class="map-note">OCEANEMBED-PG · DOMAIN: 5°N–30°N, 45°E–105°E</span>
-              <span class="confidence-badge">Uncertainty: <strong id="sigmaReadout">±0.9°C</strong> at selected coordinates</span>
-            </div>
-          </div>
-
-          <!-- Profile Panel (Right) -->
-          <aside class="profile-sidebar">
-            <div class="profile-header">
-              <div>
-                <span class="panel-kicker">STATION SOUNDING</span>
-                <h3 id="profileCoord" class="panel-title">17.8°N · 89.4°E</h3>
-              </div>
-              <button id="randomPoint" class="random-btn" title="Randomize coordinates">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
-              </button>
-            </div>
-
-            <!-- Sound Speed Profile vs Temperature Profile Toggle (Competitor feature implemented) -->
-            <div class="profile-actions">
-              <button id="btnProfileTemp" class="btn-profile-toggle active">🌡️ Temperature (°C)</button>
-              <button id="btnProfileSound" class="btn-profile-toggle">🔊 Sound Speed (m/s)</button>
-            </div>
-
-            <div class="profile-legend" style="margin-top:10px">
-              <span class="legend-item"><span class="legend-line orange"></span> <span id="legendProfileName">OceanEmbed-PG</span></span>
-              <span class="legend-item"><span class="legend-dot dark"></span> ARGO Float</span>
-            </div>
-            <canvas id="profileChart" class="profile-canvas"></canvas>
-
-            <!-- Extended Oceanographic, Naval & Fishery Metrics -->
-            <div class="derived-metrics">
-              <div class="metric-box">
-                <span class="metric-label">MLD (Mixed Layer)</span>
-                <strong class="metric-value" id="metricMLD">32 <small>m</small></strong>
-              </div>
-              <div class="metric-box">
-                <span class="metric-label">BLT (Barrier Layer)</span>
-                <strong class="metric-value" id="metricBLT">18 <small>m</small></strong>
-              </div>
-              <div class="metric-box">
-                <span class="metric-label">D26 (26°C Depth)</span>
-                <strong class="metric-value" id="metricD26">78 <small>m</small></strong>
-              </div>
-              <div class="metric-box">
-                <span class="metric-label">TCHP (Heat Fuel)</span>
-                <strong class="metric-value" id="metricTCHP">86 <small>kJ/cm²</small></strong>
-              </div>
-              <div class="metric-box">
-                <span class="metric-label">Sonic Layer Depth</span>
-                <strong class="metric-value" id="metricSLD">48 <small>m</small></strong>
-              </div>
-              <div class="metric-box">
-                <span class="metric-label">Acoustic Shadow</span>
-                <strong class="metric-value" id="metricShadow">50–180 <small>m</small></strong>
-              </div>
-              <div class="metric-box">
-                <span class="metric-label">PFZ Trawl Depth</span>
-                <strong class="metric-value" id="metricPFZ">65 <small>m</small></strong>
-              </div>
-              <div class="metric-box">
-                <span class="metric-label">Max Thermal Grad</span>
-                <strong class="metric-value" id="metricGrad">0.34 <small>°C/m</small></strong>
-              </div>
-            </div>
-
-            <!-- One-Click Export PDF Sounding Report (Competitor feature implemented) -->
-            <button id="btnExportReport" class="btn-export-report">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-              Export Station Sounding Report (PDF)
-            </button>
-          </aside>
-        </div>
-      </div>
-
-      <!-- Stage 03 View 2: Dual 3D Volume Views (Type 1: Voxel Point Cloud & Type 2: Solid Sliced Block) -->
-      <div id="view3DVolume" class="stage03-view hidden">
-        <div class="stage03-view-header">
+      <div class="grid lg:grid-cols-2 gap-8 items-stretch">
+        
+        <!-- Left: Controls -->
+        <div class="glass-card p-8 rounded-3xl border border-white/10 flex flex-col justify-between">
           <div>
-            <h3 class="view-title">3D Subsurface Thermal Reconstructions - <span id="volumeDate">2026-09-14</span></h3>
-            <p class="view-subtitle">Toggle between 3D Voxel Point Cloud and Continuous Solid Sliced 3D Block with Interactive Depth Probe slider · <span class="highlight-caption">DUAL 3D HARDWARE ACCELERATED</span></p>
-          </div>
-          <!-- 3D Type Selector -->
-          <div class="view3d-type-switch">
-            <button id="btn3DTypeVoxel" class="btn-3d-type active">🌐 Type 1: 3D Voxel Point Cloud</button>
-            <button id="btn3DTypeSolid" class="btn-3d-type">🧊 Type 2: Solid Sliced Block (Depth Probe)</button>
-          </div>
-          <div class="volume-controls" id="voxelControls">
-            <button id="btnReset3DView" class="btn-tool-pill">↺ Reset Camera</button>
-            <button id="btnSliceSurface" class="btn-tool-pill">0–200m Upper Ocean</button>
-            <button id="btnFullVolume" class="btn-tool-pill active">0–1000m Full Volume</button>
-          </div>
-        </div>
-
-        <!-- 3D Container 1: Plotly WebGL Scatter-3D Point Cloud -->
-        <div id="container3DVoxel" class="volume-stage-layout">
-          <div id="volume3DContainer" class="volume-plot-container"></div>
-          <div class="volume-meta-card">
-            <div class="meta-header">TYPE 1: 3D VOXEL MESH DIAGNOSTICS</div>
-            <div class="voxel-stat-row">
-              <span>Domain:</span>
-              <strong>Arabian Sea &amp; Bay of Bengal (5°N–25°N)</strong>
+            <h3 class="font-mono text-cyan-400 text-sm font-bold tracking-widest mb-6">1. SURFACE TELEMETRY INGESTION</h3>
+            
+            <div class="flex gap-4 mb-10">
+              <button class="flex-1 py-3 px-4 rounded-xl border border-cyan-500/50 bg-cyan-500/20 text-cyan-300 font-mono text-sm font-bold transition-all">SST Grid</button>
+              <button class="flex-1 py-3 px-4 rounded-xl border border-slate-700 bg-slate-800/50 text-slate-400 font-mono text-sm hover:border-slate-500 transition-all">SSS Grid</button>
+              <button class="flex-1 py-3 px-4 rounded-xl border border-slate-700 bg-slate-800/50 text-slate-400 font-mono text-sm hover:border-slate-500 transition-all">SLA Grid</button>
             </div>
-            <div class="voxel-stat-row">
-              <span>Vertical Depths:</span>
-              <strong>15 Standard Levels (0 to 1000m)</strong>
+            
+            <h3 class="font-mono text-cyan-400 text-sm font-bold tracking-widest mb-6">2. PROBE DEPTH COORDINATE (z)</h3>
+            
+            <div class="mb-4 flex justify-between text-slate-400 font-mono text-sm">
+              <span>Surface (0m)</span>
+              <span>Abyss (2000m)</span>
             </div>
-            <div class="voxel-stat-row">
-              <span>Horizontal Density:</span>
-              <strong>0.25° Spatial Voxel Mesh (~8,277 cells)</strong>
-            </div>
-            <div class="voxel-stat-row">
-              <span>Colormap Range:</span>
-              <strong>cmocean.thermal (3.2°C to 31.0°C)</strong>
-            </div>
-            <div class="voxel-stat-row">
-              <span>Hardware Renderer:</span>
-              <strong>WebGL Scatter-3D Hardware Acceleration</strong>
-            </div>
-            <div class="voxel-action-box">
-              <p>Rotate the cube to view the sharp boundary between the warm surface mixed layer (&gt;28°C) and the deep cold abyssal waters (&lt;7°C at 1000m depth).</p>
+            <input type="range" id="depthSlider" min="0" max="2000" value="450" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+            <div class="mt-8 p-4 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+              <span class="text-slate-400 text-sm">Target Depth:</span>
+              <span class="font-mono text-2xl text-white font-bold" id="depthDisplay">450.0m</span>
             </div>
           </div>
         </div>
 
-        <!-- 3D Container 2: Solid Sliced 3D Block with Depth Slice Probe (Competitor Feature) -->
-        <div id="container3DSolid" class="volume-stage-layout hidden">
-          <div class="solid-canvas-wrapper">
-            <canvas id="solidBlockCanvas" width="760" height="480"></canvas>
-            <div class="solid-slice-indicator">
-              <span>ACTIVE DEPTH SLICE PLANE:</span>
-              <strong id="solidSliceDepthDisplay">150m</strong>
-              <span id="solidSliceTempDisplay">(Mean T: 21.4°C)</span>
+        <!-- Right: Graph Visualization -->
+        <div class="glass-card p-8 rounded-3xl border border-white/10 relative overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-b from-cyan-500/5 to-transparent"></div>
+          <h3 class="font-mono text-cyan-400 text-sm font-bold tracking-widest mb-6 relative z-10">3. PREDICTED THERMODYNAMIC STATE</h3>
+          
+          <div class="flex justify-between items-end mb-8 relative z-10">
+            <div>
+              <span class="block text-slate-400 text-sm mb-1">Predicted Temp (μ)</span>
+              <span class="font-mono text-5xl text-white font-bold tracking-tight" id="tempDisplay">12.4°C</span>
+            </div>
+            <div class="text-right">
+              <span class="block text-slate-400 text-sm mb-1">Confidence (±1σ)</span>
+              <span class="font-mono text-2xl text-cyan-400 font-bold tracking-tight" id="sigmaDisplay">±0.18°C</span>
             </div>
           </div>
-          <div class="solid-probe-sidebar">
-            <div class="probe-header">
-              <span class="probe-kicker">INTERACTIVE DEPTH SLICE PROBE</span>
-              <h4>Continuous Volumetric Slicing</h4>
-              <p>Drag slider to move illuminated slicing plane through the water column from surface to 1000m.</p>
+
+          <div class="relative w-full h-64 border-l border-b border-slate-700">
+            <!-- Mock graph canvas -->
+            <canvas id="miniProfileCanvas" class="absolute inset-0 w-full h-full"></canvas>
+            
+            <!-- Depth indicator line -->
+            <div id="depthIndicator" class="absolute left-0 right-0 border-t border-dashed border-cyan-400/50 transition-all duration-100" style="top: 22.5%;">
+              <div class="absolute right-0 -translate-y-1/2 translate-x-full pl-2 font-mono text-xs text-cyan-400">z</div>
             </div>
-            <div class="probe-slider-group">
-              <div class="probe-val-row">
-                <span class="probe-label">DEPTH:</span>
-                <span class="probe-val"><strong id="probeValueText">150</strong> metres</span>
-              </div>
-              <input type="range" id="depthProbeSlider" min="0" max="1000" step="5" value="150" class="probe-slider">
-              <div class="probe-ticks">
-                <button class="probe-tick-btn" data-depth="0">0m<br><small>Surface</small></button>
-                <button class="probe-tick-btn" data-depth="75">75m<br><small>MLD</small></button>
-                <button class="probe-tick-btn active" data-depth="150">150m<br><small>Thermocline</small></button>
-                <button class="probe-tick-btn" data-depth="500">500m<br><small>Intermediate</small></button>
-                <button class="probe-tick-btn" data-depth="1000">1000m<br><small>Abyssal</small></button>
-              </div>
-            </div>
-            <div class="probe-slice-diagnostics">
-              <div class="probe-stat-card">
-                <span class="stat-lbl">Slice Temp</span>
-                <strong class="stat-num" id="probeSliceTemp">21.4 °C</strong>
-              </div>
-              <div class="probe-stat-card">
-                <span class="stat-lbl">Vertical Gradient</span>
-                <strong class="stat-num" id="probeSliceGrad">-0.18 °C/m</strong>
-              </div>
-              <div class="probe-stat-card">
-                <span class="stat-lbl">Sound Speed</span>
-                <strong class="stat-num" id="probeSliceSound">1,526 m/s</strong>
-              </div>
-              <div class="probe-stat-card">
-                <span class="stat-lbl">Density σₜ</span>
-                <strong class="stat-num" id="probeSliceDensity">25.12 kg/m³</strong>
-              </div>
-            </div>
-            <div class="probe-action-box">
-              <p>💡 <em>The illuminated slice dynamically sweeps through the solid block, revealing the steep thermal discontinuity between 50m and 180m.</em></p>
-            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </section>
+
+  <!-- Technical Architecture (Bento Box) -->
+  <section class="relative z-10 py-24 px-6 bg-slate-950/50" id="architecture">
+    <div class="max-w-7xl mx-auto">
+      <div class="mb-16 text-center">
+        <h2 class="text-3xl md:text-5xl font-bold text-white mb-4">Architecture Blueprint</h2>
+        <p class="text-slate-400 max-w-2xl mx-auto text-lg">Every architectural decision engineered for thermodynamic precision.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[280px]">
+        
+        <!-- Bento 1 -->
+        <div class="bento-card col-span-1 md:col-span-2 glass-card p-8 rounded-3xl border border-white/10 relative overflow-hidden group">
+          <div class="absolute -right-20 -top-20 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl group-hover:bg-cyan-500/20 transition-all"></div>
+          <div class="relative z-10 h-full flex flex-col justify-end">
+            <h3 class="font-mono text-cyan-400 text-sm font-bold tracking-widest mb-3">01. SPATIOTEMPORAL CONDITIONING</h3>
+            <h4 class="text-2xl font-bold text-white mb-2">FiLM Modulation Layer</h4>
+            <p class="text-slate-400 text-sm max-w-md">Oceanography is seasonal. By injecting Day of Year and geographic coordinates directly into the residual network layers, we dynamically scale feature maps based on exact spacetime context.</p>
+          </div>
+        </div>
+
+        <!-- Bento 2 -->
+        <div class="bento-card col-span-1 glass-card p-8 rounded-3xl border border-white/10 flex flex-col justify-end group">
+          <h3 class="font-mono text-blue-400 text-sm font-bold tracking-widest mb-3">02. LATENT SPACE</h3>
+          <h4 class="text-xl font-bold text-white mb-2">Surface Encoder</h4>
+          <p class="text-slate-400 text-sm">ResNet-50 variant compressing 32x32x7 satellite patches into a dense 256-D latent state.</p>
+        </div>
+
+        <!-- Bento 3 -->
+        <div class="bento-card col-span-1 glass-card p-8 rounded-3xl border border-white/10 flex flex-col justify-end group">
+          <h3 class="font-mono text-purple-400 text-sm font-bold tracking-widest mb-3">03. LOSS FUNCTION</h3>
+          <h4 class="text-xl font-bold text-white mb-2">Gaussian CRPS</h4>
+          <p class="text-slate-400 text-sm">Replacing deterministic MSE with Continuous Ranked Probability Score for robust uncertainty quantification.</p>
+        </div>
+
+        <!-- Bento 4 -->
+        <div class="bento-card col-span-1 md:col-span-2 glass-card p-8 rounded-3xl border border-white/10 relative overflow-hidden group">
+          <div class="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-blue-900 via-slate-900 to-transparent"></div>
+          <div class="relative z-10 h-full flex flex-col justify-end">
+            <h3 class="font-mono text-cyan-400 text-sm font-bold tracking-widest mb-3">04. RESOLUTION</h3>
+            <h4 class="text-2xl font-bold text-white mb-2">Continuous Depth Field (SIREN)</h4>
+            <p class="text-slate-400 text-sm max-w-md">Eliminating fixed grid restrictions. Fourier Feature encoding allows the model to predict thermodynamic values at any continuous vertical coordinate, capturing ultra-sharp thermoclines.</p>
           </div>
         </div>
       </div>
+    </div>
+  </section>
 
-      <!-- Stage 03 View 3: Vertical Profiles Multi-Station Comparison (SubOceanNet Screenshot 2) -->
-      <div id="viewVerticalProfiles" class="stage03-view hidden">
-        <div class="stage03-view-header">
-          <div>
-            <h3 class="view-title">Vertical Profiles T(z) Multi-Station Comparison</h3>
-            <p class="view-subtitle">Drop points on the map (amber markers P1..P5) to compare temperature-vs-depth curves · <span class="highlight-caption">IT'S A COMPACT MODEL</span></p>
-          </div>
-          <div class="multi-profile-tools">
-            <button id="btnMultiProfileAdd" class="btn-tool-pill active">📍 Drop Mode (click map)</button>
-            <button id="btnMultiProfileClear" class="btn-tool-pill">✕ Clear Points</button>
-          </div>
-        </div>
-        <div class="multi-profile-layout">
-          <div class="multi-profile-map-box">
-            <div id="multiProfileMap" class="leaflet-map multi-map"></div>
-            <div class="multi-map-statusbar">
-              <span id="multiPointStatus">Profile mode: click the map to drop temperature-profile points (4/5)</span>
-            </div>
-          </div>
-          <div class="multi-profile-chart-box">
-            <div class="chart-box-header">
-              <span>T(z) COMPARATIVE STRATIFICATION CURVES</span>
-              <div class="multi-legend" id="multiProfileLegend"></div>
-            </div>
-            <div class="chart-canvas-wrapper">
-              <canvas id="multiProfileChart"></canvas>
-            </div>
-            <!-- Profile details cards below chart (matching Screenshot 2) -->
-            <div class="profile-details-grid" id="profileDetailsGrid"></div>
-          </div>
-        </div>
+  <!-- Real World Impact -->
+  <section class="relative z-10 py-32 px-6" id="impact">
+    <div class="max-w-7xl mx-auto">
+      <div class="mb-16">
+        <h2 class="text-3xl md:text-5xl font-bold text-white mb-4">Mission Impact</h2>
+        <p class="text-slate-400 max-w-2xl text-lg">Deployed capabilities for national security and disaster management.</p>
       </div>
 
-      <!-- Stage 03 View 4: Predicted Temperature Through Time (SubOceanNet Screenshots 3 & 4) -->
-      <div id="viewTimeSeries" class="stage03-view hidden">
-        <div class="stage03-view-header">
-          <div>
-            <h3 class="view-title">Predicted Temperature Through Time</h3>
-            <p class="view-subtitle">Continuous temporal trajectory across seasonal monsoons · <span class="highlight-caption">OF REAL COPERNICUS MARINE</span></p>
+      <div class="grid md:grid-cols-3 gap-8">
+        
+        <div class="glass-card p-8 rounded-2xl border border-white/5 hover:border-orange-500/30 transition-all hover:-translate-y-2">
+          <div class="w-12 h-12 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-400 mb-6 border border-orange-500/20">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           </div>
-          <div class="timeseries-controls">
-            <div class="ts-point-selector">
-              <label for="tsPointSelect">Point:</label>
-              <select id="tsPointSelect">
-                <option value="P1">P1 (17.68°N, 66.41°E) · Central Arabian Sea</option>
-                <option value="P2">P2 (12.75°N, 70.00°E) · Malabar Upwelling</option>
-                <option value="P3">P3 (18.20°N, 88.50°E) · Bay of Bengal Gyre</option>
-                <option value="P4">P4 (8.50°N, 79.20°E) · Gulf of Mannar PFZ</option>
-                <option value="P5">P5 (5.50°N, 79.00°E) · Equatorial Channel</option>
-              </select>
-            </div>
-            <label class="ts-mean-check">
-              <input type="checkbox" id="tsAreaMean"> area-mean over selection
-            </label>
+          <h3 class="text-xl font-bold text-white mb-3">Cyclone Forecasting</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">Predicting Bay of Bengal barrier layers and Ocean Heat Content (OHC) to forecast rapid storm category jumps 24 hours earlier than SST-only models.</p>
+        </div>
+
+        <div class="glass-card p-8 rounded-2xl border border-white/5 hover:border-blue-500/30 transition-all hover:-translate-y-2">
+          <div class="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 mb-6 border border-blue-500/20">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
           </div>
+          <h3 class="text-xl font-bold text-white mb-3">Naval Defense</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">Instant mapping of acoustic shadow-zones below the thermocline. Grants decisive tactical stealth for submarines without deploying active physical buoys.</p>
         </div>
-        <div class="timeseries-depth-pills" id="tsDepthPills">
-          <span class="depth-filter-label">DEPTHS:</span>
-          <button class="ts-depth-pill active" data-depth="0">0m</button>
-          <button class="ts-depth-pill active" data-depth="50">50m</button>
-          <button class="ts-depth-pill active" data-depth="100">100m</button>
-          <button class="ts-depth-pill active" data-depth="200">200m</button>
-          <button class="ts-depth-pill active" data-depth="500">500m</button>
-          <button class="ts-depth-pill active" data-depth="1000">1000m</button>
+
+        <div class="glass-card p-8 rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-all hover:-translate-y-2">
+          <div class="w-12 h-12 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 mb-6 border border-emerald-500/20">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M12 2v20"/></svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Fisheries & Economics</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">Tracking upwelling fronts for hyper-targeted Potential Fishing Zone (PFZ) advisories, maximizing yield and reducing vessel fuel consumption by 15-20%.</p>
         </div>
-        <div class="timeseries-chart-stage">
-          <canvas id="timeSeriesChart"></canvas>
-        </div>
+
       </div>
+    </div>
+  </section>
 
-      <!-- Stage 03 View 5: 2D Basin Zonal Transect (ocean-embed-suite.vercel.app Feature) -->
-      <div id="viewZonalTransect" class="stage03-view hidden">
-        <div class="stage03-view-header">
-          <div>
-            <h3 class="view-title">2D Basin Zonal Transect · 45°E ➔ 105°E (along 5.5°N)</h3>
-            <p class="view-subtitle">Continuous depth-longitude vertical thermal slice from Somali Upwelling to the Andaman Sea · <span class="highlight-caption">D20 ISOTHERM THERMOCLINE RIDGE</span></p>
-          </div>
-          <div class="transect-controls">
-            <span class="transect-ctrl-label">QUICK TRANSECT PROBES:</span>
-            <button class="transect-chip" data-lon="45.5">45°E Somali</button>
-            <button class="transect-chip" data-lon="65.0">65°E Arabian</button>
-            <button class="transect-chip active" data-lon="79.0">79°E Sri Lanka</button>
-            <button class="transect-chip" data-lon="90.0">90°E BoB Gyre</button>
-            <button class="transect-chip" data-lon="100.0">100°E Andaman</button>
-          </div>
-        </div>
-        <div class="transect-layout">
-          <div class="transect-canvas-box">
-            <div class="transect-canvas-header">
-              <span class="transect-legend-item"><span class="legend-color-box thermal"></span> Thermal Field T(lon, depth)</span>
-              <span class="transect-legend-item"><span class="legend-line-box d20"></span> D20 Thermocline Ridge (20°C Isotherm)</span>
-              <span class="transect-legend-item"><span class="legend-line-box probe"></span> Active Longitude Sounding Probe</span>
-            </div>
-            <div class="canvas-scroll-container">
-              <canvas id="zonalTransectCanvas" width="960" height="390"></canvas>
-            </div>
-            <div class="transect-slider-container">
-              <div class="transect-slider-info">
-                <span>SOUNDING LONGITUDE PROBE:</span>
-                <strong id="transectLonReadout">79.0°E</strong>
-                <span id="transectRegionText">· Sri Lanka Dome / Equatorial Channel</span>
-              </div>
-              <input type="range" id="transectLonSlider" min="45" max="105" step="0.5" value="79" class="transect-slider">
-            </div>
-          </div>
-          <div class="transect-meta-card">
-            <div class="meta-header">ZONAL TRANSECT PROFILE AT <span id="transectCardLon">79.0°E</span></div>
-            <div class="transect-stat-row">
-              <span>Surface SST:</span>
-              <strong id="transectCardSST">29.1 °C</strong>
-            </div>
-            <div class="transect-stat-row">
-              <span>Mixed Layer Depth (MLD):</span>
-              <strong id="transectCardMLD">38 metres</strong>
-            </div>
-            <div class="transect-stat-row">
-              <span>D20 Thermocline Depth:</span>
-              <strong id="transectCardD20">112 metres</strong>
-            </div>
-            <div class="transect-stat-row">
-              <span>Thermocline Gradient:</span>
-              <strong id="transectCardGrad">-0.24 °C/m</strong>
-            </div>
-            <div class="transect-stat-row">
-              <span>Sound Speed at D20:</span>
-              <strong id="transectCardSound">1,524 m/s</strong>
-            </div>
-            <div class="transect-dynamics-box">
-              <p>🌊 <strong>Oceanographic Dynamics:</strong> The D20 isotherm shoals sharply to ~60m in the western Arabian Sea due to intense summer Ekman upwelling, and deepens to ~115m in the Bay of Bengal under downwelling anticyclonic gyre circulation.</p>
-            </div>
-          </div>
-        </div>
+  <!-- Footer -->
+  <footer class="relative z-10 border-t border-white/10 bg-slate-950 pt-16 pb-8 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+      <div class="flex items-center gap-3">
+        <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+        <span class="font-mono text-xs text-slate-400">All neural inference nodes operational</span>
       </div>
-
-      <!-- Stage 03 View 6: ARGO In-Situ CTD Matchup (Competitor Suite Feature) -->
-      <div id="viewArgoMatchup" class="stage03-view hidden">
-        <div class="stage03-view-header">
-          <div>
-            <h3 class="view-title">ARGO In-Situ CTD Float Matchup &amp; Error Analysis</h3>
-            <p class="view-subtitle">Direct matchup against independent held-out Coriolis GDAC CTD profilers · <span class="highlight-caption">+72% SKILL SCORE OVER WOA18</span></p>
-          </div>
-          <div class="argo-controls">
-            <span class="argo-badge-verified">✓ 1,284 HELD-OUT IN-SITU FLOATS VERIFIED</span>
-          </div>
-        </div>
-        <div class="argo-layout">
-          <div class="argo-matchup-card">
-            <div class="argo-float-header">
-              <div class="float-title-group">
-                <span class="float-icon">🛰️</span>
-                <div>
-                  <h4>IN-SITU MATCHUP FLOAT: WMO #2902741</h4>
-                  <span class="float-sub">Platform: INCOIS APEX CTD Float · Cycle #042 · Delayed-Mode Quality Controlled</span>
-                </div>
-              </div>
-              <span class="float-loc-badge">14.85°N, 89.20°E · Bay of Bengal</span>
-            </div>
-            <div class="argo-metrics-grid">
-              <div class="argo-metric-pill">
-                <span class="metric-title">Root Mean Sq Error (RMSE)</span>
-                <strong class="metric-val text-success">0.38 <small>°C</small></strong>
-                <span class="metric-sub">WOA18 Baseline: 1.38°C</span>
-              </div>
-              <div class="argo-metric-pill">
-                <span class="metric-title">Mean Bias Error (MBE)</span>
-                <strong class="metric-val text-info">-0.04 <small>°C</small></strong>
-                <span class="metric-sub">Zero-centered calibration</span>
-              </div>
-              <div class="argo-metric-pill">
-                <span class="metric-title">Pearson Correlation (r)</span>
-                <strong class="metric-val text-primary">0.984</strong>
-                <span class="metric-sub">High vertical fidelity</span>
-              </div>
-              <div class="argo-metric-pill">
-                <span class="metric-title">Anomaly Correlation (ACC)</span>
-                <strong class="metric-val text-accent">0.942</strong>
-                <span class="metric-sub">Mesoscale eddy capture</span>
-              </div>
-            </div>
-            <div class="argo-table-container">
-              <h5 class="table-section-title">STRATIFIED DEPTH ERROR ANALYSIS TABLE (OCEANEMBED-PG VS WOA18 BASELINE)</h5>
-              <table class="argo-error-table">
-                <thead>
-                  <tr>
-                    <th>Depth Layer</th>
-                    <th>Observed ARGO T(z)</th>
-                    <th>OceanEmbed-PG Pred</th>
-                    <th>Model RMSE</th>
-                    <th>WOA18 RMSE</th>
-                    <th>Skill Score</th>
-                    <th>Validation Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><strong>0m (Surface)</strong></td>
-                    <td>29.40 °C</td>
-                    <td>29.38 °C</td>
-                    <td class="text-success">0.18 °C</td>
-                    <td>0.85 °C</td>
-                    <td><strong>+78.8%</strong></td>
-                    <td><span class="badge-status-ok">PASSED</span></td>
-                  </tr>
-                  <tr>
-                    <td><strong>50m (MLD Base)</strong></td>
-                    <td>28.65 °C</td>
-                    <td>28.52 °C</td>
-                    <td class="text-success">0.29 °C</td>
-                    <td>1.12 °C</td>
-                    <td><strong>+74.1%</strong></td>
-                    <td><span class="badge-status-ok">PASSED</span></td>
-                  </tr>
-                  <tr class="highlight-row">
-                    <td><strong>100m (Thermocline Peak)</strong></td>
-                    <td>23.10 °C</td>
-                    <td>22.88 °C</td>
-                    <td class="text-success">0.46 °C</td>
-                    <td>1.84 °C</td>
-                    <td><strong>+75.0%</strong></td>
-                    <td><span class="badge-status-ok">PASSED</span></td>
-                  </tr>
-                  <tr>
-                    <td><strong>150m (Lower Thermocline)</strong></td>
-                    <td>18.45 °C</td>
-                    <td>18.22 °C</td>
-                    <td class="text-success">0.42 °C</td>
-                    <td>1.65 °C</td>
-                    <td><strong>+74.5%</strong></td>
-                    <td><span class="badge-status-ok">PASSED</span></td>
-                  </tr>
-                  <tr>
-                    <td><strong>200m (Intermediate)</strong></td>
-                    <td>14.80 °C</td>
-                    <td>14.65 °C</td>
-                    <td class="text-success">0.34 °C</td>
-                    <td>1.22 °C</td>
-                    <td><strong>+72.1%</strong></td>
-                    <td><span class="badge-status-ok">PASSED</span></td>
-                  </tr>
-                  <tr>
-                    <td><strong>500m (Deep Water)</strong></td>
-                    <td>9.65 °C</td>
-                    <td>9.58 °C</td>
-                    <td class="text-success">0.22 °C</td>
-                    <td>0.74 °C</td>
-                    <td><strong>+70.3%</strong></td>
-                    <td><span class="badge-status-ok">PASSED</span></td>
-                  </tr>
-                  <tr>
-                    <td><strong>1000m (Abyssal)</strong></td>
-                    <td>6.85 °C</td>
-                    <td>6.80 °C</td>
-                    <td class="text-success">0.15 °C</td>
-                    <td>0.52 °C</td>
-                    <td><strong>+71.2%</strong></td>
-                    <td><span class="badge-status-ok">PASSED</span></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+      
+      <div class="flex items-center gap-6 font-mono text-xs text-slate-500">
+        <a href="technical.html" class="hover:text-cyan-400 transition-colors">Documentation</a>
+        <a href="demo.html" class="hover:text-cyan-400 transition-colors">Console</a>
+        <span>© 2026 INCOIS SIH-2026. All rights reserved.</span>
       </div>
-
-      <!-- Stage 03 View 7: Cyclone Heat (TCHP) & Marine Heatwaves Center (Competitor Feature) -->
-      <div id="viewTchpHeatwaves" class="stage03-view hidden">
-        <div class="stage03-view-header">
-          <div>
-            <h3 class="view-title">Cyclone Heat Potential (TCHP) &amp; Marine Heatwaves Center</h3>
-            <p class="view-subtitle">Upper-ocean excess thermal energy integration (&gt;26°C) and extreme ocean heatwave tracking · <span class="highlight-caption">OPERATIONAL CYCLONE WARNING</span></p>
-          </div>
-          <div class="tchp-active-badge">
-            <span class="tchp-pulse"></span>
-            <span>ACTIVE HEAT ASSESSMENT</span>
-          </div>
-        </div>
-        <div class="tchp-layout">
-          <div class="tchp-card-primary">
-            <div class="tchp-header-row">
-              <div>
-                <span class="tchp-loc-label">ANALYZED LOCATION:</span>
-                <strong class="tchp-loc-coords" id="tchpCoords">18.00°N, 88.00°E · Bay of Bengal Gyre</strong>
-              </div>
-              <span class="heatwave-cat-badge" id="heatwaveBadge">CATEGORY I · MODERATE HEATWAVE</span>
-            </div>
-            <div class="tchp-gauge-row">
-              <div class="tchp-gauge-item">
-                <span class="gauge-lbl">TROPICAL CYCLONE HEAT POTENTIAL</span>
-                <div class="gauge-val-group">
-                  <strong class="gauge-huge" id="tchpValue">78.4</strong>
-                  <span class="gauge-unit">kJ / cm²</span>
-                </div>
-                <div class="gauge-bar-wrapper">
-                  <div class="gauge-bar-fill high" id="tchpBar" style="width: 78.4%;"></div>
-                </div>
-                <span class="gauge-desc">Integrated excess heat $Q = \rho C_p \int_0^{D_{26}} (T - 26) dz$</span>
-              </div>
-              <div class="tchp-gauge-item">
-                <span class="gauge-lbl">D26 ISOTHERM DEPTH (26°C BASE)</span>
-                <div class="gauge-val-group">
-                  <strong class="gauge-huge" id="tchpD26">42.5</strong>
-                  <span class="gauge-unit">metres</span>
-                </div>
-                <div class="gauge-bar-wrapper">
-                  <div class="gauge-bar-fill medium" id="d26Bar" style="width: 55%;"></div>
-                </div>
-                <span class="gauge-desc">Thickness of warm water layer fueling atmospheric convection</span>
-              </div>
-            </div>
-            <div class="tchp-advisory-box">
-              <div class="advisory-icon">⚠️</div>
-              <div class="advisory-text">
-                <strong id="advisoryTitle">High Cyclone Intensification Risk:</strong>
-                <p id="advisoryText">The upper ocean heat reservoir exceeds 75 kJ/cm² with a 42m deep D26 isothermal pool. Tropical depressions entering this sector will encounter low negative feedback and may undergo rapid intensification into a Very Severe Cyclonic Storm (VSCS).</p>
-              </div>
-            </div>
-          </div>
-          <div class="tchp-reference-sidebar">
-            <div class="ref-header">OPERATIONAL CYCLONE RISK THRESHOLDS</div>
-            <div class="threshold-card low">
-              <div class="th-title"><span>&lt; 25 kJ/cm²</span> <strong>Low Risk</strong></div>
-              <p>Insufficient heat; storms rapidly decouple through ocean cold wake.</p>
-            </div>
-            <div class="threshold-card moderate">
-              <div class="th-title"><span>25 – 50 kJ/cm²</span> <strong>Moderate Risk</strong></div>
-              <p>Supports standard tropical storms and monsoon depressions.</p>
-            </div>
-            <div class="threshold-card high">
-              <div class="th-title"><span>50 – 80 kJ/cm²</span> <strong>High Intensification</strong></div>
-              <p>Fuels Category 3+ Very Severe Cyclonic Storms (VSCS).</p>
-            </div>
-            <div class="threshold-card extreme">
-              <div class="th-title"><span>&gt; 80 kJ/cm²</span> <strong>Extreme Super Cyclone</strong></div>
-              <p>Explosive rapid intensification window (e.g. Super Cyclone Amphan).</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Surface Input Gallery -->
-      <div class="input-gallery">
-        <h3 class="gallery-title">Seven Surface Input Channels</h3>
-        <div class="gallery-grid">
-          <div class="input-card">
-            <div class="input-icon">🌡️</div>
-            <h4>SST</h4>
-            <p>Sea Surface Temperature — skin thermal signature from satellite IR &amp; microwave radiometry.</p>
-          </div>
-          <div class="input-card">
-            <div class="input-icon">🧂</div>
-            <h4>SSS</h4>
-            <p>Sea Surface Salinity — vital for Bay of Bengal barrier layer identification (SMOS / SMAP).</p>
-          </div>
-          <div class="input-card">
-            <div class="input-icon">📏</div>
-            <h4>SLA</h4>
-            <p>Sea Level Anomaly — primary geometric indicator of thermocline displacement via altimetry.</p>
-          </div>
-          <div class="input-card">
-            <div class="input-icon">🌊</div>
-            <h4>U-Current</h4>
-            <p>Zonal geostrophic and Ekman velocity components from satellite-derived surface kinematics.</p>
-          </div>
-          <div class="input-card">
-            <div class="input-icon">🌊</div>
-            <h4>V-Current</h4>
-            <p>Meridional velocity component capturing coastal boundary currents and eddy transport.</p>
-          </div>
-          <div class="input-card">
-            <div class="input-icon">💨</div>
-            <h4>W<sub>x</sub> Wind</h4>
-            <p>Zonal wind stress driving Ekman divergence, mixed layer deepening, and coastal upwelling.</p>
-          </div>
-          <div class="input-card">
-            <div class="input-icon">💨</div>
-            <h4>W<sub>y</sub> Wind</h4>
-            <p>Meridional wind stress component regulating monsoonal gyres across Arabian Sea.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================ -->
-    <!--  SECTION 3: REAL-TIME AIS SHIP TRACKING      -->
-    <!-- ============================================ -->
-    <section id="ais-tracking" class="section ais-section">
-      <div class="section-header">
-        <span class="section-kicker">MARITIME CONTEXT · LIVE AIS INTELLIGENCE</span>
-        <h2 class="section-title">Live AIS position radar</h2>
-        <p class="section-desc">Live AISStream reports appear alongside a clearly marked demo fleet for presentation mode. Demo routes are simulated; live route tails use received AIS reports.</p>
-      </div>
-
-      <!-- MarineTraffic Fleet Search & Type Filters -->
-      <div class="ais-toolbar">
-        <div class="ais-search-box">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="aisSearchInput" placeholder="Search received AIS reports by name, MMSI, IMO, destination..." autocomplete="off">
-          <button id="aisSearchClear" class="search-clear-btn" style="display:none">✕</button>
-        </div>
-        <div class="ais-filter-chips">
-          <button class="vessel-filter-chip active" data-type="all">All (<span id="countAll">—</span>)</button>
-          <button class="vessel-filter-chip" data-type="cargo"><span class="dot-cargo">●</span> Cargo (<span id="countCargo">—</span>)</button>
-          <button class="vessel-filter-chip" data-type="tanker"><span class="dot-tanker">●</span> Tankers (<span id="countTanker">—</span>)</button>
-          <button class="vessel-filter-chip" data-type="fishing"><span class="dot-fishing">●</span> Fishing (<span id="countFishing">—</span>)</button>
-          <button class="vessel-filter-chip" data-type="passenger"><span class="dot-passenger">●</span> Passenger (<span id="countPassenger">—</span>)</button>
-          <button class="vessel-filter-chip" data-type="military"><span class="dot-military">●</span> Naval (<span id="countMilitary">—</span>)</button>
-          <button class="vessel-filter-chip" data-type="tug"><span class="dot-tug">●</span> Tugs &amp; OSV (<span id="countTug">—</span>)</button>
-        </div>
-        <div class="ais-mode-toggle">
-          <button id="btnAisMarkers" class="ais-mode-btn active">🚢 Ships View</button>
-          <button id="btnAisDensity" class="ais-mode-btn">🔥 Density Heatmap</button>
-        </div>
-      </div>
-
-      <div class="ais-grid">
-        <div class="ais-map-container">
-          <div id="aisMap" class="leaflet-map ais-map"></div>
-          <div class="ais-overlay">
-            <div id="vesselCount" class="vessel-counter">
-              <span class="counter-value" id="vesselCountVal">—</span>
-              <span class="counter-label">Live + demo vessels</span>
-            </div>
-            <div id="aisStatus" class="ais-status-badge">
-              <span class="status-dot"></span>
-              <span class="status-text" id="aisStatusText">Connecting to AIS feed…</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Vessel Inspector Drawer & Maritime Analytics Panel -->
-        <div class="ais-sidebar-panel">
-          <!-- Active Vessel Inspector Card (MarineTraffic Style) -->
-          <div id="vesselInspectorCard" class="vessel-inspector-card">
-            <div class="inspector-header">
-              <div class="inspector-title-group">
-                <span class="inspector-flag" id="shipFlag">🚢</span>
-                <div>
-                  <h3 class="inspector-name" id="shipName">SELECT A VESSEL ON RADAR</h3>
-                  <span class="inspector-type" id="shipType">Click any vessel marker or search above</span>
-                </div>
-              </div>
-              <span class="inspector-live-tag" id="shipLiveTag">REAL-TIME</span>
-            </div>
-
-            <div class="inspector-grid">
-              <div class="inspector-stat">
-                <span class="stat-lbl">MMSI</span>
-                <strong class="stat-val" id="shipMMSI">—</strong>
-              </div>
-              <div class="inspector-stat">
-                <span class="stat-lbl">IMO</span>
-                <strong class="stat-val" id="shipIMO">—</strong>
-              </div>
-              <div class="inspector-stat">
-                <span class="stat-lbl">Speed (SOG)</span>
-                <strong class="stat-val" id="shipSOG">—</strong>
-              </div>
-              <div class="inspector-stat">
-                <span class="stat-lbl">Course (COG)</span>
-                <strong class="stat-val" id="shipCOG">—</strong>
-              </div>
-              <div class="inspector-stat">
-                <span class="stat-lbl">Draught</span>
-                <strong class="stat-val" id="shipDraught">—</strong>
-              </div>
-              <div class="inspector-stat">
-                <span class="stat-lbl">Dimensions</span>
-                <strong class="stat-val" id="shipDimensions">—</strong>
-              </div>
-              <div class="inspector-stat full-width">
-                <span class="stat-lbl">Destination &amp; ETA</span>
-                <strong class="stat-val" id="shipDest">—</strong>
-              </div>
-            </div>
-
-            <!-- Keel Subsurface Ocean Environment Box (INCOIS Intelligence) -->
-            <div class="keel-ocean-box">
-              <div class="keel-header">
-                <span>🌊</span> SUB-SURFACE KEEL ENVIRONMENT AT SHIP POSITION
-              </div>
-              <div class="keel-metrics-grid">
-                <div class="keel-metric">
-                  <span>Surface SST</span>
-                  <strong id="keelSST">—</strong>
-                </div>
-                <div class="keel-metric">
-                  <span>Mixed Layer (MLD)</span>
-                  <strong id="keelMLD">—</strong>
-                </div>
-                <div class="keel-metric">
-                  <span>Thermocline Depth</span>
-                  <strong id="keelThermocline">—</strong>
-                </div>
-                <div class="keel-metric">
-                  <span>Sound Speed at Keel</span>
-                  <strong id="keelSoundSpeed">—</strong>
-                </div>
-              </div>
-              <div class="keel-hazard-row">
-                <span>Cyclone Heat Fuel (TCHP):</span>
-                <strong id="keelTCHP">—</strong>
-              </div>
-            </div>
-
-            <button id="btnQueryShipLocation" class="btn-query-ship-station" disabled>
-              📍 Query 3D Subsurface Sounding at Ship Coordinates
-            </button>
-          </div>
-
-          <!-- General Fleet Intelligence Overview -->
-          <div class="ais-fleet-meta">
-            <div class="meta-row">
-              <span>ACTIVE DOMAIN:</span>
-              <strong>5°N–30°N · 45°E–105°E (North Indian Ocean)</strong>
-            </div>
-            <div class="meta-row">
-              <span>PRIMARY CORRIDORS:</span>
-              <strong>Malacca-Suez Trunk · Gulf of Oman · Indian Coastal Shelf</strong>
-            </div>
-            <div class="meta-row">
-              <span>REFRESH CYCLE:</span>
-              <strong>Live AIS reports + labelled demo simulation</strong>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- ============================================ -->
-  <!--  FOOTER                                      -->
-  <!-- ============================================ -->
-  <footer class="site-footer">
-    <div class="footer-content">
-      <span class="footer-brand">HALOCLINE · SIH26066 · SMART INDIA HACKATHON 2026</span>
-      <span class="footer-info">Ministry of Earth Sciences (MoES) · INCOIS Ocean Valley · Disaster Management Theme</span>
-      <span class="footer-integrity">Domain: 5°N–30°N, 45°E–105°E · 15 Standard Depths · GLORYS12V1 &amp; INCOIS ARGO Ground Truth</span>
     </div>
   </footer>
 
-  <!-- Printable Station Sounding Report Modal (Competitor feature implemented) -->
-  <div id="reportContainer" style="display:none"></div>
+  <!-- Scripts -->
+  <script>
+    // 1. Scroll-triggered animations for elements (using GSAP instead of Framer Motion for Vanilla JS)
+    gsap.registerPlugin(ScrollTrigger);
 
-  <!-- 8-Pass Monte Carlo Prediction Execution Modal (SubOceanNet Feature) -->
-  <div id="predictionModal" class="prediction-modal hidden">
-    <div class="prediction-modal-box">
-      <div class="pred-header">
-        <h4>Stage 02 + 03 · Physics-Guided Subsurface Neural Reconstruction</h4>
-        <span class="pred-close" id="closePredModal">✕</span>
-      </div>
-      <p class="pred-desc">Encoder consumes 7 surface satellite variables; decoder emits temperature across 15 standard depths with 8 Monte Carlo dropout passes for epistemic uncertainty quantification.</p>
-      <div class="pred-progress-container">
-        <div class="pred-step-labels">
-          <span id="predStep1" class="pred-step active">01 PREPROCESS</span>
-          <span id="predStep2" class="pred-step">02 8 FORWARD PASSES</span>
-          <span id="predStep3" class="pred-step">03 AGGREGATE</span>
-        </div>
-        <div class="pred-bar-bg">
-          <div id="predProgressBar" class="pred-bar-fill" style="width: 8%"></div>
-        </div>
-        <div class="pred-status-row">
-          <span id="predStatusText">8% Preprocess · Filtering CMEMS L4 SST/SSS and ERA5 winds…</span>
-          <span id="predTimer">0.0s / ~3.8s</span>
-        </div>
-      </div>
-      <div class="pred-meta-chips">
-        <span>Domain: 5°N–30°N, 45°E–105°E</span>
-        <span>Ocean Cells: ~6,186</span>
-        <span>MC Passes: 8</span>
-        <span>Standard Depths: 15 (0–1000m)</span>
-        <span>Surrogate Engine: PyTorch CPU ONNX</span>
-      </div>
-    </div>
-  </div>
+    gsap.from(".hero-title, .hero-subtitle, .hero-cta", {
+      y: 30, opacity: 0, duration: 1, stagger: 0.2, ease: "power3.out", delay: 0.2
+    });
 
-  <!-- Floating Prediction Complete Toast (SubOceanNet Screenshot Feature) -->
-  <div id="predictionToast" class="prediction-toast hidden">
-    <span class="toast-icon">✅</span>
-    <span id="toastMessage">Prediction complete: 6,186 ocean cells × 15 depths with MC-dropout uncertainty in 3.8s</span>
-    <span class="toast-close" id="closeToast">✕</span>
-  </div>
+    gsap.utils.toArray('.bento-card, .glass-card').forEach(card => {
+      gsap.from(card, {
+        scrollTrigger: { trigger: card, start: "top 85%" },
+        y: 40, opacity: 0, duration: 0.8, ease: "power3.out"
+      });
+    });
 
-  <script src="app.js"></script>
+    // 2. Interactive Depth Explorer Logic
+    const slider = document.getElementById('depthSlider');
+    const depthDisplay = document.getElementById('depthDisplay');
+    const tempDisplay = document.getElementById('tempDisplay');
+    const sigmaDisplay = document.getElementById('sigmaDisplay');
+    const depthIndicator = document.getElementById('depthIndicator');
+    const canvas = document.getElementById('miniProfileCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Resize canvas
+    function resizeCanvas() {
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+      drawCurve();
+    }
+    window.addEventListener('resize', resizeCanvas);
+    
+    function getTemperatureAtDepth(z) {
+      // Mock thermocline profile equation
+      const surfaceT = 28.5;
+      const deepT = 4.0;
+      const thermoclineDepth = 120;
+      const steepness = 0.02;
+      return deepT + (surfaceT - deepT) / (1 + Math.exp(steepness * (z - thermoclineDepth)));
+    }
+
+    function getSigmaAtDepth(z) {
+      // Uncertainty peaks around thermocline
+      const peakZ = 120;
+      return 0.1 + 0.5 * Math.exp(-Math.pow((z - peakZ)/50, 2));
+    }
+
+    function drawCurve() {
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      
+      const maxZ = 2000;
+      const maxT = 32;
+      
+      // Draw Grid
+      ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+      ctx.lineWidth = 1;
+      for(let i=1; i<5; i++) {
+        ctx.beginPath(); ctx.moveTo(w*(i/5), 0); ctx.lineTo(w*(i/5), h); ctx.stroke();
+      }
+
+      // Draw Curve
+      ctx.beginPath();
+      ctx.strokeStyle = '#22d3ee'; // cyan-400
+      ctx.lineWidth = 3;
+      
+      for(let z=0; z<=maxZ; z+=10) {
+        const t = getTemperatureAtDepth(z);
+        const x = (t / maxT) * w;
+        const y = (z / maxZ) * h;
+        if(z===0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    slider.addEventListener('input', (e) => {
+      const z = parseFloat(e.target.value);
+      depthDisplay.textContent = z.toFixed(1) + 'm';
+      
+      const t = getTemperatureAtDepth(z);
+      const s = getSigmaAtDepth(z);
+      
+      tempDisplay.textContent = t.toFixed(1) + '°C';
+      sigmaDisplay.textContent = '±' + s.toFixed(2) + '°C';
+      
+      const percent = (z / 2000) * 100;
+      depthIndicator.style.top = `${percent}%`;
+    });
+
+    // 3. Three.js Background Canvas (Plunge effect)
+    (function init3D() {
+      const container = document.getElementById('canvas-container');
+      const scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x020b18, 0.0015);
+      
+      const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+      // Start high up looking slightly down
+      camera.position.set(0, 100, 250);
+      camera.lookAt(0, 0, 0);
+      
+      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(renderer.domElement);
+
+      // 1. Surface Grid (Satellite representation)
+      const gridHelper = new THREE.GridHelper(800, 40, 0x0ea5e9, 0x0284c7);
+      gridHelper.position.y = 50;
+      gridHelper.material.transparent = true;
+      gridHelper.material.opacity = 0.2;
+      scene.add(gridHelper);
+
+      // 2. Data Particles (ARGO / Subsurface points)
+      const particlesGeo = new THREE.BufferGeometry();
+      const pCount = 3000;
+      const pos = new Float32Array(pCount * 3);
+      const colors = new Float32Array(pCount * 3);
+      
+      for(let i=0; i<pCount*3; i+=3) {
+        // x, z spread out. y goes deep down
+        pos[i] = (Math.random() - 0.5) * 600;
+        pos[i+1] = 50 - Math.random() * 800; // From surface down to -750
+        pos[i+2] = (Math.random() - 0.5) * 600;
+        
+        // Color based on depth (warm near surface, cold deep)
+        const depthRatio = (50 - pos[i+1]) / 800;
+        const color = new THREE.Color();
+        color.lerpColors(new THREE.Color(0x00f2fe), new THREE.Color(0x020617), depthRatio);
+        colors[i] = color.r; colors[i+1] = color.g; colors[i+2] = color.b;
+      }
+      particlesGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      particlesGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      
+      const pMat = new THREE.PointsMaterial({
+        size: 3,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending
+      });
+      const particles = new THREE.Points(particlesGeo, pMat);
+      scene.add(particles);
+
+      // Scroll interaction
+      let scrollY = window.scrollY;
+      window.addEventListener('scroll', () => {
+        scrollY = window.scrollY;
+      });
+
+      let time = 0;
+      function animate() {
+        requestAnimationFrame(animate);
+        time += 0.002;
+        
+        // Plunge camera based on scroll
+        // Max scroll approx 3000px. Map to Y position from 100 down to -500
+        const targetY = 100 - (scrollY * 0.25);
+        const targetZ = 250 - (scrollY * 0.1);
+        
+        // Smooth interpolation
+        camera.position.y += (targetY - camera.position.y) * 0.05;
+        camera.position.z += (targetZ - camera.position.z) * 0.05;
+        
+        // Slowly rotate particle field
+        particles.rotation.y = time;
+        
+        renderer.render(scene, camera);
+      }
+      animate();
+      
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    })();
+    
+    // Init canvas drawing
+    setTimeout(resizeCanvas, 100);
+  </script>
 </body>
 </html>

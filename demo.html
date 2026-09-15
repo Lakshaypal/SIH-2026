@@ -13,6 +13,10 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="styles.css">
+  
+  <!-- Three.js and OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body class="demo-page">
 
@@ -31,7 +35,6 @@
       <span class="brand-text">Halocline</span>
     </a>
     <nav id="mainNav">
-      <a href="index.html" class="nav-link">Home</a>
       <a href="dashboard.html" class="nav-link">Ocean Explorer</a>
       <a href="fleet.html" class="nav-link">Fleet Radar</a>
       <a href="technical.html" class="nav-link">Method &amp; Validation</a>
@@ -333,14 +336,25 @@
               <span class="result-coords" id="resultCoords"></span>
             </div>
             
-            <div class="station-chart-col">
-              <div class="chart-canvas-wrapper">
-                <canvas id="demoProfileChart"></canvas>
+            <div class="result-viz-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch;">
+              <!-- 2D Profile Chart -->
+              <div class="station-chart-col">
+                <div class="chart-canvas-wrapper">
+                  <canvas id="demoProfileChart"></canvas>
+                </div>
+                <div class="chart-legend-row" style="margin-top: 8px;">
+                  <span class="legend-item"><span class="legend-line accent"></span> Prediction</span>
+                  <span class="legend-item"><span class="legend-area band"></span> ±1σ Uncertainty</span>
+                  <span class="legend-item"><span class="legend-dot argo"></span> ARGO Truth</span>
+                </div>
               </div>
-              <div class="chart-legend-row">
-                <span class="legend-item"><span class="legend-line accent"></span> Prediction</span>
-                <span class="legend-item"><span class="legend-area band"></span> ±1σ Uncertainty</span>
-                <span class="legend-item"><span class="legend-dot argo"></span> ARGO Truth</span>
+              
+              <!-- 3D Column Reconstruction -->
+              <div class="station-3d-col" style="position: relative; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden;">
+                <div id="three-container" style="position: absolute; inset: 0; width: 100%; height: 100%;"></div>
+                <div style="position: absolute; top: 10px; left: 10px; font-family: monospace; font-size: 10px; color: #0ea5e9; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
+                  3D COLUMN RECONSTRUCTION<br>Drag to rotate
+                </div>
               </div>
             </div>
 

@@ -6066,8 +6066,8 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.5rem); }
   font-family: var(--font-mono);
   font-size: 1.1rem;
   font-weight: 600;
-  color: #e2e8f0;
-  background: rgba(255,255,255,0.06);
+  color: #0f172a;
+  background: #f8fafc;
   padding: 12px 24px;
   border-radius: 10px;
   display: inline-block;
@@ -6587,4 +6587,18 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.5rem); }
     flex-direction: column;
     gap: 12px;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DASHBOARD 3D LANDING PAGE STYLES
+   ═══════════════════════════════════════════════════════════ */
+.glass-nav {
+  background: rgba(2, 11, 24, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.glass-card {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
