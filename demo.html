@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="Halocline — Interactive Demo Walkthrough: from satellite data extraction to subsurface prediction to disaster management impact. SIH26066.">
+  <title>Halocline — Demo Walkthrough · SIH26066</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="demo-page">
+
+  <!-- ============================================ -->
+  <!--  NAVIGATION                                  -->
+  <!-- ============================================ -->
+  <header id="topbar" class="topbar">
+    <a class="brand" href="index.html">
+      <span class="brand-icon">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M2 12c2-3 5-5 10-5s8 2 10 5"/>
+          <path d="M2 17c2-3 5-5 10-5s8 2 10 5" opacity=".5"/>
+          <circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none"/>
+        </svg>
+      </span>
+      <span class="brand-text">Halocline</span>
+    </a>
+    <nav id="mainNav">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="dashboard.html" class="nav-link">Ocean Explorer</a>
+      <a href="fleet.html" class="nav-link">Fleet Radar</a>
+      <a href="technical.html" class="nav-link">Method &amp; Validation</a>
+      <a href="demo.html" class="nav-link active">Demo Walkthrough</a>
+    </nav>
+    <div class="topbar-actions">
+      <div id="liveBadge" class="live-badge">
+        <span class="badge-dot"></span>
+        <span class="badge-text">SIH 2026 DEMO</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ============================================ -->
+    <!--  SECTION 0: HERO                             -->
+    <!-- ============================================ -->
+    <section class="demo-hero">
+      <div class="demo-hero-inner">
+        <span class="demo-kicker">SIH26066 · INCOIS / MoES · SMART INDIA HACKATHON 2026</span>
+        <h1 class="demo-title">Halocline</h1>
+        <p class="demo-subtitle">Seeing beneath the surface — a physics-guided deep learning system that reconstructs the 3D ocean from satellite imagery alone.</p>
+        <div class="demo-hero-stats">
+          <div class="demo-stat">
+            <strong>7</strong>
+            <span>Satellite Channels</span>
+          </div>
+          <div class="demo-stat">
+            <strong>32×32</strong>
+            <span>Input Patches</span>
+          </div>
+          <div class="demo-stat">
+            <strong>192</strong>
+            <span>Latent Dimensions</span>
+          </div>
+          <div class="demo-stat">
+            <strong>∞</strong>
+            <span>Continuous Depth</span>
+          </div>
+        </div>
+        <a href="#data-extraction" class="demo-scroll-cue">
+          <span>Begin Walkthrough</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+        </a>
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!--  SECTION A: DATA EXTRACTION                  -->
+    <!-- ============================================ -->
+    <section id="data-extraction" class="demo-section">
+      <div class="demo-section-header reveal">
+        <span class="demo-step-num">01</span>
+        <div>
+          <span class="section-kicker">DATA EXTRACTION</span>
+          <h2 class="section-title">Seven satellite channels see the ocean surface</h2>
+          <p class="section-desc">Every day, we extract 7 surface observations from CMEMS, ERA5, and SMAP satellites — covering temperature, salinity, sea level, currents, and winds — and regrid them onto a unified 0.25° spatial grid.</p>
+        </div>
+      </div>
+
+      <div class="demo-channel-grid reveal">
+        <div class="demo-channel-card" data-channel="sst">
+          <div class="channel-icon">🌡️</div>
+          <h4>SST</h4>
+          <span class="channel-source">CMEMS ODYSSEA L4</span>
+          <p>Sea Surface Temperature — skin thermal signature from multi-sensor satellite IR &amp; microwave fusion.</p>
+          <span class="channel-unit">°C</span>
+        </div>
+        <div class="demo-channel-card" data-channel="sss">
+          <div class="channel-icon">🧂</div>
+          <h4>SSS</h4>
+          <span class="channel-source">SMOS / SMAP L4</span>
+          <p>Sea Surface Salinity — vital for detecting freshwater barrier layers in the Bay of Bengal.</p>
+          <span class="channel-unit">PSU</span>
+        </div>
+        <div class="demo-channel-card" data-channel="sla">
+          <div class="channel-icon">📏</div>
+          <h4>SLA</h4>
+          <span class="channel-source">DUACS Altimetry</span>
+          <p>Sea Level Anomaly — the dominant geometric indicator of subsurface thermocline displacement.</p>
+          <span class="channel-unit">m</span>
+        </div>
+        <div class="demo-channel-card" data-channel="u_cur">
+          <div class="channel-icon">➡️</div>
+          <h4>U-Current</h4>
+          <span class="channel-source">CMEMS Global PHY</span>
+          <p>Zonal geostrophic &amp; Ekman surface velocity component — encodes mesoscale eddy transport.</p>
+          <span class="channel-unit">m/s</span>
+        </div>
+        <div class="demo-channel-card" data-channel="v_cur">
+          <div class="channel-icon">⬆️</div>
+          <h4>V-Current</h4>
+          <span class="channel-source">CMEMS Global PHY</span>
+          <p>Meridional velocity component — captures coastal boundary currents and cross-equatorial flows.</p>
+          <span class="channel-unit">m/s</span>
+        </div>
+        <div class="demo-channel-card" data-channel="u_wind">
+          <div class="channel-icon">💨</div>
+          <h4>Wind U<sub>x</sub></h4>
+          <span class="channel-source">ERA5 Reanalysis</span>
+          <p>Zonal wind stress — drives Ekman divergence, mixed layer deepening, and coastal upwelling.</p>
+          <span class="channel-unit">m/s</span>
+        </div>
+        <div class="demo-channel-card" data-channel="v_wind">
+          <div class="channel-icon">💨</div>
+          <h4>Wind V<sub>y</sub></h4>
+          <span class="channel-source">ERA5 Reanalysis</span>
+          <p>Meridional wind stress — regulates monsoonal gyre circulation across the Arabian Sea.</p>
+          <span class="channel-unit">m/s</span>
+        </div>
+      </div>
+
+      <!-- Sample Datapoints Table -->
+      <div class="demo-datapoints-wrap reveal">
+        <div class="demo-dp-header">
+          <span class="section-kicker">10 SAMPLE DATAPOINTS</span>
+          <p>Real satellite surface values at specific North Indian Ocean locations used to showcase Halocline's predictions.</p>
+        </div>
+        <div class="demo-dp-table-scroll">
+          <table class="demo-dp-table" id="datapointsTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Location</th>
+                <th>Region</th>
+                <th>SST (°C)</th>
+                <th>SSS (PSU)</th>
+                <th>SLA (m)</th>
+                <th>U-Cur</th>
+                <th>V-Cur</th>
+                <th>W<sub>x</sub></th>
+                <th>W<sub>y</sub></th>
+              </tr>
+            </thead>
+            <tbody id="dpTableBody">
+              <!-- Filled by demo.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!--  SECTION B: ARCHITECTURE & FEATURES          -->
+    <!-- ============================================ -->
+    <section id="architecture" class="demo-section">
+      <div class="demo-section-header reveal">
+        <span class="demo-step-num">02</span>
+        <div>
+          <span class="section-kicker">NEURAL ARCHITECTURE</span>
+          <h2 class="section-title">From surface patches to continuous depth profiles</h2>
+          <p class="section-desc">Halocline is a two-stage neural field: a convolutional encoder compresses the surrounding ocean state, and a Fourier-featured depth decoder renders any queried depth as a smooth, physically consistent temperature curve with calibrated uncertainty.</p>
+        </div>
+      </div>
+
+      <!-- Pipeline Diagram -->
+      <div class="demo-pipeline reveal">
+        <div class="demo-pipe-stage" id="pipe-input">
+          <div class="pipe-badge">INPUT</div>
+          <div class="pipe-tensor">[B, 7, 32, 32]</div>
+          <h4>Surface Patch</h4>
+          <p>7 channels × 32×32 grid (~8° × 8°)</p>
+        </div>
+        <div class="demo-pipe-arrow"><span>→</span></div>
+        <div class="demo-pipe-stage" id="pipe-cond">
+          <div class="pipe-badge">CONDITIONING</div>
+          <div class="pipe-tensor">[B, 8]</div>
+          <h4>FiLM Vector</h4>
+          <p>lat/lon Fourier + day-of-year sin/cos</p>
+        </div>
+        <div class="demo-pipe-arrow"><span>→</span></div>
+        <div class="demo-pipe-stage highlight" id="pipe-encoder">
+          <div class="pipe-badge">ENCODER</div>
+          <div class="pipe-tensor">[B, 192]</div>
+          <h4>SurfaceEncoder</h4>
+          <p>ResBlocks + FiLM + Global/Centre Pooling</p>
+        </div>
+        <div class="demo-pipe-arrow"><span>→</span></div>
+        <div class="demo-pipe-stage highlight" id="pipe-decoder">
+          <div class="pipe-badge">DECODER</div>
+          <div class="pipe-tensor">[B, L, 2]</div>
+          <h4>DepthField</h4>
+          <p>Fourier features + FiLM trunk → T<sub>μ</sub>, T<sub>σ</sub></p>
+        </div>
+        <div class="demo-pipe-arrow"><span>→</span></div>
+        <div class="demo-pipe-stage" id="pipe-output">
+          <div class="pipe-badge">OUTPUT</div>
+          <div class="pipe-tensor">T(z), σ(z)</div>
+          <h4>Continuous Profile</h4>
+          <p>Temperature + calibrated uncertainty at any depth</p>
+        </div>
+      </div>
+
+      <!-- Key Design Decisions -->
+      <div class="demo-decisions-grid reveal">
+        <div class="demo-decision-card">
+          <div class="decision-icon">🎯</div>
+          <h4>Centre + Context Pooling</h4>
+          <p>Global average pooling is translation-invariant — an eddy at the edge contributes equally to one directly over the target. We concatenate centre features with pooled features so the model knows both "what is directly below" and "what is the surrounding field".</p>
+        </div>
+        <div class="demo-decision-card">
+          <div class="decision-icon">🌊</div>
+          <h4>Continuous Depth (Not 15 Heads)</h4>
+          <p>The decoder takes depth as a <strong>continuous input</strong> via Fourier features on log(1 + z/20). This produces smooth, differentiable curves — not 15 independent outputs that can disagree. Query any depth, including ones never seen in training.</p>
+        </div>
+        <div class="demo-decision-card">
+          <div class="decision-icon">📐</div>
+          <h4>CRPS Loss (Not MSE)</h4>
+          <p>The Continuous Ranked Probability Score is a <strong>strictly proper</strong> scoring rule: it rewards accuracy AND honesty. Claiming ±0.1°C and being wrong by 2°C is punished far harder than admitting ±2°C. Closed-form for Gaussians — no sampling needed.</p>
+        </div>
+        <div class="demo-decision-card">
+          <div class="decision-icon">🔄</div>
+          <h4>No Forced Monotonicity</h4>
+          <p>Standard models force T to decrease with depth. But winter Bay of Bengal inversions are real — fresh river runoff caps warmer subsurface water. Our smoothness penalty prevents jagged profiles without preventing valid inversions.</p>
+        </div>
+      </div>
+
+      <!-- Loss Function -->
+      <div class="demo-loss-card reveal">
+        <div class="loss-header">
+          <span class="section-kicker">PHYSICS-GUIDED LOSS</span>
+          <h3>Composite Training Objective</h3>
+        </div>
+        <div class="loss-equation">
+          <code>ℒ = CRPS(𝒩(μ, σ), y) + λ · ‖∂²T/∂z²‖²</code>
+        </div>
+        <div class="loss-terms">
+          <div class="loss-term">
+            <span class="term-badge crps">CRPS</span>
+            <span>Calibrated probabilistic fit — model can't fake confidence</span>
+          </div>
+          <div class="loss-term">
+            <span class="term-badge smooth">CURVATURE</span>
+            <span>Second derivative penalty — separates noise from real structure</span>
+          </div>
+          <div class="loss-term">
+            <span class="term-badge mask">MASK</span>
+            <span>Sea floor masking — depths below bathymetry never contribute gradients</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!--  SECTION C: INTERACTIVE INFERENCE CONSOLE    -->
+    <!-- ============================================ -->
+    <section id="model-output" class="demo-section">
+      <div class="demo-section-header reveal">
+        <span class="demo-step-num">03</span>
+        <div>
+          <span class="section-kicker">LIVE INFERENCE CONSOLE</span>
+          <h2 class="section-title">Feed satellite data to the model</h2>
+          <p class="section-desc">Select a set of real satellite observations, run it through the Halocline network in real-time, and watch it reconstruct the subsurface profile from the latent space.</p>
+        </div>
+      </div>
+
+      <div class="demo-inference-console reveal">
+        <!-- Left: Input Selection -->
+        <div class="console-input-panel">
+          <div class="panel-header">
+            <h3>1. Select Surface Inputs</h3>
+          </div>
+          
+          <select id="scenarioSelect" class="scenario-select">
+            <option value="" disabled selected>Choose an oceanographic scenario...</option>
+            <!-- Filled by demo.js -->
+          </select>
+
+          <div class="selected-inputs-grid" id="selectedInputs">
+            <!-- Filled by demo.js -->
+            <div class="empty-state">Select a scenario to load satellite telemetry.</div>
+          </div>
+
+          <button id="runInferenceBtn" class="run-inference-btn" disabled>
+            <span class="btn-text">Run Halocline Inference</span>
+            <span class="btn-loader"></span>
+          </button>
+        </div>
+
+        <!-- Right: Output & Processing -->
+        <div class="console-output-panel">
+          
+          <!-- Processing State (Hidden initially) -->
+          <div id="processingState" class="processing-state hidden">
+            <div class="processing-spinner"></div>
+            <h3 id="processingStep">Initializing Tensor...</h3>
+            <div class="processing-log">
+              <span id="log1"></span>
+              <span id="log2"></span>
+              <span id="log3"></span>
+            </div>
+          </div>
+
+          <!-- Result State (Hidden initially) -->
+          <div id="resultState" class="result-state hidden">
+            <div class="result-header">
+              <h3>2. Reconstructed Profile</h3>
+              <span class="result-coords" id="resultCoords"></span>
+            </div>
+            
+            <div class="station-chart-col">
+              <div class="chart-canvas-wrapper">
+                <canvas id="demoProfileChart"></canvas>
+              </div>
+              <div class="chart-legend-row">
+                <span class="legend-item"><span class="legend-line accent"></span> Prediction</span>
+                <span class="legend-item"><span class="legend-area band"></span> ±1σ Uncertainty</span>
+                <span class="legend-item"><span class="legend-dot argo"></span> ARGO Truth</span>
+              </div>
+            </div>
+
+            <div class="station-metrics-row">
+              <div class="station-metric">
+                <span class="metric-label">RMSE</span>
+                <strong id="stationRMSE">-</strong>
+              </div>
+              <div class="station-metric">
+                <span class="metric-label">R² Score</span>
+                <strong id="stationCorr">-</strong>
+              </div>
+              <div class="station-metric">
+                <span class="metric-label">Mean σ</span>
+                <strong id="stationSigma">-</strong>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Idle State -->
+          <div id="idleState" class="idle-state">
+            <div class="idle-icon">🛰️</div>
+            <p>Waiting for satellite inputs...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aggregate Metrics -->
+      <div class="demo-aggregate reveal">
+        <div class="agg-card">
+          <span class="panel-kicker">MEAN PROFILE RMSE</span>
+          <strong class="big-num" id="aggRMSE">0.37 °C</strong>
+          <p>Averaged across all 10 stations and 15 depths</p>
+        </div>
+        <div class="agg-card">
+          <span class="panel-kicker">MEAN CORRELATION</span>
+          <strong class="big-num teal" id="aggCorr">0.981</strong>
+          <p>Pearson r between predicted and observed T(z)</p>
+        </div>
+        <div class="agg-card">
+          <span class="panel-kicker">BASELINE COMPARISON</span>
+          <strong class="big-num" id="aggSkill">+84%</strong>
+          <p>Skill score improvement over WOA18 climatology</p>
+        </div>
+        <div class="agg-card">
+          <span class="panel-kicker">MODEL SIZE</span>
+          <strong class="big-num">~550K</strong>
+          <p>Total parameters — fits on any edge CPU device</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!--  SECTION D: REAL-WORLD IMPACT                -->
+    <!-- ============================================ -->
+    <section id="impact" class="demo-section demo-impact-section">
+      <div class="demo-section-header reveal">
+        <span class="demo-step-num">04</span>
+        <div>
+          <span class="section-kicker">REAL-WORLD IMPACT · DISASTER MANAGEMENT</span>
+          <h2 class="section-title">Subsurface intelligence saves lives</h2>
+          <p class="section-desc">Surface temperature alone cannot predict cyclone intensity — the heat that fuels storms is hidden below. Halocline exposes this invisible fuel reservoir in real-time, enabling earlier and more accurate disaster warnings.</p>
+        </div>
+      </div>
+
+      <!-- Amphan Case Study -->
+      <div class="demo-case-study reveal">
+        <div class="case-header">
+          <div class="case-badge">CASE STUDY</div>
+          <h3>Super Cyclone Amphan · Bay of Bengal · May 2020</h3>
+          <p>SST along the track was nearly uniform (30–31°C). All surface-based systems saw the same thing. But beneath the surface, Halocline reveals a <strong>104-metre deep warm pool</strong> with TCHP exceeding 92 kJ/cm² — the hidden fuel that powered Amphan's explosive intensification from Category 1 to Super Cyclone in under 18 hours.</p>
+        </div>
+        <div class="case-stats-grid">
+          <div class="case-stat">
+            <strong>92</strong>
+            <span class="stat-unit">kJ/cm²</span>
+            <span>Peak TCHP</span>
+          </div>
+          <div class="case-stat">
+            <strong>104</strong>
+            <span class="stat-unit">m</span>
+            <span>D26 Depth</span>
+          </div>
+          <div class="case-stat">
+            <strong>Cat 5</strong>
+            <span class="stat-unit">Super Cyclone</span>
+            <span>Peak Intensity</span>
+          </div>
+          <div class="case-stat">
+            <strong>240</strong>
+            <span class="stat-unit">km/h</span>
+            <span>Max Sustained Wind</span>
+          </div>
+          <div class="case-stat">
+            <strong>128</strong>
+            <span class="stat-unit">lives lost</span>
+            <span>Human Cost</span>
+          </div>
+          <div class="case-stat">
+            <strong>₹1.5L Cr</strong>
+            <span class="stat-unit">damage</span>
+            <span>Economic Impact</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Impact Cards -->
+      <div class="demo-impact-grid reveal">
+        <div class="impact-card cyclone">
+          <div class="impact-icon">🌀</div>
+          <h4>Cyclone Early Warning</h4>
+          <p>TCHP maps from Halocline identify rapid intensification zones <strong>48 hours before landfall</strong>. When TCHP exceeds 75 kJ/cm², the probability of explosive deepening rises sharply — a signal invisible to SST-only systems.</p>
+          <div class="impact-metric">
+            <span>Detection Lead Time</span>
+            <strong>+48 hours</strong>
+          </div>
+        </div>
+        <div class="impact-card fishery">
+          <div class="impact-icon">🐟</div>
+          <h4>Fishery Zone Targeting</h4>
+          <p>Pelagic fish congregate along the thermocline where nutrients meet warm water. Real-time thermocline depth targeting guides fleets to optimal net depths, <strong>cutting fuel costs by ~30%</strong> for INCOIS PFZ advisories.</p>
+          <div class="impact-metric">
+            <span>Fuel Cost Reduction</span>
+            <strong>~30%</strong>
+          </div>
+        </div>
+        <div class="impact-card naval">
+          <div class="impact-icon">🛡️</div>
+          <h4>Naval ASW Operations</h4>
+          <p>Sound velocity profiles computed from Halocline outputs identify acoustic shadow zones where sonar cannot reach. The Sonic Layer Depth determines submarine detection capability — <strong>critical for Indian Navy operations</strong>.</p>
+          <div class="impact-metric">
+            <span>Shadow Zone Detection</span>
+            <strong>50–180 m</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Final CTA -->
+      <div class="demo-final-cta reveal">
+        <h2>The ocean's most dangerous heat is invisible from space.</h2>
+        <p>Halocline makes it visible — in real-time, on any device, with honest uncertainty.</p>
+        <div class="demo-cta-actions">
+          <a href="dashboard.html" class="demo-cta-btn primary">Explore the Dashboard →</a>
+          <a href="technical.html" class="demo-cta-btn secondary">Read the Method</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-content">
+      <span class="footer-brand">HALOCLINE · SIH26066 · SMART INDIA HACKATHON 2026</span>
+      <span class="footer-info">Ministry of Earth Sciences (MoES) · INCOIS Ocean Valley · Disaster Management Theme</span>
+      <span class="footer-integrity">Domain: 5°N–30°N, 45°E–105°E · Continuous Depth · GLORYS12V1 &amp; INCOIS ARGO Ground Truth</span>
+    </div>
+  </footer>
+
+  <script src="demo.js"></script>
+</body>
+</html>
