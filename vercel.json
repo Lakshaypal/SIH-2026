@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "buildCommand": "",
+  "outputDirectory": ".",
+  "rewrites": [
+    { "source": "/api/status", "destination": "/api/status.mjs" },
+    { "source": "/api/vessels", "destination": "/api/vessels.mjs" },
+    { "source": "/api/vessels/history", "destination": "/api/vessels-history.mjs" },
+    { "source": "/api/ais/stream", "destination": "/api/ais-stream.mjs" },
+    { "source": "/tiles/carto/:z/:x/:y.png", "destination": "/api/carto-tile.mjs" }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+      ]
+    },
+    {
+      "source": "/tiles/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=86400" }
+      ]
+    }
+  ]
+}
