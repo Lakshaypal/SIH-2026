@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Halocline | Seeing Beneath the Surface</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            abyssal: '#020b18',
+          },
+          fontFamily: {
+            inter: ['Inter', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+    <!-- GSAP for smooth scroll animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body class="bg-stone-50 text-slate-900 font-inter overflow-x-hidden">
+
+  <!-- Ambient Warm Background -->
+  <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+    <!-- Soft warm gradient orbs -->
+    <div class="absolute -top-[20%] -left-[10%] w-[70vw] h-[70vw] rounded-full bg-gradient-to-br from-orange-100/60 to-amber-50/20 blur-[120px] mix-blend-multiply animate-[spin_60s_linear_infinite]"></div>
+    <div class="absolute top-[30%] -right-[20%] w-[60vw] h-[60vw] rounded-full bg-gradient-to-tl from-yellow-100/50 to-orange-50/10 blur-[100px] mix-blend-multiply animate-[spin_40s_linear_infinite_reverse]"></div>
+    <div class="absolute -bottom-[30%] left-[10%] w-[80vw] h-[80vw] rounded-full bg-gradient-to-tr from-amber-100/40 to-rose-50/20 blur-[150px] mix-blend-multiply animate-[spin_80s_linear_infinite]"></div>
+    
+    <!-- Subtle grid overlay for texture -->
+    <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+    
+    <!-- Vignette -->
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(250,250,249,0.5)_100%)]"></div>
+  </div>
+
+  <!-- Navigation -->
+  <header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md shadow-sm transition-all duration-500 ease-in-out border-b border-slate-300 transition-all duration-300" id="mainNav">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="relative flex items-center justify-center w-8 h-8 rounded-full border border-blue-300 bg-blue-100">
+          <div class="w-2.5 h-2.5 rounded-full bg-cyan-400 "></div>
+        </div>
+        <span class="font-mono font-bold tracking-widest text-lg text-slate-900 group-hover:text-blue-600 transition-colors">HALOCLINE</span>
+      </a>
+      
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
+        <a href="#technology" class="hover:text-slate-900 transition-colors">Technology</a>
+        <a href="technical.html" class="hover:text-slate-900 transition-colors">Architecture</a>
+        <a href="dashboard.html" class="hover:text-slate-900 transition-colors">Dashboard</a>
+        <a href="demo.html" class="hover:text-slate-900 transition-colors">Live Console</a>
+      </nav>
+
+      <a href="demo.html" class="hidden md:inline-flex h-10 items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-slate-900 transition-all hover:bg-cyan-400 hover:text-slate-900 hover:shadow-md">
+        Launch Interactive Demo
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="relative z-10 min-h-screen flex flex-col justify-center items-center text-center px-4 pt-20" id="hero">
+    <div class="max-w-4xl mx-auto">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/30 bg-blue-100 text-blue-600 font-mono text-xs font-bold tracking-wider mb-8">
+        <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+        INCOIS / MINISTRY OF EARTH SCIENCES
+      </div>
+      
+      <h1 class="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 mb-6 leading-[1.1]">
+        Reconstructing the Ocean’s <br/>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">3D Invisible Architecture</span> <br/>
+        in Real-Time.
+      </h1>
+      
+      <p class="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed">
+        Replacing slow supercomputer numerical models with physics-guided neural depth fields for instant subsurface forecasting and anomaly detection.
+      </p>
+      
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="demo.html" class="h-12 inline-flex items-center justify-center rounded-full bg-blue-500 px-8 text-sm font-bold text-slate-900 transition-all hover:bg-cyan-400 hover:scale-105 hover:shadow-lg">
+          Explore Live 3D Model
+        </a>
+        <a href="technical.html" class="h-12 inline-flex items-center justify-center rounded-full border border-slate-300 bg-slate-100 px-8 text-sm font-semibold text-slate-900 transition-all hover:bg-slate-200 hover:border-slate-500">
+          View Technical Specs
+        </a>
+      </div>
+    </div>
+    
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce opacity-50">
+      <span class="text-xs font-mono text-slate-600 mb-2">DESCEND TO DEPTH</span>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+    </div>
+  </section>
+
+  <!-- Interactive Depth Explorer -->
+  <section class="relative z-10 py-32 px-6" id="technology">
+    <div class="max-w-7xl mx-auto">
+      <div class="mb-16">
+        <h2 class="text-3xl md:text-5xl font-bold text-slate-900 mb-4">Interactive Depth Explorer</h2>
+        <p class="text-slate-600 max-w-2xl text-lg">Translate surface telemetry directly into deep-water thermodynamic curves using continuous neural functions.</p>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-8 items-stretch">
+        
+        <!-- Left: Controls -->
+        <div class="bg-white/70 shadow-sm transition-all duration-500 ease-in-out hover:shadow-md p-8 rounded-3xl border border-slate-300 flex flex-col justify-between">
+          <div>
+            <h3 class="font-mono text-blue-600 text-sm font-bold tracking-widest mb-6">1. SURFACE TELEMETRY INGESTION</h3>
+            
+            <div class="flex gap-4 mb-10">
+              <button class="flex-1 py-3 px-4 rounded-xl border border-cyan-500/50 bg-blue-100 text-cyan-300 font-mono text-sm font-bold transition-all">SST Grid</button>
+              <button class="flex-1 py-3 px-4 rounded-xl border border-slate-300 bg-slate-100 text-slate-600 font-mono text-sm hover:border-slate-500 transition-all">SSS Grid</button>
+              <button class="flex-1 py-3 px-4 rounded-xl border border-slate-300 bg-slate-100 text-slate-600 font-mono text-sm hover:border-slate-500 transition-all">SLA Grid</button>
+            </div>
+            
+            <h3 class="font-mono text-blue-600 text-sm font-bold tracking-widest mb-6">2. PROBE DEPTH COORDINATE (z)</h3>
+            
+            <div class="mb-4 flex justify-between text-slate-600 font-mono text-sm">
+              <span>Surface (0m)</span>
+              <span>Abyss (2000m)</span>
+            </div>
+            <input type="range" id="depthSlider" min="0" max="2000" value="450" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+            <div class="mt-8 p-4 rounded-xl bg-slate-100 border border-slate-300 flex items-center justify-between">
+              <span class="text-slate-600 text-sm">Target Depth:</span>
+              <span class="font-mono text-2xl text-slate-900 font-bold" id="depthDisplay">450.0m</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Graph Visualization -->
+        <div class="bg-white/70 shadow-sm transition-all duration-500 ease-in-out hover:shadow-md p-8 rounded-3xl border border-slate-300 relative overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-b from-blue-500/5 to-transparent"></div>
+          <h3 class="font-mono text-blue-600 text-sm font-bold tracking-widest mb-6 relative z-10">3. PREDICTED THERMODYNAMIC STATE</h3>
+          
+          <div class="flex justify-between items-end mb-8 relative z-10">
+            <div>
+              <span class="block text-slate-600 text-sm mb-1">Predicted Temp (μ)</span>
+              <span class="font-mono text-5xl text-slate-900 font-bold tracking-tight" id="tempDisplay">12.4°C</span>
+            </div>
+            <div class="text-right">
+              <span class="block text-slate-600 text-sm mb-1">Confidence (±1σ)</span>
+              <span class="font-mono text-2xl text-blue-600 font-bold tracking-tight" id="sigmaDisplay">±0.18°C</span>
+            </div>
+          </div>
+
+          <div class="relative w-full h-64 border-l border-b border-slate-300">
+            <!-- Mock graph canvas -->
+            <canvas id="miniProfileCanvas" class="absolute inset-0 w-full h-full"></canvas>
+            
+            <!-- Depth indicator line -->
+            <div id="depthIndicator" class="absolute left-0 right-0 border-t border-dashed border-cyan-400/50 transition-all duration-100" style="top: 22.5%;">
+              <div class="absolute right-0 -translate-y-1/2 translate-x-full pl-2 font-mono text-xs text-blue-600">z</div>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </section>
+
+  <!-- Technical Architecture (Bento Box) -->
+  <section class="relative z-10 py-24 px-6 bg-slate-100/50" id="architecture">
+    <div class="max-w-7xl mx-auto">
+      <div class="mb-16 text-center">
+        <h2 class="text-3xl md:text-5xl font-bold text-slate-900 mb-4">Architecture Blueprint</h2>
+        <p class="text-slate-600 max-w-2xl mx-auto text-lg">Every architectural decision engineered for thermodynamic precision.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[280px]">
+        
+        <!-- Bento 1 -->
+        <div class="bento-card col-span-1 md:col-span-2 bg-white/70 shadow-sm transition-all duration-500 ease-in-out hover:shadow-md p-8 rounded-3xl border border-slate-300 relative overflow-hidden group">
+          <div class="absolute -right-20 -top-20 w-64 h-64 bg-blue-100 rounded-full blur-3xl group-hover:bg-blue-100 transition-all"></div>
+          <div class="relative z-10 h-full flex flex-col justify-end">
+            <h3 class="font-mono text-blue-600 text-sm font-bold tracking-widest mb-3">01. SPATIOTEMPORAL CONDITIONING</h3>
+            <h4 class="text-2xl font-bold text-slate-900 mb-2">FiLM Modulation Layer</h4>
+            <p class="text-slate-600 text-sm max-w-md">Oceanography is seasonal. By injecting Day of Year and geographic coordinates directly into the residual network layers, we dynamically scale feature maps based on exact spacetime context.</p>
+          </div>
+        </div>
+
+        <!-- Bento 2 -->
+        <div class="bento-card col-span-1 bg-white/70 shadow-sm transition-all duration-500 ease-in-out hover:shadow-md p-8 rounded-3xl border border-slate-300 flex flex-col justify-end group">
+          <h3 class="font-mono text-blue-600 text-sm font-bold tracking-widest mb-3">02. LATENT SPACE</h3>
+          <h4 class="text-xl font-bold text-slate-900 mb-2">Surface Encoder</h4>
+          <p class="text-slate-600 text-sm">ResNet-50 variant compressing 32x32x7 satellite patches into a dense 256-D latent state.</p>
+        </div>
+
+        <!-- Bento 3 -->
+        <div class="bento-card col-span-1 bg-white/70 shadow-sm transition-all duration-500 ease-in-out hover:shadow-md p-8 rounded-3xl border border-slate-300 flex flex-col justify-end group">
+          <h3 class="font-mono text-purple-600 text-sm font-bold tracking-widest mb-3">03. LOSS FUNCTION</h3>
+          <h4 class="text-xl font-bold text-slate-900 mb-2">Gaussian CRPS</h4>
+          <p class="text-slate-600 text-sm">Replacing deterministic MSE with Continuous Ranked Probability Score for robust uncertainty quantification.</p>
+        </div>
+
+        <!-- Bento 4 -->
+        <div class="bento-card col-span-1 md:col-span-2 bg-white/70 shadow-sm transition-all duration-500 ease-in-out hover:shadow-md p-8 rounded-3xl border border-slate-300 relative overflow-hidden group">
+          <div class="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-blue-100 via-stone-50 to-transparent"></div>
+          <div class="relative z-10 h-full flex flex-col justify-end">
+            <h3 class="font-mono text-blue-600 text-sm font-bold tracking-widest mb-3">04. RESOLUTION</h3>
+            <h4 class="text-2xl font-bold text-slate-900 mb-2">Continuous Depth Field (SIREN)</h4>
+            <p class="text-slate-600 text-sm max-w-md">Eliminating fixed grid restrictions. Fourier Feature encoding allows the model to predict thermodynamic values at any continuous vertical coordinate, capturing ultra-sharp thermoclines.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Real World Impact -->
+  <section class="relative z-10 py-32 px-6" id="impact">
+    <div class="max-w-7xl mx-auto">
+      <div class="mb-16">
+        <h2 class="text-3xl md:text-5xl font-bold text-slate-900 mb-4">Mission Impact</h2>
+        <p class="text-slate-600 max-w-2xl text-lg">Deployed capabilities for national security and disaster management.</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        
+        <div class="bg-white/70 shadow-sm transition-all duration-500 ease-in-out hover:shadow-md p-8 rounded-2xl border border-slate-300 hover:border-orange-500/30 transition-all hover:-translate-y-2">
+          <div class="w-12 h-12 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-400 mb-6 border border-orange-500/20">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 mb-3">Cyclone Forecasting</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">Predicting Bay of Bengal barrier layers and Ocean Heat Content (OHC) to forecast rapid storm category jumps 24 hours earlier than SST-only models.</p>
+        </div>
+
+        <div class="bg-white/70 shadow-sm transition-all duration-500 ease-in-out hover:shadow-md p-8 rounded-2xl border border-slate-300 hover:border-blue-500/30 transition-all hover:-translate-y-2">
+          <div class="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600 mb-6 border border-blue-500/20">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 mb-3">Naval Defense</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">Instant mapping of acoustic shadow-zones below the thermocline. Grants decisive tactical stealth for submarines without deploying active physical buoys.</p>
+        </div>
+
+        <div class="bg-white/70 shadow-sm transition-all duration-500 ease-in-out hover:shadow-md p-8 rounded-2xl border border-slate-300 hover:border-emerald-500/30 transition-all hover:-translate-y-2">
+          <div class="w-12 h-12 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 mb-6 border border-emerald-500/20">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M12 2v20"/></svg>
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 mb-3">Fisheries & Economics</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">Tracking upwelling fronts for hyper-targeted Potential Fishing Zone (PFZ) advisories, maximizing yield and reducing vessel fuel consumption by 15-20%.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="relative z-10 border-t border-slate-300 bg-slate-100 pt-16 pb-8 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+      <div class="flex items-center gap-3">
+        <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+        <span class="font-mono text-xs text-slate-600">All neural inference nodes operational</span>
+      </div>
+      
+      <div class="flex items-center gap-6 font-mono text-xs text-slate-500">
+        <a href="technical.html" class="hover:text-blue-600 transition-colors">Documentation</a>
+        <a href="demo.html" class="hover:text-blue-600 transition-colors">Console</a>
+        <span>© 2026 INCOIS SIH-2026. All rights reserved.</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // 1. Scroll-triggered animations for elements (using GSAP instead of Framer Motion for Vanilla JS)
+    gsap.registerPlugin(ScrollTrigger);
+
+    gsap.from(".hero-title, .hero-subtitle, .hero-cta", {
+      y: 30, opacity: 0, duration: 1, stagger: 0.2, ease: "power3.out", delay: 0.2
+    });
+
+    gsap.utils.toArray('.bento-card, .bg-white/70 shadow-sm transition-all duration-500 ease-in-out hover:shadow-md').forEach(card => {
+      gsap.from(card, {
+        scrollTrigger: { trigger: card, start: "top 85%" },
+        y: 40, opacity: 0, duration: 0.8, ease: "power3.out"
+      });
+    });
+
+    // 2. Interactive Depth Explorer Logic
+    const slider = document.getElementById('depthSlider');
+    const depthDisplay = document.getElementById('depthDisplay');
+    const tempDisplay = document.getElementById('tempDisplay');
+    const sigmaDisplay = document.getElementById('sigmaDisplay');
+    const depthIndicator = document.getElementById('depthIndicator');
+    const canvas = document.getElementById('miniProfileCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Resize canvas
+    function resizeCanvas() {
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+      drawCurve();
+    }
+    window.addEventListener('resize', resizeCanvas);
+    
+    function getTemperatureAtDepth(z) {
+      // Mock thermocline profile equation
+      const surfaceT = 28.5;
+      const deepT = 4.0;
+      const thermoclineDepth = 120;
+      const steepness = 0.02;
+      return deepT + (surfaceT - deepT) / (1 + Math.exp(steepness * (z - thermoclineDepth)));
+    }
+
+    function getSigmaAtDepth(z) {
+      // Uncertainty peaks around thermocline
+      const peakZ = 120;
+      return 0.1 + 0.5 * Math.exp(-Math.pow((z - peakZ)/50, 2));
+    }
+
+    function drawCurve() {
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      
+      const maxZ = 2000;
+      const maxT = 32;
+      
+      // Draw Grid
+      ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+      ctx.lineWidth = 1;
+      for(let i=1; i<5; i++) {
+        ctx.beginPath(); ctx.moveTo(w*(i/5), 0); ctx.lineTo(w*(i/5), h); ctx.stroke();
+      }
+
+      // Draw Curve
+      ctx.beginPath();
+      ctx.strokeStyle = '#22d3ee'; // cyan-400
+      ctx.lineWidth = 3;
+      
+      for(let z=0; z<=maxZ; z+=10) {
+        const t = getTemperatureAtDepth(z);
+        const x = (t / maxT) * w;
+        const y = (z / maxZ) * h;
+        if(z===0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    slider.addEventListener('input', (e) => {
+      const z = parseFloat(e.target.value);
+      depthDisplay.textContent = z.toFixed(1) + 'm';
+      
+      const t = getTemperatureAtDepth(z);
+      const s = getSigmaAtDepth(z);
+      
+      tempDisplay.textContent = t.toFixed(1) + '°C';
+      sigmaDisplay.textContent = '±' + s.toFixed(2) + '°C';
+      
+      const percent = (z / 2000) * 100;
+      depthIndicator.style.top = `${percent}%`;
+    });
+
+        
+    // Init canvas drawing
+    setTimeout(resizeCanvas, 100);
+  </script>
+</body>
+</html>
