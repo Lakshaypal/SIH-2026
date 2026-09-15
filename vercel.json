@@ -1,3 +1,23 @@
 {
-  "framework": "nextjs"
+  "version": 2,
+  "builds": [
+    { "src": "api/**/*.js", "use": "@vercel/node" },
+    { "src": "**/*.{html,css,js,png,pdf,docx,txt,mjs,json}", "use": "@vercel/static" }
+  ],
+  "rewrites": [
+    { "source": "/api/status", "destination": "/api/status.js" },
+    { "source": "/api/vessels", "destination": "/api/vessels.js" },
+    { "source": "/api/vessels/history", "destination": "/api/vessels-history.js" },
+    { "source": "/tiles/carto/:z/:x/:y.png", "destination": "/api/carto-tile.js" }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+      ]
+    }
+  ]
 }

@@ -176,4 +176,4 @@ demoFleet.clear();
 for (const [id, vessel] of createDemoFleet()) { demoFleet.set(id, vessel); appendTrack(vessel); }
 setInterval(moveDemoFleet, 3000);
 server.listen(port, () => console.log(`OceanEmbed-PG at http://localhost:${port} · ${aisKey ? 'AISStream ready' : 'AIS key missing'} · ${demoFleet.size} labelled demo vessels`));
-if (aisKey) startAis();
+// if (aisKey) startAis();

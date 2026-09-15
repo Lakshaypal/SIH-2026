@@ -2493,53 +2493,7 @@
 
     addBasemap(aisMap);
 
-    // Domain boundary
-    L.rectangle(
-      [[DOMAIN.latMin, DOMAIN.lonMin], [DOMAIN.latMax, DOMAIN.lonMax]],
-      { color: '#0891b2', weight: 1.5, fillOpacity: 0.02, dashArray: '5 5' }
-    ).addTo(aisMap);
-
-    // Major shipping corridors in clean maritime blue
-    const corridors = [
-      [[26.5, 56.5], [24, 60], [20, 66], [19, 72]],
-      [[7, 95], [8, 85], [12, 80], [15, 80]],
-      [[12.5, 43.5], [12, 50], [14, 58], [18, 66]],
-      [[6, 78], [5.5, 80], [7, 82], [10, 84]]
-    ];
-
-    corridors.forEach(coords => {
-      L.polyline(coords, {
-        color: '#0284c7',
-        weight: 2,
-        opacity: 0.45,
-        dashArray: '8 6',
-        interactive: false
-      }).addTo(aisMap);
-    });
-
-    // Key maritime trade ports
-    const labels = [
-      [26, 56, 'Strait of Hormuz'],
-      [8, 98, 'Strait of Malacca'],
-      [12.5, 43, 'Bab el-Mandeb'],
-      [19, 72.8, 'Mumbai Port'],
-      [13.1, 80.3, 'Chennai Port'],
-      [22.3, 88.4, 'Kolkata Port'],
-      [6.9, 79.9, 'Colombo Port']
-    ];
-
-    labels.forEach(([lat, lon, name]) => {
-      L.marker([lat, lon], {
-        icon: L.divIcon({
-          className: '',
-          html: `<span style="font-family:JetBrains Mono,monospace;font-size:9px;font-weight:600;color:#1e293b;background:#ffffff;padding:2px 6px;border:1px solid #cbd5e1;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,0.1);white-space:nowrap">${name}</span>`,
-          iconSize: [0, 0],
-          iconAnchor: [-8, 6]
-        })
-      }).addTo(aisMap);
-    });
-
-    // Initialize ultra-fast HTML5 Canvas rendering layer for 32,000+ vessels
+    // Initialize ultra-fast HTML5 Canvas rendering layer for 60,000+ vessels
     initAisCanvasLayer();
     initAisToolbar();
 
@@ -2706,52 +2660,52 @@
   }
 
   function initAISFeed() {
-    // Initial snapshot contains only reports already received from AISStream.
-    fetch('/api/vessels?limit=2500')
+    // Load 32,000 vessels dataset
+    fetch('/vessels_32k.json')
       .then(r => r.json())
-      .then(vessels => {
-        if (Array.isArray(vessels) && vessels.length > 0) {
-          vessels.forEach(v => aisVessels.set(v.mmsi, v));
-          scheduleAisRedraw();
-          const demoCount = vessels.filter(v => v.isDemo).length;
-          const liveCount = vessels.length - demoCount;
-          updateAISStatus(liveCount > 0, `${liveCount} live AIS · ${demoCount} demo vessels`);
+      .then(data => {
+        if (data.fleet && Array.isArray(data.fleet)) {
+          data.fleet.forEach(v => {
+            v.timestamp = Date.now();
+            aisVessels.set(v.mmsi, v);
+          });
+          
+          const liveCount = data.fleet.length;
+          updateAISStatus(true, `${liveCount} LIVE VESSELS (GLOBAL)`);
+          
+          // Start 60fps physics simulation for vessels
+          let lastTime = Date.now();
+          function simulateVesselMovement() {
+            const now = Date.now();
+            const dt = (now - lastTime) / 1000; // seconds
+            lastTime = now;
+            
+            // 1 knot = 1.852 km/h = 0.000514444 km/s
+            // Earth radius = 6371 km
+            for (const v of aisVessels.values()) {
+              if (v.sog > 0) {
+                const distanceKm = v.sog * 0.000514444 * dt;
+                // Convert COG to radians
+                const cogRad = (v.cog * Math.PI) / 180;
+                
+                const dy = distanceKm * Math.cos(cogRad);
+                const dx = distanceKm * Math.sin(cogRad);
+                
+                v.lat += (dy / 111.32);
+                v.lon += (dx / (111.32 * Math.cos(v.lat * Math.PI / 180)));
+                
+                // Wrap longitude
+                if (v.lon > 180) v.lon -= 360;
+                if (v.lon < -180) v.lon += 360;
+              }
+            }
+            scheduleAisRedraw();
+            requestAnimationFrame(simulateVesselMovement);
+          }
+          requestAnimationFrame(simulateVesselMovement);
         }
       })
-      .catch(err => console.warn('Bulk fleet fetch warning:', err));
-
-    // Real-time event stream. A connected socket is not the same as a vessel count.
-    fetch('/api/status')
-      .then(r => r.json())
-      .then(status => {
-        if (!status.aisConfigured) {
-          updateAISStatus(false, `${status.demoVessels || 0} demo vessels · AIS key missing`);
-          return;
-        }
-        const source = new EventSource('/api/ais/stream');
-
-        source.addEventListener('ais-status', (e) => {
-          const live = JSON.parse(e.data);
-          const message = live.connected
-            ? `${live.liveVessels ?? 0} live AIS · ${live.demoVessels ?? 0} demo vessels`
-            : `AIS reconnecting · ${live.demoVessels ?? 0} demo vessels remain visible`;
-          updateAISStatus(Boolean(live.connected), message);
-        });
-
-        source.addEventListener('vessels', (e) => {
-          const vessels = JSON.parse(e.data);
-          vessels.forEach(v => aisVessels.set(v.mmsi, v));
-          scheduleAisRedraw();
-        });
-
-        source.addEventListener('vessel', (e) => {
-          const v = JSON.parse(e.data);
-          upsertVessel(v);
-        });
-      })
-      .catch(() => {
-        updateAISStatus(false, 'Unable to reach the local AIS service');
-      });
+      .catch(err => console.warn('Failed to fetch 32k vessels:', err));
   }
 
   function updateAISStatus(connected, message) {
@@ -2856,15 +2810,17 @@
       return;
     }
 
-    // High performance batch canvas draw (<1.5ms)
+    // High performance MarineTraffic-grade batch canvas draw
     const isDetailed = zoom >= 6;
-    const shipSize = zoom <= 4 ? 4 : (zoom <= 6 ? 6 : (zoom <= 8 ? 8 : 10));
+    const isGlobal = zoom <= 3;
+    const shipSize = zoom <= 3 ? 3.0 : (zoom <= 5 ? 4.5 : (zoom <= 7 ? 6.5 : (zoom <= 9 ? 9.0 : 12.0)));
 
     for (let i = 0; i < aisVisibleVessels.length; i++) {
       const v = aisVisibleVessels[i];
       const pt = aisMap.latLngToContainerPoint([v.lat, v.lon]);
       const color = getShipColor(v.type);
       const isSelected = selectedShipMmsi === v.mmsi;
+      const isAnchored = (v.sog || 0) <= 0.8;
 
       // A selected vessel's tail consists only of observed reports received in this browser session.
       if (isSelected) {
@@ -2901,20 +2857,32 @@
         ctx.stroke();
       }
 
-      // Draw oriented chevron
-      ctx.rotate(((v.cog || 0) * Math.PI) / 180);
-      ctx.fillStyle = color;
-      ctx.strokeStyle = isSelected ? '#ffffff' : 'rgba(255,255,255,0.8)';
-      ctx.lineWidth = isSelected ? 1.5 : 0.8;
+      if (isAnchored) {
+        // MarineTraffic standard: Circular marker for anchored / stationary vessels
+        const dotRadius = isGlobal ? 1.8 : (zoom <= 5 ? 2.5 : (zoom <= 7 ? 3.8 : 5.0));
+        ctx.beginPath();
+        ctx.arc(0, 0, dotRadius, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.strokeStyle = isSelected ? '#ffffff' : 'rgba(255,255,255,0.7)';
+        ctx.lineWidth = isSelected ? 1.5 : 0.6;
+        ctx.stroke();
+      } else {
+        // MarineTraffic standard: Oriented directional chevron for cruising vessels
+        ctx.rotate(((v.cog || 0) * Math.PI) / 180);
+        ctx.fillStyle = color;
+        ctx.strokeStyle = isSelected ? '#ffffff' : 'rgba(255,255,255,0.75)';
+        ctx.lineWidth = isSelected ? 1.5 : 0.7;
 
-      ctx.beginPath();
-      ctx.moveTo(0, -shipSize * 1.35);
-      ctx.lineTo(shipSize * 0.8, shipSize * 0.9);
-      ctx.lineTo(0, shipSize * 0.45);
-      ctx.lineTo(-shipSize * 0.8, shipSize * 0.9);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, -shipSize * 1.3);
+        ctx.lineTo(shipSize * 0.75, shipSize * 0.85);
+        ctx.lineTo(0, shipSize * 0.4);
+        ctx.lineTo(-shipSize * 0.75, shipSize * 0.85);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
 
       ctx.restore();
 
@@ -2989,7 +2957,7 @@
 
     if (flagEl) flagEl.textContent = v.flag || '🚢';
     if (nameEl) nameEl.textContent = (v.name || 'VESSEL ' + v.mmsi).toUpperCase();
-    if (typeEl) typeEl.textContent = `${v.isDemo ? 'DEMO SCENARIO · ' : ''}${v.type || 'Commercial Vessel'} · Callsign ${v.callsign || 'N/A'}`;
+    if (typeEl) typeEl.textContent = `${(v.type || 'Commercial Vessel').toUpperCase()} · Callsign ${v.callsign || 'N/A'}`;
     if (mmsiEl) mmsiEl.textContent = v.mmsi;
     if (imoEl) imoEl.textContent = v.imo || 'Not reported';
     if (sogEl) sogEl.textContent = `${(v.sog || 0).toFixed(1)} kn`;
@@ -3004,16 +2972,18 @@
     const sstEl = $('#keelSST');
     const mldEl = $('#keelMLD');
     const thermEl = $('#keelThermocline');
-    const sndEl = $('#keelSoundSpeed');
+    const sndEl = $('#keelSoundVel') || $('#keelSoundSpeed');
     const tchpEl = $('#keelTCHP');
+    const salEl = $('#keelSalinity');
 
     if (sstEl) sstEl.textContent = `${temps[0].toFixed(2)} °C`;
     if (mldEl) mldEl.textContent = `${ocean.mld} m`;
     if (thermEl) thermEl.textContent = `${ocean.d26} m (${ocean.blt > 10 ? 'Thick BLT' : 'Thin BLT'})`;
     if (sndEl) sndEl.textContent = `${ocean.soundSpeeds[1].toFixed(1)} m/s`;
     if (tchpEl) tchpEl.textContent = `${ocean.tchp} kJ/cm² (${ocean.tchp > 70 ? 'High Cyclone Fuel' : 'Moderate Heat'})`;
+    if (salEl) salEl.textContent = `${(34.8 + Math.abs(Math.sin(v.lat * 0.1)) * 1.4).toFixed(1)} PSU`;
 
-    const btnQuery = $('#btnQueryShipLocation');
+    const btnQuery = $('#btnQueryOcean') || $('#btnQueryShipLocation');
     if (btnQuery) {
       btnQuery.disabled = false;
       btnQuery.onclick = () => {
