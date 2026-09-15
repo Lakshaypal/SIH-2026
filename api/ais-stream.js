@@ -1,4 +1,4 @@
-import { createDemoFleet } from './_shared.mjs';
+import { createDemoFleet } from './_shared.js';
 
 export default function handler(req, res) {
   // SSE (Server-Sent Events) is not natively supported in Vercel serverless.

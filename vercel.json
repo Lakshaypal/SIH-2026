@@ -1,13 +1,15 @@
 {
   "version": 2,
-  "buildCommand": "",
-  "outputDirectory": ".",
+  "builds": [
+    { "src": "api/**/*.js", "use": "@vercel/node" },
+    { "src": "**/*.{html,css,js,png,pdf,docx,txt}", "use": "@vercel/static" }
+  ],
   "rewrites": [
-    { "source": "/api/status", "destination": "/api/status.mjs" },
-    { "source": "/api/vessels", "destination": "/api/vessels.mjs" },
-    { "source": "/api/vessels/history", "destination": "/api/vessels-history.mjs" },
-    { "source": "/api/ais/stream", "destination": "/api/ais-stream.mjs" },
-    { "source": "/tiles/carto/:z/:x/:y.png", "destination": "/api/carto-tile.mjs" }
+    { "source": "/api/status", "destination": "/api/status.js" },
+    { "source": "/api/vessels", "destination": "/api/vessels.js" },
+    { "source": "/api/vessels/history", "destination": "/api/vessels-history.js" },
+    { "source": "/api/ais/stream", "destination": "/api/ais-stream.js" },
+    { "source": "/tiles/carto/:z/:x/:y.png", "destination": "/api/carto-tile.js" }
   ],
   "headers": [
     {
