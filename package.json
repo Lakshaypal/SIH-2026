@@ -6,5 +6,8 @@
   "scripts": {
     "start": "node --experimental-websocket local-server.mjs",
     "test": "node --experimental-websocket --check local-server.mjs && node --check frontend.js"
+  },
+  "dependencies": {
+    "ws": "^8.21.3"
   }
 }

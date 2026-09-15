@@ -24,6 +24,7 @@
   <!-- Chart.js (for vessel analytics) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="page-fleet">
@@ -66,9 +67,9 @@
   <section class="section" style="padding-top: 100px; padding-bottom: 24px;">
     <div class="fleet-banner">
       <div>
-        <span class="section-kicker">MARITIME CONTEXT · AIS + DEMO</span>
+        <span class="section-kicker">MARITIME CONTEXT · LIVE AIS</span>
         <h1 class="section-title" style="margin-top: 6px;">Fleet radar</h1>
-        <p class="section-desc" style="max-width: 720px;">Live AISStream reports and a clearly labelled demo fleet share the same map. Demo movement keeps the presentation usable offline; live and demo records remain distinct in the inspector.</p>
+        <p class="section-desc" style="max-width: 720px;">Live AISStream reports populate the map in real time. Hover over or click a vessel to view its analytics, speed, and subsurface ocean environment keel conditions.</p>
       </div>
     </div>
   </section>
@@ -85,7 +86,7 @@
     <div class="ais-toolbar">
       <div class="ais-search-box">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="aisSearchInput" placeholder="Search live AIS or demo vessels…" autocomplete="off">
+        <input type="text" id="aisSearchInput" placeholder="Search live AIS vessels…" autocomplete="off">
         <button id="aisSearchClear" class="search-clear-btn" style="display:none">✕</button>
       </div>
       <div class="ais-filter-chips">
@@ -109,7 +110,7 @@
         <div class="ais-overlay">
           <div id="vesselCount" class="vessel-counter">
             <span class="counter-value" id="vesselCountVal">—</span>
-              <span class="counter-label">Live + demo vessels</span>
+              <span class="counter-label">Live vessels</span>
           </div>
           <div id="aisStatus" class="ais-status-badge">
             <span class="status-dot"></span>

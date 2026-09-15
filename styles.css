@@ -5460,10 +5460,10 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.5rem); }
 }
 
 .master-hub-bar .stage-tab-btn.active {
-  background: #0f172a;
-  border-color: #0f172a;
-  color: #ffffff;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.25);
+  background: rgba(34, 211, 238, 0.15);
+  border-color: #22d3ee;
+  color: #22d3ee;
+  box-shadow: 0 4px 14px rgba(34, 211, 238, 0.2);
 }
 
 .tab-emoji {
@@ -6602,3 +6602,24 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.5rem); }
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
+
+.apps-section { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+.app-row { display: grid; grid-template-columns: 1fr; gap: 40px; margin-bottom: 60px; align-items: center; }
+@media (min-width: 768px) {
+  .app-row { grid-template-columns: 1fr 1fr; }
+  .app-row.reverse .app-image { order: 2; }
+  .app-row.reverse .app-text { order: 1; }
+}
+.app-image { background: #1e293b; border-radius: 12px; min-height: 250px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; border: 1px solid #334155; }
+.overlay-text { font-family: var(--font-mono); font-size: 0.8rem; background: rgba(0,0,0,0.7); color: #22d3ee; padding: 6px 12px; border-radius: 6px; }
+.mission-badge { display: inline-block; padding: 4px 10px; font-size: 0.7rem; font-weight: 700; border-radius: 4px; margin-bottom: 12px; letter-spacing: 0.5px; }
+.badge-navy { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+.badge-fish { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+.badge-cyclone { background: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; }
+.app-text h3 { margin-top: 0; margin-bottom: 16px; font-size: 1.5rem; color: #0f172a; }
+.app-text p { color: #475569; line-height: 1.6; margin-bottom: 20px; }
+.app-stats { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; font-size: 0.85rem; color: #334155; }
+.app-stats div { margin-bottom: 8px; }
+.app-stats div:last-child { margin-bottom: 0; }
+.app-stats .mono { font-family: var(--font-mono); color: #0f172a; }
+

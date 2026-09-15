@@ -1742,7 +1742,7 @@
         }
 
         // Add distinct distinct noise/variance per cell for mosaic texture
-        const noise = Math.sin(i * 14.2 + j * 9.8 + lat) * 20;
+        const noise = Math.sin(i * 14.2 + j * 9.8) * 20;
         ctx.fillStyle = `rgb(${Math.floor(r + noise)}, ${Math.floor(g + noise)}, ${Math.floor(b + noise)})`;
         ctx.fillRect(x, y, stepW + 0.5, stepH + 0.5);
       }
