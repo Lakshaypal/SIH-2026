@@ -1,16 +1,20 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0f172a">
-  <meta name="description" content="Halocline Fleet Radar — Real-Time AIS Maritime Vessel Tracking & Subsurface Intelligence · SIH26066 / INCOIS / MoES">
+  <meta name="description"
+    content="Halocline Fleet Radar — Real-Time AIS Maritime Vessel Tracking & Subsurface Intelligence · SIH26066 / INCOIS / MoES">
   <title>Fleet Radar — Halocline · SIH26066</title>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
 
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
@@ -26,6 +30,7 @@
 
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body class="page-fleet">
 
   <!-- ============================================ -->
@@ -33,13 +38,8 @@
   <!-- ============================================ -->
   <header id="topbar" class="topbar">
     <a class="brand" href="index.html">
-      <span class="brand-icon">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2">
-          <path d="M2 12c2-3 5-5 10-5s8 2 10 5"/>
-          <path d="M2 17c2-3 5-5 10-5s8 2 10 5" opacity=".5"/>
-          <circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none"/>
-        </svg>
-      </span>
+      <img src="src/assets/Gemini_Generated_Image_seiva4seiva4seiv.png" alt="Halocline Logo"
+        style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; margin-right: 8px;">
       <span class="brand-text">Halocline</span>
     </a>
     <nav id="mainNav">
@@ -49,8 +49,13 @@
       <a href="demo.html" class="nav-link">Demo Walkthrough</a>
     </nav>
     <div class="topbar-actions">
-      <a href="OceanEmbed_PG_SIH2026_Engineering_and_Data_Specification.pdf" download class="btn-pdf-spec" title="Download Official ML & Data Scraper Engineering Specification (PDF)">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <a href="OceanEmbed_PG_SIH2026_Engineering_and_Data_Specification.pdf" download class="btn-pdf-spec"
+        title="Download Official ML & Data Scraper Engineering Specification (PDF)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
         <span>Technical PDF</span>
       </a>
       <div id="liveBadge" class="live-badge">
@@ -68,7 +73,9 @@
       <div>
         <span class="section-kicker">MARITIME CONTEXT · AIS + DEMO</span>
         <h1 class="section-title" style="margin-top: 6px;">Fleet radar</h1>
-        <p class="section-desc" style="max-width: 720px;">Live AISStream reports and a clearly labelled demo fleet share the same map. Demo movement keeps the presentation usable offline; live and demo records remain distinct in the inspector.</p>
+        <p class="section-desc" style="max-width: 720px;">Live AISStream reports and a clearly labelled demo fleet share
+          the same map. Demo movement keeps the presentation usable offline; live and demo records remain distinct in
+          the inspector.</p>
       </div>
     </div>
   </section>
@@ -84,18 +91,27 @@
     <!-- Fleet Search & Type Filters -->
     <div class="ais-toolbar">
       <div class="ais-search-box">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
         <input type="text" id="aisSearchInput" placeholder="Search live AIS or demo vessels…" autocomplete="off">
         <button id="aisSearchClear" class="search-clear-btn" style="display:none">✕</button>
       </div>
       <div class="ais-filter-chips">
         <button class="vessel-filter-chip active" data-type="all">All (<span id="countAll">—</span>)</button>
-        <button class="vessel-filter-chip" data-type="cargo"><span class="dot-cargo">●</span> Cargo (<span id="countCargo">—</span>)</button>
-        <button class="vessel-filter-chip" data-type="tanker"><span class="dot-tanker">●</span> Tankers (<span id="countTanker">—</span>)</button>
-        <button class="vessel-filter-chip" data-type="fishing"><span class="dot-fishing">●</span> Fishing (<span id="countFishing">—</span>)</button>
-        <button class="vessel-filter-chip" data-type="passenger"><span class="dot-passenger">●</span> Passenger (<span id="countPassenger">—</span>)</button>
-        <button class="vessel-filter-chip" data-type="military"><span class="dot-military">●</span> Naval (<span id="countMilitary">—</span>)</button>
-        <button class="vessel-filter-chip" data-type="tug"><span class="dot-tug">●</span> Tugs &amp; OSV (<span id="countTug">—</span>)</button>
+        <button class="vessel-filter-chip" data-type="cargo"><span class="dot-cargo">●</span> Cargo (<span
+            id="countCargo">—</span>)</button>
+        <button class="vessel-filter-chip" data-type="tanker"><span class="dot-tanker">●</span> Tankers (<span
+            id="countTanker">—</span>)</button>
+        <button class="vessel-filter-chip" data-type="fishing"><span class="dot-fishing">●</span> Fishing (<span
+            id="countFishing">—</span>)</button>
+        <button class="vessel-filter-chip" data-type="passenger"><span class="dot-passenger">●</span> Passenger (<span
+            id="countPassenger">—</span>)</button>
+        <button class="vessel-filter-chip" data-type="military"><span class="dot-military">●</span> Naval (<span
+            id="countMilitary">—</span>)</button>
+        <button class="vessel-filter-chip" data-type="tug"><span class="dot-tug">●</span> Tugs &amp; OSV (<span
+            id="countTug">—</span>)</button>
       </div>
       <div class="ais-mode-toggle">
         <button id="btnAisMarkers" class="ais-mode-btn active">🚢 Ships View</button>
@@ -109,7 +125,7 @@
         <div class="ais-overlay">
           <div id="vesselCount" class="vessel-counter">
             <span class="counter-value" id="vesselCountVal">—</span>
-              <span class="counter-label">Live + demo vessels</span>
+            <span class="counter-label">Live + demo vessels</span>
           </div>
           <div id="aisStatus" class="ais-status-badge">
             <span class="status-dot"></span>
@@ -199,7 +215,10 @@
 
           <div class="inspector-actions">
             <button class="btn-tool-pill" id="btnQueryOcean" disabled>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12c2-3 5-5 10-5s8 2 10 5"/><path d="M2 17c2-3 5-5 10-5s8 2 10 5" opacity=".5"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 12c2-3 5-5 10-5s8 2 10 5" />
+                <path d="M2 17c2-3 5-5 10-5s8 2 10 5" opacity=".5" />
+              </svg>
               Query OceanEmbed at Keel
             </button>
           </div>
@@ -247,47 +266,16 @@
   <!--  FOOTER                                      -->
   <!-- ============================================ -->
   <footer class="site-footer">
-    <div class="footer-inner">
-      <div class="footer-brand">
-        <span class="footer-logo">⚓</span>
-        <span>OceanEmbed<sup>PG</sup> — Physics-Guided Subsurface Temperature Reconstruction</span>
-      </div>
-      <div class="footer-links">
-        <div class="footer-col">
-          <h4>Platform</h4>
-          <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="dashboard.html">Ocean Dashboard</a></li>
-            <li><a href="fleet.html">Fleet Radar</a></li>
-            <li><a href="technical.html">Technical Documentation</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Government Partners</h4>
-          <ul>
-            <li>INCOIS — Indian National Centre for Ocean Information Services</li>
-            <li>MoES — Ministry of Earth Sciences</li>
-            <li>Smart India Hackathon 2026 · Problem SIH26066</li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Data Sources</h4>
-          <ul>
-            <li>CMEMS Copernicus Marine (SST, SSS, SLA)</li>
-            <li>ERA5 Reanalysis (Winds, Sea-State)</li>
-            <li>WOA23 (In-situ Validation)</li>
-            <li>AISStream WebSocket API (Maritime AIS)</li>
-            <li>Argo Float Network (GDAC)</li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <span>© 2026 OceanEmbed-PG Research Platform · SIH26066</span>
-        <span>Built for INCOIS / MoES under Smart India Hackathon 2026</span>
-      </div>
+    <div class="footer-content">
+      <span class="footer-brand">⚓ OCEANEMBED<sup>PG</sup> · PHYSICS-GUIDED SUBSURFACE TEMPERATURE RECONSTRUCTION</span>
+      <span class="footer-info">Government Partners: INCOIS, MoES · Data Sources: CMEMS, ERA5, WOA23, AISStream, Argo
+        Floats</span>
+      <span class="footer-integrity">© 2026 OceanEmbed-PG Research Platform · Built for INCOIS / MoES under Smart India
+        Hackathon 2026</span>
     </div>
   </footer>
 
   <script src="app.js"></script>
 </body>
+
 </html>

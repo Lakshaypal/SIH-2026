@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "node --experimental-websocket server.mjs",
     "start": "node --experimental-websocket server.mjs",
     "test": "node --experimental-websocket --check server.mjs && node --check app.js"
   }
