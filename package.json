@@ -1,8 +1,15 @@
 {
   "name": "halocline-sih2026",
   "version": "1.0.0",
+  "private": true,
   "description": "Vanilla HTML Site",
+  "type": "module",
   "main": "local-server.mjs",
+  "scripts": {
+    "dev": "node --experimental-websocket local-server.mjs",
+    "start": "node --experimental-websocket local-server.mjs",
+    "test": "node --experimental-websocket --check local-server.mjs && node --check frontend.js"
+  },
   "dependencies": {
     "ws": "^8.18.0"
   },

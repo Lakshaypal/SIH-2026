@@ -41,13 +41,7 @@
   <!-- ============================================ -->
   <header id="topbar" class="topbar">
     <a class="brand" href="#hero">
-      <span class="brand-icon">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2">
-          <path d="M2 12c2-3 5-5 10-5s8 2 10 5"/>
-          <path d="M2 17c2-3 5-5 10-5s8 2 10 5" opacity=".5"/>
-          <circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none"/>
-        </svg>
-      </span>
+      <img src="src/assets/Gemini_Generated_Image_seiva4seiva4seiv.png" alt="Halocline Logo" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; margin-right: 8px;">
       <span class="brand-text">Halocline</span>
     </a>
     <nav id="mainNav">
@@ -297,74 +291,7 @@
         </div>
       </div>
 
-      <!-- Bento Grid -->
-      <div class="bento-container">
-        <div class="section-header">
-          <span class="section-kicker">THE MODEL</span>
-          <h2 class="section-title">Neural Architecture</h2>
-        </div>
-        
-        <div class="bento-grid">
-          <div class="bento-card b-large">
-            <span class="panel-kicker">TENSOR FLOW</span>
-            <h3>Spatial Feature Extraction</h3>
-            <p>A U-Net style convolutional encoder compresses 7 input channels into multiscale latent features, capturing baroclinic modes before decoding into 15 depth layers.</p>
-            <div class="bento-code">[7, 101, 241] &rarr; Conv2D &rarr; [64, 50, 120] &rarr; Latent &rarr; [15, 101, 241]</div>
-          </div>
-          
-          <div class="bento-card b-small">
-            <span class="panel-kicker">PERFORMANCE</span>
-            <strong class="big-num">74ms</strong>
-            <p>End-to-end CPU Inference</p>
-          </div>
-          
-          <div class="bento-card b-small">
-            <span class="panel-kicker">MODEL SIZE</span>
-            <strong class="big-num">427k</strong>
-            <p>Parameters (Highly Optimized)</p>
-          </div>
-          
-          <div class="bento-card b-wide">
-            <span class="panel-kicker">UNCERTAINTY QUANTIFICATION</span>
-            <h3>Monte Carlo Dropout</h3>
-            <p>At inference time, active dropout layers provide a stochastic distribution of predictions, yielding a robust 95% confidence interval for every reconstructed voxel.</p>
-          </div>
-        </div>
-      </div>
 
-      <!-- Physics Constraints (Split-Equation Zig-Zag) -->
-      <div class="physics-zigzag">
-        <div class="pz-row">
-          <div class="pz-text">
-            <span class="section-kicker">PHYSICS GUIDANCE</span>
-            <h2>Composite Loss Formulation</h2>
-            <p>OceanEmbed-PG doesn't just learn from data; it respects the laws of fluid dynamics. By embedding physics constraints directly into the loss function, the model ensures vertical smoothness and hydrostatic stability.</p>
-          </div>
-          <div class="pz-code-card">
-            <pre><code>ℒ_total = ℒ_MSE(Y, Ŷ) 
-        + λ₁ &middot; || &part;Ŷ/&part;z || 
-        + λ₂ &middot; ReLU(-&part;ρ/&part;z)</code></pre>
-            <div class="pz-legend">
-              <span class="c-data">ℒ_MSE</span> Data fidelity (ARGO/GLORYS)<br>
-              <span class="c-grad">ℒ_grad</span> Vertical smoothness<br>
-              <span class="c-stab">ℒ_stab</span> Hydrostatic stability
-            </div>
-          </div>
-        </div>
-        <div class="pz-row reverse">
-          <div class="pz-text">
-            <h2>The Halocline Exception</h2>
-            <p>Standard naive models force monotonic temperature decrease with depth. This fails in the Bay of Bengal, where massive freshwater runoff caps warmer subsurface waters during winter. Our conditional stability term preserves these real inversion phenomena.</p>
-          </div>
-          <div class="pz-code-card danger">
-            <pre><code>if (basin == 'BoB' && season == 'Winter') {
-  allow_thermal_inversion = true;
-  // Salinity dictates density, 
-  // overriding thermal stability
-}</code></pre>
-          </div>
-        </div>
-      </div>
     </section>
 
     <!-- ============================================ -->
