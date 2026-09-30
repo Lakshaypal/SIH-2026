@@ -6,9 +6,9 @@
   "type": "module",
   "main": "local-server.mjs",
   "scripts": {
-    "dev": "node --experimental-websocket server.mjs",
-    "start": "node --experimental-websocket server.mjs",
-    "test": "node --experimental-websocket --check server.mjs && node --check app.js"
+    "dev": "node --experimental-websocket local-server.mjs",
+    "start": "node --experimental-websocket local-server.mjs",
+    "test": "node --experimental-websocket --check local-server.mjs && node --check frontend.js"
   },
   "dependencies": {
     "ws": "^8.18.0"
