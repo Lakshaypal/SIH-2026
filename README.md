@@ -1,30 +1,36 @@
-# OceanEmbed-PG
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-**A Physics-Guided Deep Learning Framework for 3D Subsurface Ocean Temperature Reconstruction**  
-Built for SIH26066 · Ministry of Earth Sciences (MoES) / INCOIS
+## Getting Started
 
-## Overview
-OceanEmbed-PG reconstructs the full 3D subsurface temperature structure of the North Indian Ocean (0–1000m) in real-time from 7 surface satellite parameters using a physics-constrained neural network. 
+First, run the development server:
 
-The web interface is designed with a high-contrast, technical aesthetic, and includes live marine AIS vessel tracking, 3D voxel modeling, 2D basin transects, ARGO matchup statistics, and Tropical Cyclone Heat Potential (TCHP) readouts.
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-## Quick Start
-1. Ensure Node.js (v20+) is installed.
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Run the development server (requires WebSocket support for AIS streaming):
-   ```bash
-   node --experimental-websocket server.mjs
-   ```
-4. Access the web interface at `http://localhost:4173`.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Deliverables & Documentation
-- **Live Platform**: Real-time rendering, AIS tracking, AI diagnostics (http://localhost:4173).
-- **Engineering PDF**: `OceanEmbed_PG_SIH2026_Engineering_and_Data_Specification.pdf` (Printable reference).
-- **Technical Dossier**: `SIH_2026_COMPLETE_TECHNICAL_DOSSIER.md` (Copy-paste friendly documentation with Python/PyTorch code).
-- **Comprehensive Text Documentation**: `OCEANEMBED_COMPLETE_DOCUMENTATION.txt`
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-## Handoff
-Please refer to `HANDOFF.md` for a complete architectural breakdown of the source code and components for incoming developers.
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

@@ -1,11 +1,19 @@
 {
-  "name": "halocline-oceanembed-sih26066",
-  "version": "0.1.0",
+  "name": "halocline-sih2026",
+  "version": "1.0.0",
   "private": true,
+  "description": "Vanilla HTML Site",
   "type": "module",
+  "main": "local-server.mjs",
   "scripts": {
     "dev": "node --experimental-websocket server.mjs",
     "start": "node --experimental-websocket server.mjs",
     "test": "node --experimental-websocket --check server.mjs && node --check app.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "engines": {
+    "node": "24.x"
   }
 }
