@@ -20,7 +20,13 @@ cd SIH-2026
 npm ci
 ```
 
-Create local environment settings (never commit populated credentials):
+Copy the existing example to a local, ignored environment file:
+
+```sh
+cp .env.example .env
+```
+
+Set your own values (never commit populated credentials):
 
 ```dotenv
 AISSTREAM_API_KEY=
@@ -28,7 +34,7 @@ CARTO_API_KEY=
 PORT=4173
 ```
 
-The repository's `.env` may already exist with empty credential fields; edit it locally and keep real keys private.
+`.env` is intentionally excluded from tracked source. Keep real keys private.
 
 ```sh
 npm run dev
