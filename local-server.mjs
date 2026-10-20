@@ -1,14 +1,17 @@
 import http from 'node:http';
 import { existsSync, readFileSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import { extname, join, normalize } from 'node:path';
+import { extname, join, normalize, sep } from 'node:path';
 
 // Credentials are read only on the server; no client asset receives these values.
 if (existsSync('.env')) {
   for (const line of readFileSync('.env', 'utf8').split('\n')) {
     const text = line.trim();
     const divider = text.indexOf('=');
-    if (divider > 0 && !text.startsWith('#')) process.env[text.slice(0, divider).trim()] = text.slice(divider + 1).trim();
+    if (divider > 0 && !text.startsWith('#')) {
+      const key = text.slice(0, divider).trim();
+      if (process.env[key] === undefined) process.env[key] = text.slice(divider + 1).trim();
+    }
   }
 }
 
@@ -167,13 +170,17 @@ const server = http.createServer(async (req, res) => {
   if (url.pathname === '/api/ais/stream') { res.writeHead(200, { 'content-type':'text/event-stream', 'cache-control':'no-cache', connection:'keep-alive', ...cors }); res.write(`event: ais-status\ndata: ${JSON.stringify({ connected:Boolean(aisSocket && aisSocket.readyState === 1), configured:Boolean(aisKey), source:'AISStream live + demo fleet', liveVessels:vessels.size, demoVessels:demoFleet.size })}\n\n`); res.write(`event: vessels\ndata: ${JSON.stringify(allVessels())}\n\n`); clients.add(res); req.on('close', () => clients.delete(res)); startAis(); return; }
   const tile = url.pathname.match(/^\/tiles\/carto\/(\d+)\/(\d+)\/(\d+)\.png$/);
   if (tile) { const [,z,x,y] = tile; const upstreamUrl = cartoKey ? `https://a.basemaps.cartocdn.com/light_all/${z}/${x}/${y}.png?key=${encodeURIComponent(cartoKey)}` : `https://tile.openstreetmap.org/${z}/${x}/${y}.png`; try { const upstream = await fetch(upstreamUrl, { headers:{'User-Agent':'OceanEmbed-PG/SIH26066'} }); const body = Buffer.from(await upstream.arrayBuffer()); res.writeHead(upstream.ok ? 200 : upstream.status, { 'content-type':upstream.headers.get('content-type') || 'image/png', 'cache-control':'public, max-age=86400', ...cors }); res.end(body); } catch { res.writeHead(502).end('Basemap unavailable'); } return; }
-  const requested = url.pathname === '/' ? '/index.html' : url.pathname, file = normalize(join(root, requested));
-  if (!file.startsWith(root)) { res.writeHead(403).end('Forbidden'); return; }
+  let requested;
+  try { requested = decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname); }
+  catch { res.writeHead(400).end('Invalid path'); return; }
+  if (requested.split(/[\\/]/).some(part => part.startsWith('.'))) { res.writeHead(403).end('Forbidden'); return; }
+  const file = normalize(join(root, requested));
+  if (file !== root && !file.startsWith(root + sep)) { res.writeHead(403).end('Forbidden'); return; }
   try { const body = await readFile(file); res.writeHead(200, { 'content-type':types[extname(file)] || 'application/octet-stream', ...cors }); res.end(body); } catch { res.writeHead(404).end('Not found'); }
 });
 
 demoFleet.clear();
 for (const [id, vessel] of createDemoFleet()) { demoFleet.set(id, vessel); appendTrack(vessel); }
 setInterval(moveDemoFleet, 3000);
-server.listen(port, () => console.log(`OceanEmbed-PG at http://localhost:${port} · ${aisKey ? 'AISStream ready' : 'AIS key missing'} · ${demoFleet.size} labelled demo vessels`));
+server.listen(port, process.env.HOST || '127.0.0.1', () => console.log(`OceanEmbed-PG at http://localhost:${port} · ${aisKey ? 'AISStream ready' : 'AIS key missing'} · ${demoFleet.size} labelled demo vessels`));
 // if (aisKey) startAis();

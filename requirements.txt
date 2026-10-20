@@ -11,3 +11,6 @@ xgboost>=2.0
 gsw>=3.6
 matplotlib>=3.8
 cmocean>=3.1
+
+# Neural model training and export
+torch

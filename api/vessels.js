@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   const ws = new WebSocket('wss://stream.aisstream.io/v0/stream');
 
   const subscriptionMessage = {
-    Apikey: AIS_KEY,
+    APIKey: AIS_KEY,
     BoundingBoxes: [
       [[-40, 20], [30, 115]] // Indian Ocean coverage
     ],
@@ -40,7 +40,7 @@ export default async function handler(req, res) {
           vessels.push({
             mmsi: meta.MMSI,
             name: meta.ShipName || `MMSI: ${meta.MMSI}`,
-            type: getShipType(report.TrueHeading, report.Cog), // Dummy derived type if missing
+            type: 'Unclassified AIS', // Position reports do not establish vessel type
             lat: meta.latitude,
             lon: meta.longitude,
             sog: report.Sog,
@@ -61,15 +61,3 @@ export default async function handler(req, res) {
   return res.status(200).json({ fleet: vessels });
 }
 
-function getShipType(heading, cog) {
-  // Simple deterministic fallback for ship type if not available
-  const hash = (heading + cog) % 6;
-  switch (hash) {
-    case 0: return 'cargo';
-    case 1: return 'tanker';
-    case 2: return 'fishing';
-    case 3: return 'passenger';
-    case 4: return 'military';
-    default: return 'other';
-  }
-}

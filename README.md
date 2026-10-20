@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Halocline / OceanEmbed-PG — SIH 2026
 
-## Getting Started
+An ocean-data research prototype and maritime dashboard for SIH 2026 problem SIH26066. The repository combines a surface-to-depth ocean-profile learning pipeline with a web visualisation and AIS vessel-monitoring experiments.
 
-First, run the development server:
+## Components
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Dashboard:** vanilla HTML/CSS/JavaScript views, maps and maritime displays (`index.html`, `dashboard.html`, `frontend.js`).
+- **Local server:** Node.js HTTP/SSE server, optional AISStream connection, receiver history and a clearly labelled demo fleet (`local-server.mjs`).
+- **Serverless adapters:** Vercel functions in `api/`; their behaviour differs from the persistent local server.
+- **Research pipeline:** PyTorch surface encoder and depth-conditioned field, patch datasets, masked probabilistic losses, training, baselines and exports (`src/`).
+- **Development data:** a synthetic-data generator and processed sample data. Synthetic demonstrations are not evidence of performance on real ocean observations.
+
+## Run the dashboard
+
+Use Node.js 24 and npm:
+
+```sh
+git clone https://github.com/Lakshaypal/SIH-2026.git
+cd SIH-2026
+npm ci
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Create local environment settings (never commit populated credentials):
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```dotenv
+AISSTREAM_API_KEY=
+CARTO_API_KEY=
+PORT=4173
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The repository's `.env` may already exist with empty credential fields; edit it locally and keep real keys private.
 
-## Learn More
+```sh
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open `http://localhost:4173` (or your configured port). The local server maintains 96 labelled demo vessels. Live AIS needs your own AISStream key and a connection to `/api/ais/stream`; the presence of the dashboard alone does not establish a live feed. Tracks are held in process memory and disappear on restart.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```sh
+npm test
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The npm test command checks JavaScript syntax; it is not a full behaviour or model-quality test suite.
 
-## Deploy on Vercel
+## Research pipeline
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Use Python 3.10+ with a compatible PyTorch build:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```sh
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m src.data.make_fake_data --help
+python -m src.train --help
+python -m src.baselines.run_baselines --help
+python -m src.export --help
+```
+
+Inspect the command options and data requirements before starting a run. The dataset layer expects compatible surface, profile and climatology Zarr stores; training uses time-based splits. Obtain and validate real source datasets separately before making scientific accuracy claims.
+
+## Local and hosted modes
+
+The local server maintains a long-lived AIS/SSE session and track history. Vercel handlers are short-lived: the SSE adapter sends a demo snapshot, history is empty, and the vessel adapter collects a brief live sample if configured. A serverless deployment is not equivalent to the persistent local server.
+
+## Structure
+
+```text
+api/                Serverless maritime endpoints
+src/data/           Synthetic development data
+src/datasets/       Patch/profile dataset loading
+src/models/         Surface encoder and depth field
+src/losses/         CRPS and physical/regularisation losses
+src/baselines/      Reference models and comparison runner
+src/eval/           Profile metrics
+src/train.py        Training entry point
+src/export.py       Export entry point
+local-server.mjs    Local dashboard and AIS bridge
+```
+
+Repository design notes describe broader planned capabilities. The code and evaluation artefacts should be used to distinguish implemented work from proposed extensions.
